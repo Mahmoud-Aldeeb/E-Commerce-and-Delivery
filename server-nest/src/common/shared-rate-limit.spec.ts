@@ -73,7 +73,7 @@ describe('limitWith', () => {
   it('uses a shared key when the ip is unknown', async () => {
     const check = vi.fn(async () => answer());
 
-    await run(check, undefined);
+    await run(check, {});
 
     expect(check).toHaveBeenCalledWith('login:unknown');
   });
