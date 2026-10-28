@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String?   // null for Google-only accounts
+  googleId  String?   @unique // Google OAuth ID
+  passwordResetToken   String?   // hashed reset token
+  passwordResetExpires DateTime? // token expiry
+  tokenVersion Int @default(0) // raised to cancel every token issued before
+  phone     String?   @default("")
+  avatar    String?   @default("")
+  addresses Address[]
+  orders    Order[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  role Role @default(USER)
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  address   String
+  city      String
+  state     String
+  zip       String
+  isDefault Boolean  @default(false)
+  lat       Float
+  lng       Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId, createdAt])
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?  @default("")
+  price         Float
+  originalPrice Float?   @default(0)
+  image         String
+  category      String
+    // A product must belong to an existing category. A category with products cannot be deleted
+    categoryRef   Category @relation(fields: [category], references: [name], onDelete: Restrict, onUpdate: Cascade)
+  stock         Int?     @default(0)
+  rating        Float?   @default(0)
+  reviewCount   Int?     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([category])
+}
+
+model Order {
+  id              String @id @default(uuid())
+  userId          String
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           Json
+  shippingAddress Json
+  paymentMethod   String @default("card")
+  subtotal        Float
+  deliveryFee     Float? @default(0)
+  tax             Float? @default(0)
+  total           Float
+  status          String @default("Placed")
+  statusHistory   Json
+
+  deliveryPartnerId String?
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id], onDelete: SetNull)
+  deliveryOtp       String?          @default("")
+  liveLocation      Json?
+  isPaid            Boolean?         @default(false)
+  paymentIntentId String? // Stripe payment, saved by the webhook: it is needed to refund
+  refundId        String? // Stripe refund
+  refundStatus    String? // "refunded" | "pending" | "failed". null = no refund involved
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([deliveryPartnerId, status])
+  @@index([createdAt])
+}
+
+model DeliveryPartner {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  phone       String
+  avatar      String?  @default("")
+  vehicleType String?  @default("bike")
+  isActive    Boolean? @default(true)
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique // also what every product stores in Product.category
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}

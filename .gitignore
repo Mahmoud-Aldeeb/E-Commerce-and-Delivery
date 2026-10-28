@@ -1,0 +1,11 @@
+# Secrets and local files: never upload these
+.env
+.env.*
+!.env.example
+
+node_modules/
+dist/
+.next/
+*.log
+*.tsbuildinfo
+.vercel/
