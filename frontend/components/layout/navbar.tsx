@@ -207,9 +207,6 @@ export default function Navbar({ categories }: { categories: string[] }) {
             <Link href="/deals" className={`${navLink} block`} onClick={closeMobile}>
               Flash deals
             </Link>
-            <p className="px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-              Categories
-            </p>
             {categories.length > 0 && (
               <p className="px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Categories

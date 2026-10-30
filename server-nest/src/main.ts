@@ -1,3 +1,4 @@
+import './instrument.js';
 import {
   BadRequestException,
   ValidationError,

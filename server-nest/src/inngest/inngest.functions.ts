@@ -6,7 +6,13 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { MailService } from '../mail/mail.service.js';
 import { Role } from '../generated/prisma/enums.js';
 import { inngest } from './inngest.client.js';
-import { lowStockEmail, monthlyOffersEmail } from './email-templates.js';
+import {
+  lowStockEmail,
+  monthlyOffersEmail,
+  orderConfirmationEmail,
+  type OrderEmailItem,
+} from './email-templates.js';
+import { orderNumber } from '../orders/order-number.js';
 import {
   ACTIVE_STATUSES,
   FINISHED_STATUSES,
@@ -77,6 +83,10 @@ export function createInngestFunctions({ prisma, mail, config }: InngestDeps) {
       triggers: [cron('0 10 1 * *')],
     },
     async ({ step }) => {
+      // Bulk emails go out only when someone turned them on on purpose
+      if (config.get<string>('MONTHLY_OFFERS_ENABLED') !== 'true') {
+        return { skipped: true, reason: 'Monthly offers are turned off' };
+      }
       const { deals, users } = await step.run(
         'fetch-deals-and-users',
         async () => {
@@ -96,7 +106,7 @@ export function createInngestFunctions({ prisma, mail, config }: InngestDeps) {
         return { skipped: true, reason: 'No users or deals' };
       }
 
-      const shopUrl = `${config.get<string>('CLIENT_URL') ?? 'http://localhost:5173'}/products`;
+      const shopUrl = `${(config.get<string>('CLIENT_URL') ?? 'http://localhost:3000').replace(/\/+$/, '')}/products`;
       let sent = 0;
 
       // Batches keep each step short and avoid overwhelming the mail server
@@ -189,5 +199,79 @@ export function createInngestFunctions({ prisma, mail, config }: InngestDeps) {
     },
   );
 
-  return [checkLowStock, sendMonthlyOffers, autoAssignRider];
+  // Right after an order is placed (cash) or paid (card): tell the customer what was ordered.
+  // The "order/placed" event comes from OrdersService (cash) and from the Stripe webhook (card)
+  const sendOrderConfirmation = inngest.createFunction(
+    {
+      id: 'send-order-confirmation',
+      name: 'Order Confirmation Email',
+      triggers: [{ event: 'order/placed' }],
+    },
+    async ({ event, step }) => {
+      const { orderId } = event.data as { orderId: string };
+
+      // One step on purpose: the order is read and the email is sent together,
+      // so a retry never works with an old copy of the order
+      return step.run('send-confirmation-email', async () => {
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+          include: {
+            user: { select: { name: true, email: true, phone: true } },
+          },
+        });
+
+        if (!order) return { skipped: true, reason: 'Order not found' };
+        // The customer cancelled in the seconds since it was placed: a confirmation would confuse
+        if (order.status === 'Cancelled') {
+          return { skipped: true, reason: 'Order was cancelled' };
+        }
+
+        const clientUrl = (
+          config.get<string>('CLIENT_URL') ?? 'http://localhost:3000'
+        ).replace(/\/+$/, '');
+        const items = Array.isArray(order.items)
+          ? (order.items as unknown as OrderEmailItem[])
+          : [];
+        const address = (order.shippingAddress ?? {}) as Record<
+          string,
+          unknown
+        >;
+        const text = (value: unknown) => String(value ?? '');
+        const number = orderNumber(order.id);
+
+        await mail.sendEmail({
+          to: order.user.email,
+          subject: `Order confirmed: ${number}`,
+          body: orderConfirmationEmail({
+            number,
+            customerName: order.user.name,
+            customerPhone: order.user.phone || null,
+            items,
+            subtotal: order.subtotal,
+            deliveryFee: order.deliveryFee ?? 0,
+            tax: order.tax ?? 0,
+            total: order.total,
+            paymentMethod: order.paymentMethod,
+            address: {
+              label: text(address.label),
+              address: text(address.address),
+              city: text(address.city),
+              state: text(address.state),
+              zip: text(address.zip),
+            },
+            orderUrl: `${clientUrl}/orders/${order.id}`,
+          }),
+        });
+
+        return { sent: true, orderId };
+      });
+    },
+  );
+
+  return [
+    checkLowStock,
+    sendMonthlyOffers,
+    autoAssignRider,
+    sendOrderConfirmation,
+  ];
 }
