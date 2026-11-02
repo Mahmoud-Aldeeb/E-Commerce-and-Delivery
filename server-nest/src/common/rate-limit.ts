@@ -92,6 +92,7 @@ export function applyRateLimits(app: NestExpressApplication) {
   ); // OTP attempts
   app.use('/api/upload', strict('upload', 10, 60));
   app.use('/api/orders/:id/cancel', strict('order-cancel', 10, 60));
+  app.use('/api/coupons/validate', strict('coupon-validate', 10, 60)); // stops guessing codes
 
   // General limit for everything else. Stripe and Inngest are server-to-server calls,
   // so they are skipped (their own signatures protect them).

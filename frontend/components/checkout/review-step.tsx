@@ -12,6 +12,8 @@ interface ReviewStepProps {
   items: CartItem[];
   totals: ReturnType<typeof calculateTotals>;
   busy: boolean;
+  /** Why the order cannot be placed right now (for example while a coupon is being checked) */
+  disabledReason?: string | null;
   onEdit: (step: Step) => void;
   onBack: () => void;
   onPlaceOrder: () => void;
@@ -23,6 +25,7 @@ export default function ReviewStep({
   items,
   totals,
   busy,
+  disabledReason = null,
   onEdit,
   onBack,
   onPlaceOrder,
@@ -89,12 +92,20 @@ export default function ReviewStep({
         When your order arrives, the courier will ask you for a one-time code. You will find it
         in your order details.
       </p>
-
+      {disabledReason && (
+        <p role="status" className="mb-3 text-sm text-ink-soft">
+          {disabledReason}
+        </p>
+      )}
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <button onClick={onBack} disabled={busy} className="btn btn-secondary">
           <ChevronLeftIcon className="size-4" /> Back
         </button>
-        <button onClick={onPlaceOrder} disabled={busy} className="btn btn-primary btn-lg">
+        <button
+          onClick={onPlaceOrder}
+          disabled={busy || Boolean(disabledReason)}
+          className="btn btn-primary btn-lg"
+        >
           {busy && <Loader2Icon className="size-4 animate-spin" />}
           {busy
             ? isCard

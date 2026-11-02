@@ -3,7 +3,15 @@ import { siteConfig } from "@/config/site";
 import { getSitemapProductIds } from "@/lib/server/products";
 
 // Public pages that never change their address
-const STATIC_PATHS = ["/", "/products", "/deals"];
+const STATIC_PATHS = [
+  "/",
+  "/products",
+  "/deals",
+  "/faq",
+  "/contact",
+  "/privacy",
+  "/terms",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const productIds = await getSitemapProductIds();

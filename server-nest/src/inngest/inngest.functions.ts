@@ -248,6 +248,7 @@ export function createInngestFunctions({ prisma, mail, config }: InngestDeps) {
             customerPhone: order.user.phone || null,
             items,
             subtotal: order.subtotal,
+            discount: order.discount,
             deliveryFee: order.deliveryFee ?? 0,
             tax: order.tax ?? 0,
             total: order.total,

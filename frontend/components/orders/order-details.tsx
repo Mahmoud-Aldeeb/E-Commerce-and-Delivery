@@ -3,6 +3,7 @@ import { MapPinIcon } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { awaitingPayment, paymentLabel } from "@/lib/orders";
 import type { Order } from "@/types";
+import Link from "next/link";
 
 export function DeliveryAddressCard({ address }: { address: Order["shippingAddress"] }) {
   return (
@@ -44,6 +45,14 @@ export function OrderItemsCard({ order }: { order: Order }) {
               <p className="text-xs text-ink-muted">
                 {item.quantity} × {formatPrice(item.price)}
               </p>
+              {order.status === "Delivered" && (
+                <Link
+                  href={`/products/${item.product}#reviews`}
+                  className="text-xs font-medium text-primary-700 hover:underline"
+                >
+                  Rate this product
+                </Link>
+              )}
             </div>
             <span className="text-sm font-semibold">{formatPrice(item.price * item.quantity)}</span>
           </li>
@@ -55,6 +64,14 @@ export function OrderItemsCard({ order }: { order: Order }) {
           <dt className="text-ink-soft">Subtotal</dt>
           <dd>{formatPrice(order.subtotal)}</dd>
         </div>
+        {(order.discount ?? 0) > 0 && (
+          <div className="flex justify-between">
+            <dt className="text-ink-soft">
+              Discount{order.couponCode ? ` (${order.couponCode})` : ""}
+            </dt>
+            <dd className="text-success">-{formatPrice(order.discount)}</dd>
+          </div>
+        )}
         <div className="flex justify-between">
           <dt className="text-ink-soft">Delivery</dt>
           <dd>{fee === 0 ? <span className="text-success">Free</span> : formatPrice(fee)}</dd>

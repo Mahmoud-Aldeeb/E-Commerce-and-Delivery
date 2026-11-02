@@ -10,6 +10,7 @@ import { useCart } from "@/context/cart-context";
 import { discountPercent, formatPrice } from "@/lib/format";
 import { buildHref } from "@/lib/product-filters";
 import type { Product } from "@/types";
+import FavoriteButton from "./favorite-button";
 
 // Used when a product has no stock number (null): no limit is known
 const FALLBACK_MAX_QUANTITY = 99;
@@ -89,14 +90,21 @@ export default function ProductDetails({ product }: { product: Product }) {
         >
           {product.category}
         </Link>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink sm:text-3xl">{product.name}</h1>
-
+        <div className="mt-1 flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">{product.name}</h1>
+          <FavoriteButton productId={product.id} productName={product.name} className="-mr-2 shrink-0" />
+        </div>
         {hasRating && (
-          <div className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
+          <a
+            href="#reviews"
+            className="mt-3 flex items-center gap-2 text-sm text-ink-soft hover:underline"
+          >
             <RatingStars rating={product.rating ?? 0} />
             <span className="font-medium text-ink">{product.rating?.toFixed(1)}</span>
-            <span>({product.reviewCount} ratings)</span>
-          </div>
+            <span>
+              ({product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"})
+            </span>
+          </a>
         )}
 
         <div className="mt-5 flex flex-wrap items-baseline gap-3">

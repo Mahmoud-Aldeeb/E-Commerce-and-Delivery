@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftIcon, ShoppingBagIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import AddressStep from "@/components/checkout/address-step";
+import CouponBox from "@/components/checkout/coupon-box";
 import OrderSummary from "@/components/checkout/order-summary";
 import PaymentStep from "@/components/checkout/payment-step";
 import type { PaymentMethod } from "@/components/checkout/payment-methods";
@@ -18,8 +19,9 @@ import { useCart } from "@/context/cart-context";
 import api, { getErrorMessage } from "@/lib/api";
 import { calculateTotals } from "@/lib/pricing";
 import { addressesOptions } from "@/lib/queries/addresses";
+import { couponKeys, useCheckoutCoupon } from "@/lib/queries/coupons";
 import { productKeys } from "@/lib/queries/products";
-import type { Order } from "@/types";
+import type { CartItem, Order } from "@/types";
 import { useAuth } from "@/context/auth-context";
 
 // The API answers with { url } for card payments and { order } for the others
@@ -31,10 +33,20 @@ interface PlaceOrderResponse {
 export default function CheckoutView() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { items, cartTotal, cartCount, clearCart, isReady } = useCart();
+  const {
+    items,
+    selectedItems,
+    selectedCount,
+    selectedTotal,
+    removeOrderedItems,
+    setIsCartOpen,
+    isReady,
+  } = useCart();
   const addressesQuery = useQuery(addressesOptions());
   const { user } = useAuth();
   const hasPhone = Boolean(user?.phone);
+  // The discount of the coupon, worked out by the API for the items that are ticked right now
+  const coupon = useCheckoutCoupon(selectedItems);
 
   const [step, setStep] = useState<Step>("address");
   const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
@@ -51,7 +63,8 @@ export default function CheckoutView() {
     addresses[0] ??
     null;
 
-  const totals = calculateTotals(cartTotal);
+  // Only the ticked lines are ordered, so only they are priced
+  const totals = calculateTotals(selectedTotal, coupon.discount);
 
   // A step opens only when the steps before it are complete
   const reachable: Record<Step, boolean> = {
@@ -61,12 +74,28 @@ export default function CheckoutView() {
   };
   const activeStep: Step = reachable[step] ? step : "address";
 
+  // An order is never placed while the coupon is being checked, or does not work:
+  // the customer would pay a different amount than the one on the screen
+  const orderBlockedReason =
+    coupon.status === "checking"
+      ? "Checking your coupon..."
+      : coupon.status === "error"
+        ? "Fix or remove the coupon to place your order."
+        : null;
+
   const placeOrder = useMutation({
-    mutationFn: async () => {
+    // What is ordered is passed in (not read inside): it is exactly what is removed afterwards
+    mutationFn: async ({
+      orderItems,
+      couponCode,
+    }: {
+      orderItems: CartItem[];
+      couponCode: string | null;
+    }) => {
       if (!address) throw new Error("No delivery address");
 
       const { data } = await api.post<PlaceOrderResponse>("/orders", {
-        items: items.map((item) => ({ product: item.product.id, quantity: item.quantity })),
+        items: orderItems.map((item) => ({ product: item.product.id, quantity: item.quantity })),
         shippingAddress: {
           label: address.label,
           address: address.address,
@@ -77,12 +106,14 @@ export default function CheckoutView() {
           lng: address.lng,
         },
         paymentMethod,
+        // Only the code goes: the API works the discount out again on its own
+        ...(couponCode ? { couponCode } : {}),
       });
       return data;
     },
-    onSuccess: (data) => {
-      // Card: the cart is cleared later, when Stripe sends the customer back to /orders.
-      // Until the browser leaves, the mutation stays "successful" and keeps the button disabled.
+    onSuccess: (data, { orderItems }) => {
+      // Card: the ordered products leave the cart later, when Stripe sends the customer back to
+      // the order page. Until the browser leaves, the mutation stays "successful" and keeps the button disabled.
       if (data.url) {
         window.location.assign(data.url);
         return;
@@ -90,14 +121,20 @@ export default function CheckoutView() {
       if (!data.order) return;
 
       setPlaced(true);
-      clearCart();
+      removeOrderedItems(
+        orderItems.map((item) => ({ product: item.product.id, quantity: item.quantity })),
+      );
       // Stock changed and there is a new order: cached lists are outdated
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast.success("Order placed!");
       router.replace(`/orders/${data.order.id}`);
     },
-    onError: (error) => toast.error(getErrorMessage(error)),
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+      // The coupon may be the reason (it expired, or its limit was reached): check it again
+      queryClient.invalidateQueries({ queryKey: couponKeys.all });
+    },
   });
 
   // Back from Stripe with the browser's back button, the page can come back from memory
@@ -132,6 +169,24 @@ export default function CheckoutView() {
     );
   }
 
+  // The cart has items, but none is ticked
+  if (selectedItems.length === 0) {
+    return (
+      <div className="container-page max-w-2xl py-16">
+        <EmptyState
+          icon={ShoppingBagIcon}
+          title="No items selected"
+          description="Tick the items you want to buy in your cart."
+          action={
+            <button onClick={() => setIsCartOpen(true)} className="btn btn-primary">
+              Open your cart
+            </button>
+          }
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="container-page py-6">
       <Link
@@ -155,7 +210,6 @@ export default function CheckoutView() {
               onRetry={() => addressesQuery.refetch()}
               onSelect={setChosenAddressId}
               onContinue={() => setStep("payment")}
-              phoneReady={hasPhone}
             />
           )}
 
@@ -172,17 +226,31 @@ export default function CheckoutView() {
             <ReviewStep
               address={address}
               paymentMethod={paymentMethod}
-              items={items}
+              items={selectedItems}
               totals={totals}
               busy={busy}
+              disabledReason={orderBlockedReason}
               onEdit={setStep}
               onBack={() => setStep("payment")}
-              onPlaceOrder={() => placeOrder.mutate()}
+              onPlaceOrder={() =>
+                placeOrder.mutate({
+                  orderItems: selectedItems,
+                  couponCode: coupon.status === "applied" ? coupon.code : null,
+                })
+              }
             />
           )}
         </div>
 
-        <OrderSummary itemCount={cartCount} totals={totals} />
+        <OrderSummary
+          itemCount={selectedCount}
+          totals={totals}
+          couponCode={coupon.discount > 0 ? coupon.code : null}
+          leftInCart={items.length - selectedItems.length}
+          onEditCart={() => setIsCartOpen(true)}
+        >
+          <CouponBox coupon={coupon} />
+        </OrderSummary>
       </div>
     </div>
   );

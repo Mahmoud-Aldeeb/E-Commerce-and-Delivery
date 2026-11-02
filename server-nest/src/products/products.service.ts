@@ -8,23 +8,10 @@ import { Prisma } from '../generated/prisma/client.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { GetProductsQueryDto } from './dto/get-products-query.dto.js';
-
+import { withDiscount } from './product-discount.util.js';
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
-
-  private withDiscount<
-    T extends { price: number; originalPrice: number | null },
-  >(product: T) {
-    const discount =
-      product.originalPrice && product.price
-        ? Math.round(
-            ((product.originalPrice - product.price) / product.originalPrice) *
-              100,
-          )
-        : 0;
-    return { ...product, discount };
-  }
 
   // Every order ends with `id`: when many products share the same price (or rating),
   // a tie-breaker is needed, otherwise the same product can appear on two pages
@@ -78,7 +65,7 @@ export class ProductsService {
       take: 8,
     });
 
-    return { products: products.map((p) => this.withDiscount(p)) };
+    return { products: products.map((p) => withDiscount(p)) };
   }
 
   // GET /api/products
@@ -116,7 +103,7 @@ export class ProductsService {
     ]);
 
     return {
-      products: products.map((product) => this.withDiscount(product)),
+      products: products.map((product) => withDiscount(product)),
       total,
       page,
       pages: limit ? Math.max(1, Math.ceil(total / limit)) : 1,
@@ -129,7 +116,7 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    return { product: this.withDiscount(product) };
+    return { product: withDiscount(product) };
   }
 
   // POST /api/products

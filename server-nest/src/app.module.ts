@@ -16,8 +16,14 @@ import { DeliveryModule } from './delivery/delivery.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { UploadModule } from './upload/upload.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
+import { FavoritesModule } from './favorites/favorites.module.js';
+import { CouponsModule } from './coupons/coupons.module.js';
+import { ReviewsModule } from './reviews/reviews.module.js';
 @Module({
   imports: [
+    FavoritesModule,
+    CouponsModule,
+    ReviewsModule,
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.registerAsync({
       global: true,

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -11,6 +11,8 @@ import {
   ValidateNested,
   IsLatitude,
   IsLongitude,
+  IsOptional,
+  MaxLength,
 } from 'class-validator';
 
 const ADDRESS_MESSAGE = 'Shipping address is incomplete';
@@ -93,4 +95,14 @@ export class CreateOrderDto {
   @IsString({ message: 'Payment method is required' })
   @IsNotEmpty({ message: 'Payment method is required' })
   paymentMethod: string;
+
+  @ApiPropertyOptional({
+    example: 'WELCOME10',
+    description:
+      'A coupon code. The server works out the discount: it is never taken from the client',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(32)
+  couponCode?: string;
 }

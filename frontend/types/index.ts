@@ -91,6 +91,8 @@ export interface Order {
   subtotal: number;
   deliveryFee: number | null;
   tax: number | null;
+  discount?: number; // what a coupon took off the items (the subtotal is the price BEFORE it)
+  couponCode?: string | null;
   total: number;
   status: string;
   statusHistory: { status: string; timestamp: string; note: string }[];

@@ -47,3 +47,18 @@ export type DeliveryPartner = Prisma.DeliveryPartnerModel
  * 
  */
 export type Category = Prisma.CategoryModel
+/**
+ * Model Favorite
+ * 
+ */
+export type Favorite = Prisma.FavoriteModel
+/**
+ * Model Coupon
+ * 
+ */
+export type Coupon = Prisma.CouponModel
+/**
+ * Model Review
+ * 
+ */
+export type Review = Prisma.ReviewModel

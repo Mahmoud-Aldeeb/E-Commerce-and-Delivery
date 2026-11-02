@@ -56,7 +56,10 @@ export const ModelName = {
   Product: 'Product',
   Order: 'Order',
   DeliveryPartner: 'DeliveryPartner',
-  Category: 'Category'
+  Category: 'Category',
+  Favorite: 'Favorite',
+  Coupon: 'Coupon',
+  Review: 'Review'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -149,6 +152,9 @@ export const OrderScalarFieldEnum = {
   paymentIntentId: 'paymentIntentId',
   refundId: 'refundId',
   refundStatus: 'refundStatus',
+  discount: 'discount',
+  couponId: 'couponId',
+  couponCode: 'couponCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -181,6 +187,48 @@ export const CategoryScalarFieldEnum = {
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
+export const FavoriteScalarFieldEnum = {
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+} as const
+
+export type FavoriteScalarFieldEnum = (typeof FavoriteScalarFieldEnum)[keyof typeof FavoriteScalarFieldEnum]
+
+
+export const CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  type: 'type',
+  value: 'value',
+  maxDiscount: 'maxDiscount',
+  minSubtotal: 'minSubtotal',
+  startsAt: 'startsAt',
+  expiresAt: 'expiresAt',
+  usageLimit: 'usageLimit',
+  perUserLimit: 'perUserLimit',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
+
+
+export const ReviewScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  rating: 'rating',
+  comment: 'comment',
+  isHidden: 'isHidden',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
 
 
 export const SortOrder = {

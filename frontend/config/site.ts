@@ -1,6 +1,7 @@
 import {
   ArmchairIcon,
   BadgeCheckIcon,
+  ClockIcon,
   DumbbellIcon,
   MailIcon,
   MapPinIcon,
@@ -25,6 +26,20 @@ export const siteConfig = {
   siteUrl: (
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
   ).replace(/\/+$/, ""),
+};
+
+// The real details of the store: ONE place, used by the footer and by the info pages
+export const storeInfo = {
+  email: "mahmoudalden125@gmail.com",
+  phone: "+20 111 619 9664",
+  phoneHref: "tel:+201116199664",
+  address: "Tanta, Egypt",
+  replyHours: "8:00 AM to 8:00 PM (Egypt time)",
+  deliveryCities: ["Cairo", "Tanta", "Alexandria"],
+  deliveryHours: 72,
+  returnDays: 14,
+  // Change it every time the policies change
+  legalUpdatedAt: "October 31, 2026",
 };
 
 // The slugs must match the `category` values stored on the products
@@ -74,10 +89,11 @@ export const footerData = {
     name: siteConfig.name,
     description:
       "Quality products from trusted sellers, delivered fast and tracked live from checkout to your door.",
+    // Put the real address of each account in `link`. An entry with an empty link is not shown
     socials: [
-      { icon: SiFacebook, link: "#", label: "Facebook" },
-      { icon: SiX, link: "#", label: "X" },
-      { icon: SiInstagram, link: "#", label: "Instagram" },
+      { icon: SiFacebook, link: "", label: "Facebook" },
+      { icon: SiX, link: "", label: "X" },
+      { icon: SiInstagram, link: "", label: "Instagram" },
     ],
   },
 
@@ -94,23 +110,35 @@ export const footerData = {
       links: [
         { label: "My account", href: "/account" },
         { label: "My orders", href: "/orders" },
+        { label: "Favorites", href: "/favorites" },
         { label: "Addresses", href: "/addresses" },
+      ],
+    },
+    {
+      title: "Help",
+      links: [
+        { label: "FAQ", href: "/faq" },
+        { label: "Contact us", href: "/contact" },
       ],
     },
   ],
 
-  // Placeholders: replace with real details
   contact: [
-    { icon: MapPinIcon, text: "123 Market Street, Your City" },
-    { icon: PhoneIcon, text: "+1 (111) 123-4567" },
-    { icon: MailIcon, text: "hello@example.com" },
+    { icon: MapPinIcon, text: storeInfo.address },
+    { icon: PhoneIcon, text: storeInfo.phone, href: storeInfo.phoneHref },
+    {
+      icon: MailIcon,
+      text: storeInfo.email,
+      href: `mailto:${storeInfo.email}`,
+    },
+    { icon: ClockIcon, text: `Replies ${storeInfo.replyHours}` },
   ],
 
   bottom: {
     copyright: `© 2026 ${siteConfig.name}. A portfolio project by Mahmoud Aldeeb.`,
     links: [
-      { label: "Privacy Policy", href: "#" },
-      { label: "Terms of Service", href: "#" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
     ],
   },
 };

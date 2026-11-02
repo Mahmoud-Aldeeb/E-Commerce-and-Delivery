@@ -8,6 +8,7 @@ import Breadcrumbs from "@/components/ui/breadcrumbs";
 import { getProduct } from "@/lib/server/products";
 import { buildHref } from "@/lib/product-filters";
 import { safely } from "@/lib/server/safely";
+import ReviewsSection from "@/components/reviews/reviews-section";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -37,7 +38,6 @@ async function ProductContent({ params }: Props) {
 
 
   // Structured data: lets Google show the price and availability in search results.
-  // Ratings are left out on purpose: they are demo numbers, not real customer reviews.
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -45,6 +45,16 @@ async function ProductContent({ params }: Props) {
     image: product.image,
     description: product.description ?? undefined,
     category: product.category,
+    // Real ratings now: they come from the verified reviews. A product with no review has none
+    ...(product.rating && product.reviewCount
+      ? {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: product.rating.toFixed(1),
+          reviewCount: product.reviewCount,
+        },
+      }
+      : {}),
     offers: {
       "@type": "Offer",
       priceCurrency: "USD",
@@ -70,6 +80,8 @@ async function ProductContent({ params }: Props) {
       />
 
       <ProductDetails product={product} />
+
+      <ReviewsSection productId={product.id} productName={product.name} />
 
       {/* Secondary content streams in by itself: it never delays the product above */}
       <Suspense fallback={null}>

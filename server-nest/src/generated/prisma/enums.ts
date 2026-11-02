@@ -15,3 +15,11 @@ export const Role = {
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]
+
+
+export const CouponType = {
+  PERCENT: 'PERCENT',
+  FIXED: 'FIXED'
+} as const
+
+export type CouponType = (typeof CouponType)[keyof typeof CouponType]

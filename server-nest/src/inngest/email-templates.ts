@@ -117,6 +117,7 @@ export interface OrderEmailData {
   customerPhone: string | null;
   items: OrderEmailItem[];
   subtotal: number;
+  discount: number;
   deliveryFee: number;
   tax: number;
   total: number;
@@ -178,6 +179,7 @@ export function orderConfirmationEmail(order: OrderEmailData): string {
 
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px;">
         ${totalRow('Subtotal', money(order.subtotal))}
+        ${order.discount > 0 ? totalRow('Discount', `-${money(order.discount)}`) : ''}
         ${totalRow('Delivery', order.deliveryFee === 0 ? 'Free' : money(order.deliveryFee))}
         ${totalRow('Tax', money(order.tax))}
         ${totalRow('Total', money(order.total), true)}

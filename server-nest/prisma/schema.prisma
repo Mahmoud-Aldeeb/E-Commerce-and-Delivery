@@ -26,6 +26,8 @@ model User {
   avatar    String?   @default("")
   addresses Address[]
   orders    Order[]
+  favorites Favorite[]
+  reviews   Review[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   role Role @default(USER)
@@ -56,8 +58,10 @@ model Product {
   originalPrice Float?   @default(0)
   image         String
   category      String
-    // A product must belong to an existing category. A category with products cannot be deleted
-    categoryRef   Category @relation(fields: [category], references: [name], onDelete: Restrict, onUpdate: Cascade)
+  // A product must belong to an existing category. A category with products cannot be deleted
+  categoryRef   Category @relation(fields: [category], references: [name], onDelete: Restrict, onUpdate: Cascade)
+  favorites     Favorite[]
+  reviews       Review[]
   stock         Int?     @default(0)
   rating        Float?   @default(0)
   reviewCount   Int?     @default(0)
@@ -88,13 +92,17 @@ model Order {
   paymentIntentId String? // Stripe payment, saved by the webhook: it is needed to refund
   refundId        String? // Stripe refund
   refundStatus    String? // "refunded" | "pending" | "failed". null = no refund involved
-
+  discount        Float   @default(0) // what the coupon took off the items (subtotal is BEFORE it)
+  couponId        String?
+  coupon          Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  couponCode      String? // the code as it was when the order was placed
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId, createdAt])
   @@index([deliveryPartnerId, status])
   @@index([createdAt])
+    @@index([couponId])
 }
 
 model DeliveryPartner {
@@ -119,4 +127,60 @@ model Category {
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+
+model Favorite {
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  // A user saves a product once: the pair IS the identity (no duplicates are possible)
+  @@id([userId, productId])
+  @@index([userId, createdAt])
+}
+
+
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+model Coupon {
+  id           String     @id @default(uuid())
+  code         String     @unique // always saved in capitals ("WELCOME10")
+  type         CouponType
+  value        Float // PERCENT: above 0 and up to 100. FIXED: the dollars taken off
+  maxDiscount  Float? // PERCENT only: the discount never goes above this
+  minSubtotal  Float? // the items must cost at least this (before the discount)
+  startsAt     DateTime?
+  expiresAt    DateTime?
+  usageLimit   Int? // across all customers. null = no limit
+  perUserLimit Int? // for each customer. null = no limit
+  isActive     Boolean    @default(true)
+  orders       Order[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Int // 1 to 5
+  comment   String? // up to 1000 characters
+  isHidden  Boolean  @default(false) // hidden by an admin: not shown and not counted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One review per customer per product: the pair is what makes it unique
+  @@unique([userId, productId])
+  @@index([productId, isHidden, createdAt])
+  @@index([createdAt])
 }

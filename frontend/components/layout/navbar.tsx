@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChevronDownIcon,
+  HeartIcon,
   LogOutIcon,
   MapPinIcon,
   MenuIcon,
@@ -120,6 +121,9 @@ function AccountMenu() {
           </Link>
           <Link href="/orders" role="menuitem" className={menuItem} onClick={() => setOpen(false)}>
             <PackageIcon className="size-4" /> My orders
+          </Link>
+          <Link href="/favorites" role="menuitem" className={menuItem} onClick={() => setOpen(false)}>
+            <HeartIcon className="size-4" /> Favorites
           </Link>
           <Link href="/addresses" role="menuitem" className={menuItem} onClick={() => setOpen(false)}>
             <MapPinIcon className="size-4" /> Addresses

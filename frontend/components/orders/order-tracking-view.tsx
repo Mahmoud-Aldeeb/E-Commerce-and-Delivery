@@ -19,6 +19,7 @@ import { formatDate } from "@/lib/format";
 import { awaitingPayment, canCustomerCancel, isActiveOrder, orderNumber, toMapPoint } from "@/lib/orders";
 import { orderDetailOptions } from "@/lib/queries/orders";
 import CancelOrderDialog from "@/components/orders/cancel-order-dialog";
+import ReorderButton from "@/components/orders/reorder-button";
 
 const POLL_LIVE_MS = 10_000; // an order that is on its way: refresh the status and the location
 const POLL_PAYMENT_MS = 2_000; // waiting for the payment confirmation
@@ -26,9 +27,10 @@ const PAYMENT_WAIT_MS = 60_000; // stop waiting after a minute
 
 export default function OrderTrackingView({ id }: { id: string }) {
   const router = useRouter();
-  const { clearCart } = useCart();
+  const { removeOrderedItems } = useCart();
   const [waitedTooLong, setWaitedTooLong] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const handledStripeReturn = useRef(false);
   const {
     data: order,
     isPending,
@@ -47,12 +49,20 @@ export default function OrderTrackingView({ id }: { id: string }) {
     },
   });
 
-  // Coming back from Stripe (?clearCart=true): the order is paid for, so empty the cart
+  // Coming back from Stripe (?clearCart=true): the products of THIS order leave the cart.
+  // The order has to be loaded first: its items say what to remove. The ref makes it happen
+  // once, even while the page keeps refreshing the order
+  const orderedItems = order?.items;
   useEffect(() => {
+    if (!orderedItems || handledStripeReturn.current) return;
     if (new URLSearchParams(window.location.search).get("clearCart") !== "true") return;
-    clearCart();
-    router.replace(`/orders/${id}`); // remove the parameter: a refresh must not clear the cart again
-  }, [id, clearCart, router]);
+
+    handledStripeReturn.current = true;
+    removeOrderedItems(
+      orderedItems.map((item) => ({ product: item.product, quantity: item.quantity })),
+    );
+    router.replace(`/orders/${id}`); // remove the parameter: a refresh must not do it again
+  }, [id, orderedItems, removeOrderedItems, router]);
 
   // Give up polling for the payment after a minute
   useEffect(() => {
@@ -197,6 +207,16 @@ export default function OrderTrackingView({ id }: { id: string }) {
               >
                 Cancel order
               </button>
+            </section>
+          )}
+
+          {!active && order.items.length > 0 && (
+            <section className="card p-5">
+              <h2 className="text-sm font-semibold">Want it again?</h2>
+              <p className="mt-1 text-xs text-ink-muted">
+                We add the same items to your cart, at the current prices and stock.
+              </p>
+              <ReorderButton order={order} className="btn-sm mt-3 w-full" />
             </section>
           )}
         </div>

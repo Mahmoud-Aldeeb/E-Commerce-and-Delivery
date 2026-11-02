@@ -30,6 +30,7 @@ import {
 import { GetAllOrdersQueryDto } from './dto/get-all-orders-query.dto.js';
 import { GetOrdersQueryDto } from './dto/get-orders-query.dto.js';
 import { calculateTotals } from './order-pricing.js';
+import { CouponsService } from '../coupons/coupons.service.js';
 
 // Card orders stay hidden until Stripe confirms the payment
 export const HIDE_UNPAID_CARD_ORDERS: Prisma.OrderWhereInput = {
@@ -55,6 +56,7 @@ export class OrdersService {
     private stripe: StripeService,
     private inngest: InngestService,
     private cancellation: OrderCancellationService,
+    private coupons: CouponsService,
   ) {}
 
   // Background events must never make an already-created order fail
@@ -119,9 +121,21 @@ export class OrdersService {
       };
     });
 
+    const itemsTotal = orderItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+
+    // The discount is worked out HERE, from the database: a discount sent by the client is
+    // never trusted. An invalid code stops the order before anything is saved
+    const coupon = dto.couponCode?.trim()
+      ? await this.coupons.resolve(userId, dto.couponCode, itemsTotal)
+      : null;
+
     // The prices, the fees and the rounding live in order-pricing.ts (and are tested there)
-    const { subtotal, deliveryFee, tax, total } = calculateTotals(
-      orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    const { subtotal, discount, deliveryFee, tax, total } = calculateTotals(
+      itemsTotal,
+      coupon?.discount ?? 0,
     );
 
     const isCard = paymentMethod === 'card';
@@ -140,6 +154,9 @@ export class OrdersService {
             deliveryFee,
             tax,
             total,
+            discount,
+            couponId: coupon?.couponId ?? null,
+            couponCode: coupon?.code ?? null,
             statusHistory: [
               {
                 status: 'Placed',

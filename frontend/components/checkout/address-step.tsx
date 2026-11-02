@@ -17,8 +17,6 @@ interface AddressStepProps {
   onRetry: () => void;
   onSelect: (id: string) => void;
   onContinue: () => void;
-  /** The customer has a phone number saved: the courier needs it */
-  phoneReady: boolean;
 }
 
 export default function AddressStep({

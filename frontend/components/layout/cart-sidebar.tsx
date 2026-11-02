@@ -17,8 +17,19 @@ import { formatPrice } from "@/lib/format";
 import { calculateTotals } from "@/lib/pricing";
 
 export default function CartSidebar() {
-  const { items, cartTotal, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart } =
-    useCart();
+  const {
+    items,
+    selectedItems,
+    selectedCount,
+    selectedTotal,
+    isSelected,
+    toggleSelected,
+    setAllSelected,
+    isCartOpen,
+    setIsCartOpen,
+    updateQuantity,
+    removeFromCart,
+  } = useCart();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // While the drawer is open: Escape closes it, the page behind does not scroll,
@@ -43,10 +54,15 @@ export default function CartSidebar() {
 
   if (!isCartOpen) return null;
 
-  const totals = calculateTotals(cartTotal);
+  const allSelected = items.length > 0 && selectedItems.length === items.length;
+  const noneSelected = selectedItems.length === 0;
+  const leftOut = items.length - selectedItems.length;
+
+  // The delivery fee depends on what is ordered, so everything here uses the selected lines
+  const totals = calculateTotals(selectedTotal);
   const hasFreeDelivery = totals.deliveryFee === 0;
-  const remainingForFree = Math.max(siteConfig.freeDeliveryThreshold - cartTotal, 0.01);
-  const progress = Math.min((cartTotal / siteConfig.freeDeliveryThreshold) * 100, 100);
+  const remainingForFree = Math.max(siteConfig.freeDeliveryThreshold - selectedTotal, 0.01);
+  const progress = Math.min((selectedTotal / siteConfig.freeDeliveryThreshold) * 100, 100);
   const close = () => setIsCartOpen(false);
 
   return (
@@ -79,7 +95,7 @@ export default function CartSidebar() {
         </div>
 
         {/* Free delivery progress */}
-        {items.length > 0 && (
+        {!noneSelected && (
           <div className="border-b border-line bg-canvas px-5 py-3">
             <p className="text-xs text-ink-soft">
               {hasFreeDelivery ? (
@@ -101,6 +117,28 @@ export default function CartSidebar() {
           </div>
         )}
 
+        {/* Select all */}
+        {items.length > 1 && (
+          <div className="flex items-center justify-between border-b border-line px-5 py-2.5">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                className="size-4 accent-primary-700"
+                checked={allSelected}
+                // Some ticked and some not: the box shows a dash
+                ref={(element) => {
+                  if (element) element.indeterminate = !allSelected && !noneSelected;
+                }}
+                onChange={() => setAllSelected(!allSelected)}
+              />
+              Select all
+            </label>
+            <span className="text-xs text-ink-muted">
+              {selectedItems.length} of {items.length} selected
+            </span>
+          </div>
+        )}
+
         {/* Items */}
         <div className="flex-1 space-y-3 overflow-y-auto p-5">
           {items.length === 0 ? (
@@ -115,14 +153,27 @@ export default function CartSidebar() {
           ) : (
             items.map((item) => {
               const atLimit = item.quantity >= (item.product.stock ?? Infinity);
+              const selected = isSelected(item.product.id);
               return (
-                <div key={item.product.id} className="flex gap-3 rounded-card border border-line p-3">
+                <div
+                  key={item.product.id}
+                  className={`flex items-center gap-3 rounded-card border p-3 transition-colors ${selected ? "border-line" : "border-line bg-canvas"
+                    }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="size-4 shrink-0 accent-primary-700"
+                    checked={selected}
+                    onChange={() => toggleSelected(item.product.id)}
+                    aria-label={`Include ${item.product.name} in this order`}
+                  />
                   <Image
                     src={item.product.image}
                     alt={item.product.name}
                     width={64}
                     height={64}
-                    className="size-16 shrink-0 rounded-control bg-canvas object-cover"
+                    className={`size-16 shrink-0 rounded-control bg-canvas object-cover ${selected ? "" : "opacity-60"
+                      }`}
                   />
                   <div className="min-w-0 flex-1">
                     <Link
@@ -182,35 +233,59 @@ export default function CartSidebar() {
         {/* Summary */}
         {items.length > 0 && (
           <div className="space-y-2 border-t border-line p-5">
-            <div className="flex justify-between text-sm">
-              <span className="text-ink-soft">Subtotal</span>
-              <span className="font-medium">{formatPrice(totals.subtotal)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-ink-soft">Delivery</span>
-              <span className="font-medium">
-                {hasFreeDelivery ? (
-                  <span className="text-success">Free</span>
-                ) : (
-                  formatPrice(totals.deliveryFee)
-                )}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-ink-soft">Estimated tax</span>
-              <span className="font-medium">{formatPrice(totals.tax)}</span>
-            </div>
-            <div className="flex justify-between border-t border-line pt-3 text-base font-semibold">
-              <span>Total</span>
-              <span>{formatPrice(totals.total)}</span>
-            </div>
-            <Link
-              href="/checkout"
-              onClick={close}
-              className="btn btn-primary btn-lg mt-2 w-full"
-            >
-              Proceed to checkout <ArrowRightIcon className="size-4" />
-            </Link>
+            {noneSelected ? (
+              <p className="py-2 text-center text-sm text-ink-soft">
+                Tick the items you want to buy.
+              </p>
+            ) : (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-ink-soft">
+                    Subtotal ({selectedCount} {selectedCount === 1 ? "item" : "items"})
+                  </span>
+                  <span className="font-medium">{formatPrice(totals.subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-ink-soft">Delivery</span>
+                  <span className="font-medium">
+                    {hasFreeDelivery ? (
+                      <span className="text-success">Free</span>
+                    ) : (
+                      formatPrice(totals.deliveryFee)
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-ink-soft">Estimated tax</span>
+                  <span className="font-medium">{formatPrice(totals.tax)}</span>
+                </div>
+                <div className="flex justify-between border-t border-line pt-3 text-base font-semibold">
+                  <span>Total</span>
+                  <span>{formatPrice(totals.total)}</span>
+                </div>
+              </>
+            )}
+
+            {leftOut > 0 && !noneSelected && (
+              <p className="text-xs text-ink-muted">
+                {leftOut} {leftOut === 1 ? "item stays" : "items stay"} in your cart for later.
+              </p>
+            )}
+
+            {noneSelected ? (
+              <button disabled className="btn btn-primary btn-lg mt-2 w-full">
+                Select items to check out
+              </button>
+            ) : (
+              <Link
+                href="/checkout"
+                onClick={close}
+                className="btn btn-primary btn-lg mt-2 w-full"
+              >
+                {allSelected ? "Proceed to checkout" : `Checkout selected (${selectedCount})`}
+                <ArrowRightIcon className="size-4" />
+              </Link>
+            )}
           </div>
         )}
       </aside>

@@ -14,6 +14,7 @@ const order: OrderEmailData = {
     { name: 'Yoga Mat', price: 21.99, quantity: 2 },
   ],
   subtotal: 103.97,
+  discount: 0,
   deliveryFee: 0,
   tax: 8.32,
   total: 112.29,
@@ -103,5 +104,13 @@ describe('orderConfirmationEmail', () => {
     expect(html).not.toContain('<img src=x>');
     expect(html).toContain('&lt;script&gt;');
     expect(html).toContain('&lt;b&gt;Bold&lt;/b&gt; Watch');
+  });
+
+  it('shows a discount line only when a coupon took something off', () => {
+    const withCoupon = orderConfirmationEmail({ ...order, discount: 10 });
+
+    expect(withCoupon).toContain('Discount');
+    expect(withCoupon).toContain('-$10.00');
+    expect(orderConfirmationEmail(order)).not.toContain('Discount');
   });
 });

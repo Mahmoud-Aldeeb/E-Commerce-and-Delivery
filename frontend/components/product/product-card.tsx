@@ -6,7 +6,7 @@ import { ShoppingCartIcon, StarIcon } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { discountPercent, formatPrice } from "@/lib/format";
 import type { Product } from "@/types";
-
+import FavoriteButton from "@/components/product/favorite-button";
 
 const LOW_STOCK_LIMIT = 5;
 
@@ -30,7 +30,7 @@ export default function ProductCard({ product, eager = false }: ProductCardProps
   const hasRating = (product.rating ?? 0) > 0;
 
   return (
-    <article className="card group flex h-full flex-col overflow-hidden transition-shadow hover:shadow-pop">
+    <article className="card group relative flex h-full flex-col overflow-hidden transition-shadow hover:shadow-pop">
       {/* The image link is skipped by keyboard users: the title link below goes to the same page */}
       <Link
         href={`/products/${product.id}`}
@@ -55,6 +55,15 @@ export default function ProductCard({ product, eager = false }: ProductCardProps
           </span>
         )}
       </Link>
+
+      {/* Outside the links: a button inside a link is not valid HTML */}
+      <FavoriteButton
+        productId={product.id}
+        productName={product.name}
+        className="absolute right-2 top-2 z-10 rounded-full bg-surface/90 shadow-card"
+      />
+
+      <div className="flex flex-1 flex-col gap-2 p-4"></div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <Link

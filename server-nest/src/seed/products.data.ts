@@ -230,8 +230,8 @@ export function buildProducts(): Prisma.ProductCreateManyInput[] {
         category,
         // Deterministic "random" values so every seed run gives the same data
         stock: item.stock ?? 20 + ((i * 37) % 80),
-        rating: 4 + ((i * 7) % 10) / 10,
-        reviewCount: 5 + ((i * 13) % 200),
+        rating: 0,
+        reviewCount: 0,
       };
     }),
   );

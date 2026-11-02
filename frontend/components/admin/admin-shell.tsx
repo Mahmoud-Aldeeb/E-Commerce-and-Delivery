@@ -13,7 +13,9 @@ import {
   StoreIcon,
   TruckIcon,
   XIcon,
+  TagIcon,
   type LucideIcon,
+  StarIcon,
 } from "lucide-react";
 import RequireAdmin from "@/components/auth/require-admin";
 import Logo from "@/components/layout/logo";
@@ -30,6 +32,8 @@ const NAV: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: BarChart3Icon, exact: true },
   { href: "/admin/products", label: "Products", icon: PackageSearchIcon },
   { href: "/admin/categories", label: "Categories", icon: LayoutGridIcon },
+  { href: "/admin/coupons", label: "Coupons", icon: TagIcon },
+  { href: "/admin/reviews", label: "Reviews", icon: StarIcon },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBagIcon },
   { href: "/admin/delivery-partners", label: "Delivery partners", icon: TruckIcon },
 ];

@@ -50,14 +50,4 @@ export class CreateProductDto {
   @IsInt()
   @Min(0)
   stock?: number;
-
-  @ApiPropertyOptional({ example: 4.5 })
-  @IsOptional()
-  @IsNumber()
-  rating?: number;
-
-  @ApiPropertyOptional({ example: 12 })
-  @IsOptional()
-  @IsInt()
-  reviewCount?: number;
 }
