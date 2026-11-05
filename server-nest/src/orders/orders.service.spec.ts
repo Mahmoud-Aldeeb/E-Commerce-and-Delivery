@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   BadRequestException,
   ConflictException,
@@ -73,6 +73,7 @@ function setup(
   const prisma = {
     user: { findUnique: vi.fn().mockResolvedValue({ phone }) },
     product: { findMany: vi.fn().mockResolvedValue(products) },
+    order: { findFirst: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
     $transaction: vi.fn(async (work: (client: unknown) => unknown) => work(tx)),
   };
   const sessionsCreate = vi
@@ -310,5 +311,154 @@ describe('createOrder: the checks before the order exists', () => {
 
     expect(error).toBeInstanceOf(ConflictException);
     expect(error).toHaveProperty('message', '"Watch" was just sold out');
+  });
+});
+
+describe('getOrder: the arrival estimate', () => {
+  const NOW = new Date('2026-11-01T10:00:00.000Z');
+  const KM_PER_DEGREE = (Math.PI / 180) * 6371;
+  const tenSecondsAgo = new Date(NOW.getTime() - 10_000).toISOString();
+
+  // The time is frozen: the estimate depends on how old the location of the courier is
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // The customer is at (30, 31) and the courier is 6 km north of there, on a scooter
+  const onItsWay = (overrides: Record<string, unknown> = {}) => ({
+    id: 'o1',
+    userId: 'u1',
+    status: 'Out for Delivery',
+    shippingAddress: { lat: 30, lng: 31 },
+    liveLocation: {
+      lat: 30 + 6 / KM_PER_DEGREE,
+      lng: 31,
+      updatedAt: tenSecondsAgo,
+    },
+    deliveryPartner: { name: 'Omar', vehicleType: 'scooter' },
+    ...overrides,
+  });
+
+  it('adds the arrival estimate while the order is out for delivery', async () => {
+    const { service, prisma } = setup();
+    prisma.order.findFirst.mockResolvedValue(onItsWay());
+
+    const { order } = await service.getOrder('u1', 'o1');
+
+    expect(order).toMatchObject({ id: 'o1', status: 'Out for Delivery' });
+    expect(order.eta).toEqual({
+      minutes: 24,
+      minMinutes: 18,
+      maxMinutes: 30,
+      distanceKm: 6,
+      locationUpdatedAt: tenSecondsAgo,
+    });
+  });
+
+  it.each([['Placed'], ['Assigned'], ['Packed'], ['Delivered'], ['Cancelled']])(
+    'gives no estimate when the order is %s',
+    async (status) => {
+      const { service, prisma } = setup();
+      prisma.order.findFirst.mockResolvedValue(onItsWay({ status }));
+
+      const { order } = await service.getOrder('u1', 'o1');
+
+      expect(order.eta).toBeNull();
+    },
+  );
+
+  it('gives no estimate when the location of the courier is old', async () => {
+    const { service, prisma } = setup();
+    const fiveMinutesAgo = new Date(NOW.getTime() - 5 * 60_000).toISOString();
+    prisma.order.findFirst.mockResolvedValue(
+      onItsWay({
+        liveLocation: { lat: 30.05, lng: 31, updatedAt: fiveMinutesAgo },
+      }),
+    );
+
+    const { order } = await service.getOrder('u1', 'o1');
+
+    expect(order.eta).toBeNull();
+  });
+
+  it('gives no estimate when the courier has not shared a location', async () => {
+    const { service, prisma } = setup();
+    prisma.order.findFirst.mockResolvedValue(onItsWay({ liveLocation: null }));
+
+    const { order } = await service.getOrder('u1', 'o1');
+
+    expect(order.eta).toBeNull();
+  });
+
+  it("looks the order up by its owner, so another user's order is not found", async () => {
+    const { service, prisma } = setup();
+    prisma.order.findFirst.mockResolvedValue(null);
+
+    const error = await failureOf(service.getOrder('u2', 'o1'));
+
+    expect(error).toBeInstanceOf(NotFoundException);
+    expect(prisma.order.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'o1', userId: 'u2' } }),
+    );
+  });
+});
+
+describe('updateOrderStatus: the moment of delivery', () => {
+  const NOW = new Date('2026-11-01T10:00:00.000Z');
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const active = { id: 'o1', status: 'Out for Delivery', statusHistory: [] };
+
+  it('records the moment when an admin marks an order Delivered (it counts like a delivery by the courier)', async () => {
+    const { service, prisma } = setup();
+    prisma.order.findUnique.mockResolvedValue(active);
+    prisma.order.update.mockResolvedValue({ id: 'o1' });
+
+    await service.updateOrderStatus('o1', { status: 'Delivered' } as never);
+
+    expect(prisma.order.update).toHaveBeenCalledWith({
+      where: { id: 'o1' },
+      data: expect.objectContaining({ status: 'Delivered', deliveredAt: NOW }),
+    });
+  });
+
+  it('records no moment for the other statuses', async () => {
+    const { service, prisma } = setup();
+    prisma.order.findUnique.mockResolvedValue({ ...active, status: 'Packed' });
+    prisma.order.update.mockResolvedValue({ id: 'o1' });
+
+    await service.updateOrderStatus('o1', {
+      status: 'Out for Delivery',
+    } as never);
+
+    expect(prisma.order.update.mock.calls[0][0].data).not.toHaveProperty(
+      'deliveredAt',
+    );
+  });
+
+  it('refuses an order that is already finished', async () => {
+    const { service, prisma } = setup();
+    prisma.order.findUnique.mockResolvedValue({
+      ...active,
+      status: 'Delivered',
+    });
+
+    const error = await failureOf(
+      service.updateOrderStatus('o1', { status: 'Delivered' } as never),
+    );
+
+    expect(error).toBeInstanceOf(BadRequestException);
+    expect(prisma.order.update).not.toHaveBeenCalled();
   });
 });

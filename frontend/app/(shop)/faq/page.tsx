@@ -50,6 +50,11 @@ export default function FaqPage() {
           Open <Link href="/orders" className={link}>My orders</Link> and choose the order. When a
           courier is on the way, you can follow them live on the map.
         </Faq>
+        <Faq question="How accurate is the arrival time?">
+          While your order is out for delivery, we estimate the arrival time from the live location of
+          your courier and the distance to your address. It is an estimate: roads, traffic and the
+          time to reach your door can change it.
+        </Faq>
 
         <Faq question="Who can write a review?">
           Only customers who received a product. After your order is delivered, open the product (or

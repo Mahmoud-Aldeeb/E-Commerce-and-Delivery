@@ -31,6 +31,7 @@ import { GetAllOrdersQueryDto } from './dto/get-all-orders-query.dto.js';
 import { GetOrdersQueryDto } from './dto/get-orders-query.dto.js';
 import { calculateTotals } from './order-pricing.js';
 import { CouponsService } from '../coupons/coupons.service.js';
+import { estimateDeliveryEta } from './delivery-eta.js';
 
 // Card orders stay hidden until Stripe confirms the payment
 export const HIDE_UNPAID_CARD_ORDERS: Prisma.OrderWhereInput = {
@@ -323,7 +324,19 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException('Order not found');
 
-    return { order };
+    // The arrival time exists only while the order is on its way: before that the courier
+    // may still be far from the customer for reasons that have nothing to do with the delivery
+    const eta =
+      order.status === 'Out for Delivery'
+        ? estimateDeliveryEta({
+            liveLocation: order.liveLocation,
+            destination: order.shippingAddress,
+            vehicleType: order.deliveryPartner?.vehicleType,
+            now: new Date(),
+          })
+        : null;
+
+    return { order: { ...order, eta } };
   }
 
   // PUT /api/orders/:id/status (admin)
@@ -353,6 +366,8 @@ export class OrdersService {
       where: { id },
       data: {
         status: dto.status,
+        // An admin can also mark an order Delivered: it counts like a delivery by the courier
+        ...(dto.status === 'Delivered' ? { deliveredAt: new Date() } : {}),
         statusHistory: [
           ...history,
           {

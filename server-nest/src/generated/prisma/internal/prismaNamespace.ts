@@ -405,7 +405,8 @@ export const ModelName = {
   Category: 'Category',
   Favorite: 'Favorite',
   Coupon: 'Coupon',
-  Review: 'Review'
+  Review: 'Review',
+  CashSettlement: 'CashSettlement'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "address" | "product" | "order" | "deliveryPartner" | "category" | "favorite" | "coupon" | "review"
+    modelProps: "user" | "address" | "product" | "order" | "deliveryPartner" | "category" | "favorite" | "coupon" | "review" | "cashSettlement"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1091,6 +1092,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CashSettlement: {
+      payload: Prisma.$CashSettlementPayload<ExtArgs>
+      fields: Prisma.CashSettlementFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CashSettlementFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CashSettlementFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>
+        }
+        findFirst: {
+          args: Prisma.CashSettlementFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CashSettlementFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>
+        }
+        findMany: {
+          args: Prisma.CashSettlementFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>[]
+        }
+        create: {
+          args: Prisma.CashSettlementCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>
+        }
+        createMany: {
+          args: Prisma.CashSettlementCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CashSettlementCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>[]
+        }
+        delete: {
+          args: Prisma.CashSettlementDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>
+        }
+        update: {
+          args: Prisma.CashSettlementUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>
+        }
+        deleteMany: {
+          args: Prisma.CashSettlementDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CashSettlementUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CashSettlementUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>[]
+        }
+        upsert: {
+          args: Prisma.CashSettlementUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CashSettlementPayload>
+        }
+        aggregate: {
+          args: Prisma.CashSettlementAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCashSettlement>
+        }
+        groupBy: {
+          args: Prisma.CashSettlementGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CashSettlementGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CashSettlementCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CashSettlementCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1200,6 +1275,7 @@ export const OrderScalarFieldEnum = {
   deliveryPartnerId: 'deliveryPartnerId',
   deliveryOtp: 'deliveryOtp',
   liveLocation: 'liveLocation',
+  deliveredAt: 'deliveredAt',
   isPaid: 'isPaid',
   paymentIntentId: 'paymentIntentId',
   refundId: 'refundId',
@@ -1281,6 +1357,20 @@ export const ReviewScalarFieldEnum = {
 } as const
 
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+export const CashSettlementScalarFieldEnum = {
+  id: 'id',
+  partnerId: 'partnerId',
+  amount: 'amount',
+  note: 'note',
+  settledAt: 'settledAt',
+  recordedById: 'recordedById',
+  voidedAt: 'voidedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CashSettlementScalarFieldEnum = (typeof CashSettlementScalarFieldEnum)[keyof typeof CashSettlementScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1601,6 +1691,7 @@ export type GlobalOmitConfig = {
   favorite?: Prisma.FavoriteOmit
   coupon?: Prisma.CouponOmit
   review?: Prisma.ReviewOmit
+  cashSettlement?: Prisma.CashSettlementOmit
 }
 
 /* Types for Logging */

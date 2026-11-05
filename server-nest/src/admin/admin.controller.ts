@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -36,6 +37,8 @@ import {
   CancelOrderResponseDto,
   OrderItemResultDto,
 } from '../orders/dto/order-response.dto.js';
+import { AnalyticsService } from './analytics.service.js';
+import { AnalyticsQueryDto } from './dto/analytics-query.dto.js';
 
 @ApiTags('Admin')
 @ApiBearerAuth()
@@ -45,13 +48,30 @@ import {
 @UseGuards(AuthGuard, AdminGuard)
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly analyticsService: AnalyticsService,
+  ) {}
 
   @Get('stats')
   @ApiOperation({ summary: 'Dashboard numbers and the 8 newest orders' })
   @ApiOkResponse({ type: AdminStatsResponseDto })
   getStats() {
     return this.adminService.getStats();
+  }
+
+  @Get('analytics')
+  @ApiOperation({
+    summary:
+      'Sales by day, best sellers, refunds that need attention, products running out and products in cancelled orders',
+  })
+  @ApiOkResponse({
+    description:
+      '{ range, truncated, summary, previous, change, days, bestSellers, cancelledProducts, lowStock, refunds }',
+  })
+  @ApiBadRequestResponse({ description: 'days is not 7, 30 or 90' })
+  getAnalytics(@Query() query: AnalyticsQueryDto) {
+    return this.analyticsService.getAnalytics(query);
   }
 
   @Get('delivery-partners')

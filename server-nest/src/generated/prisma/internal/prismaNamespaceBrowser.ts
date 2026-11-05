@@ -59,7 +59,8 @@ export const ModelName = {
   Category: 'Category',
   Favorite: 'Favorite',
   Coupon: 'Coupon',
-  Review: 'Review'
+  Review: 'Review',
+  CashSettlement: 'CashSettlement'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -148,6 +149,7 @@ export const OrderScalarFieldEnum = {
   deliveryPartnerId: 'deliveryPartnerId',
   deliveryOtp: 'deliveryOtp',
   liveLocation: 'liveLocation',
+  deliveredAt: 'deliveredAt',
   isPaid: 'isPaid',
   paymentIntentId: 'paymentIntentId',
   refundId: 'refundId',
@@ -229,6 +231,20 @@ export const ReviewScalarFieldEnum = {
 } as const
 
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+export const CashSettlementScalarFieldEnum = {
+  id: 'id',
+  partnerId: 'partnerId',
+  amount: 'amount',
+  note: 'note',
+  settledAt: 'settledAt',
+  recordedById: 'recordedById',
+  voidedAt: 'voidedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CashSettlementScalarFieldEnum = (typeof CashSettlementScalarFieldEnum)[keyof typeof CashSettlementScalarFieldEnum]
 
 
 export const SortOrder = {

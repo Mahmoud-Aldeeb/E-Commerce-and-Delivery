@@ -17,6 +17,7 @@ import {
 } from "@/lib/queries/delivery";
 import { useLocationSharing } from "@/lib/use-location-sharing";
 import type { Order } from "@/types";
+import CashCard from "@/components/delivery/cash-card";
 
 const timeFormat = new Intl.DateTimeFormat("en-US", { timeStyle: "short" });
 
@@ -85,6 +86,7 @@ export default function DashboardView() {
   return (
     <>
       <h1 className="mb-4 text-2xl font-bold tracking-tight">My deliveries</h1>
+      <CashCard />
 
       <div className="mb-5 flex gap-2" role="group" aria-label="Filter deliveries">
         {(["active", "completed"] as const).map((key) => (

@@ -81,6 +81,15 @@ export interface OrderCustomer {
   phone?: string | null;
 }
 
+// The estimate of when the courier arrives. It exists only while the order is out for delivery
+export interface DeliveryEta {
+  minutes: number; // 0 = the courier is at the door
+  minMinutes: number;
+  maxMinutes: number;
+  distanceKm: number;
+  locationUpdatedAt: string;
+}
+
 export interface Order {
   id: string;
   userId: string;
@@ -99,6 +108,7 @@ export interface Order {
   deliveryPartner?: OrderPartner | null;
   deliveryOtp?: string | null; // customers only: the API never sends it to delivery partners
   liveLocation?: { lat: number; lng: number; updatedAt?: string } | null;
+  eta?: DeliveryEta | null;
   isPaid: boolean | null;
   refundStatus?: "refunded" | "pending" | "failed" | null; // card orders: what happened to the money
   createdAt: string;

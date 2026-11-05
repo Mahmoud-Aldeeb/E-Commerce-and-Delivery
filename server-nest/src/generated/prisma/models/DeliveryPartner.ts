@@ -223,6 +223,7 @@ export type DeliveryPartnerWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"DeliveryPartner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DeliveryPartner"> | Date | string
   orders?: Prisma.OrderListRelationFilter
+  settlements?: Prisma.CashSettlementListRelationFilter
 }
 
 export type DeliveryPartnerOrderByWithRelationInput = {
@@ -237,6 +238,7 @@ export type DeliveryPartnerOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   orders?: Prisma.OrderOrderByRelationAggregateInput
+  settlements?: Prisma.CashSettlementOrderByRelationAggregateInput
 }
 
 export type DeliveryPartnerWhereUniqueInput = Prisma.AtLeast<{
@@ -254,6 +256,7 @@ export type DeliveryPartnerWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"DeliveryPartner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DeliveryPartner"> | Date | string
   orders?: Prisma.OrderListRelationFilter
+  settlements?: Prisma.CashSettlementListRelationFilter
 }, "id" | "email">
 
 export type DeliveryPartnerOrderByWithAggregationInput = {
@@ -300,6 +303,7 @@ export type DeliveryPartnerCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orders?: Prisma.OrderCreateNestedManyWithoutDeliveryPartnerInput
+  settlements?: Prisma.CashSettlementCreateNestedManyWithoutPartnerInput
 }
 
 export type DeliveryPartnerUncheckedCreateInput = {
@@ -314,6 +318,7 @@ export type DeliveryPartnerUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutDeliveryPartnerInput
+  settlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutPartnerInput
 }
 
 export type DeliveryPartnerUpdateInput = {
@@ -328,6 +333,7 @@ export type DeliveryPartnerUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUpdateManyWithoutDeliveryPartnerNestedInput
+  settlements?: Prisma.CashSettlementUpdateManyWithoutPartnerNestedInput
 }
 
 export type DeliveryPartnerUncheckedUpdateInput = {
@@ -342,6 +348,7 @@ export type DeliveryPartnerUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUncheckedUpdateManyWithoutDeliveryPartnerNestedInput
+  settlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutPartnerNestedInput
 }
 
 export type DeliveryPartnerCreateManyInput = {
@@ -427,6 +434,11 @@ export type DeliveryPartnerMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type DeliveryPartnerScalarRelationFilter = {
+  is?: Prisma.DeliveryPartnerWhereInput
+  isNot?: Prisma.DeliveryPartnerWhereInput
+}
+
 export type DeliveryPartnerCreateNestedOneWithoutOrdersInput = {
   create?: Prisma.XOR<Prisma.DeliveryPartnerCreateWithoutOrdersInput, Prisma.DeliveryPartnerUncheckedCreateWithoutOrdersInput>
   connectOrCreate?: Prisma.DeliveryPartnerCreateOrConnectWithoutOrdersInput
@@ -443,6 +455,20 @@ export type DeliveryPartnerUpdateOneWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DeliveryPartnerUpdateToOneWithWhereWithoutOrdersInput, Prisma.DeliveryPartnerUpdateWithoutOrdersInput>, Prisma.DeliveryPartnerUncheckedUpdateWithoutOrdersInput>
 }
 
+export type DeliveryPartnerCreateNestedOneWithoutSettlementsInput = {
+  create?: Prisma.XOR<Prisma.DeliveryPartnerCreateWithoutSettlementsInput, Prisma.DeliveryPartnerUncheckedCreateWithoutSettlementsInput>
+  connectOrCreate?: Prisma.DeliveryPartnerCreateOrConnectWithoutSettlementsInput
+  connect?: Prisma.DeliveryPartnerWhereUniqueInput
+}
+
+export type DeliveryPartnerUpdateOneRequiredWithoutSettlementsNestedInput = {
+  create?: Prisma.XOR<Prisma.DeliveryPartnerCreateWithoutSettlementsInput, Prisma.DeliveryPartnerUncheckedCreateWithoutSettlementsInput>
+  connectOrCreate?: Prisma.DeliveryPartnerCreateOrConnectWithoutSettlementsInput
+  upsert?: Prisma.DeliveryPartnerUpsertWithoutSettlementsInput
+  connect?: Prisma.DeliveryPartnerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DeliveryPartnerUpdateToOneWithWhereWithoutSettlementsInput, Prisma.DeliveryPartnerUpdateWithoutSettlementsInput>, Prisma.DeliveryPartnerUncheckedUpdateWithoutSettlementsInput>
+}
+
 export type DeliveryPartnerCreateWithoutOrdersInput = {
   id?: string
   name: string
@@ -454,6 +480,7 @@ export type DeliveryPartnerCreateWithoutOrdersInput = {
   isActive?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  settlements?: Prisma.CashSettlementCreateNestedManyWithoutPartnerInput
 }
 
 export type DeliveryPartnerUncheckedCreateWithoutOrdersInput = {
@@ -467,6 +494,7 @@ export type DeliveryPartnerUncheckedCreateWithoutOrdersInput = {
   isActive?: boolean | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  settlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutPartnerInput
 }
 
 export type DeliveryPartnerCreateOrConnectWithoutOrdersInput = {
@@ -496,6 +524,7 @@ export type DeliveryPartnerUpdateWithoutOrdersInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settlements?: Prisma.CashSettlementUpdateManyWithoutPartnerNestedInput
 }
 
 export type DeliveryPartnerUncheckedUpdateWithoutOrdersInput = {
@@ -509,6 +538,79 @@ export type DeliveryPartnerUncheckedUpdateWithoutOrdersInput = {
   isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutPartnerNestedInput
+}
+
+export type DeliveryPartnerCreateWithoutSettlementsInput = {
+  id?: string
+  name: string
+  email: string
+  password: string
+  phone: string
+  avatar?: string | null
+  vehicleType?: string | null
+  isActive?: boolean | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orders?: Prisma.OrderCreateNestedManyWithoutDeliveryPartnerInput
+}
+
+export type DeliveryPartnerUncheckedCreateWithoutSettlementsInput = {
+  id?: string
+  name: string
+  email: string
+  password: string
+  phone: string
+  avatar?: string | null
+  vehicleType?: string | null
+  isActive?: boolean | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutDeliveryPartnerInput
+}
+
+export type DeliveryPartnerCreateOrConnectWithoutSettlementsInput = {
+  where: Prisma.DeliveryPartnerWhereUniqueInput
+  create: Prisma.XOR<Prisma.DeliveryPartnerCreateWithoutSettlementsInput, Prisma.DeliveryPartnerUncheckedCreateWithoutSettlementsInput>
+}
+
+export type DeliveryPartnerUpsertWithoutSettlementsInput = {
+  update: Prisma.XOR<Prisma.DeliveryPartnerUpdateWithoutSettlementsInput, Prisma.DeliveryPartnerUncheckedUpdateWithoutSettlementsInput>
+  create: Prisma.XOR<Prisma.DeliveryPartnerCreateWithoutSettlementsInput, Prisma.DeliveryPartnerUncheckedCreateWithoutSettlementsInput>
+  where?: Prisma.DeliveryPartnerWhereInput
+}
+
+export type DeliveryPartnerUpdateToOneWithWhereWithoutSettlementsInput = {
+  where?: Prisma.DeliveryPartnerWhereInput
+  data: Prisma.XOR<Prisma.DeliveryPartnerUpdateWithoutSettlementsInput, Prisma.DeliveryPartnerUncheckedUpdateWithoutSettlementsInput>
+}
+
+export type DeliveryPartnerUpdateWithoutSettlementsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orders?: Prisma.OrderUpdateManyWithoutDeliveryPartnerNestedInput
+}
+
+export type DeliveryPartnerUncheckedUpdateWithoutSettlementsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vehicleType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutDeliveryPartnerNestedInput
 }
 
 
@@ -518,10 +620,12 @@ export type DeliveryPartnerUncheckedUpdateWithoutOrdersInput = {
 
 export type DeliveryPartnerCountOutputType = {
   orders: number
+  settlements: number
 }
 
 export type DeliveryPartnerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | DeliveryPartnerCountOutputTypeCountOrdersArgs
+  settlements?: boolean | DeliveryPartnerCountOutputTypeCountSettlementsArgs
 }
 
 /**
@@ -541,6 +645,13 @@ export type DeliveryPartnerCountOutputTypeCountOrdersArgs<ExtArgs extends runtim
   where?: Prisma.OrderWhereInput
 }
 
+/**
+ * DeliveryPartnerCountOutputType without action
+ */
+export type DeliveryPartnerCountOutputTypeCountSettlementsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CashSettlementWhereInput
+}
+
 
 export type DeliveryPartnerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -554,6 +665,7 @@ export type DeliveryPartnerSelect<ExtArgs extends runtime.Types.Extensions.Inter
   createdAt?: boolean
   updatedAt?: boolean
   orders?: boolean | Prisma.DeliveryPartner$ordersArgs<ExtArgs>
+  settlements?: boolean | Prisma.DeliveryPartner$settlementsArgs<ExtArgs>
   _count?: boolean | Prisma.DeliveryPartnerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deliveryPartner"]>
 
@@ -599,6 +711,7 @@ export type DeliveryPartnerSelectScalar = {
 export type DeliveryPartnerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "phone" | "avatar" | "vehicleType" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["deliveryPartner"]>
 export type DeliveryPartnerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | Prisma.DeliveryPartner$ordersArgs<ExtArgs>
+  settlements?: boolean | Prisma.DeliveryPartner$settlementsArgs<ExtArgs>
   _count?: boolean | Prisma.DeliveryPartnerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DeliveryPartnerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -608,6 +721,7 @@ export type $DeliveryPartnerPayload<ExtArgs extends runtime.Types.Extensions.Int
   name: "DeliveryPartner"
   objects: {
     orders: Prisma.$OrderPayload<ExtArgs>[]
+    settlements: Prisma.$CashSettlementPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1015,6 +1129,7 @@ readonly fields: DeliveryPartnerFieldRefs;
 export interface Prisma__DeliveryPartnerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   orders<T extends Prisma.DeliveryPartner$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeliveryPartner$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  settlements<T extends Prisma.DeliveryPartner$settlementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeliveryPartner$settlementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashSettlementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1468,6 +1583,30 @@ export type DeliveryPartner$ordersArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * DeliveryPartner.settlements
+ */
+export type DeliveryPartner$settlementsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CashSettlement
+   */
+  select?: Prisma.CashSettlementSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CashSettlement
+   */
+  omit?: Prisma.CashSettlementOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CashSettlementInclude<ExtArgs> | null
+  where?: Prisma.CashSettlementWhereInput
+  orderBy?: Prisma.CashSettlementOrderByWithRelationInput | Prisma.CashSettlementOrderByWithRelationInput[]
+  cursor?: Prisma.CashSettlementWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CashSettlementScalarFieldEnum | Prisma.CashSettlementScalarFieldEnum[]
 }
 
 /**

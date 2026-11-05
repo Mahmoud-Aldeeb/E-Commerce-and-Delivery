@@ -1,3 +1,4 @@
+import { CashModule } from './cash/cash.module.js';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module.js';
@@ -24,6 +25,7 @@ import { ReviewsModule } from './reviews/reviews.module.js';
     FavoritesModule,
     CouponsModule,
     ReviewsModule,
+    CashModule,
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.registerAsync({
       global: true,

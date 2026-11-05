@@ -25,6 +25,7 @@ export const adminKeys = {
   stats: ["admin", "stats"] as const,
   orders: ["admin", "orders"] as const,
   partners: ["admin", "partners"] as const,
+  analytics: ["admin", "analytics"] as const,
 };
 
 export const adminStatsOptions = () =>
@@ -279,6 +280,7 @@ export function useRetryRefund() {
         toast.success(
           refund === "pending" ? "Refund is pending" : "Refund issued",
         );
+      queryClient.invalidateQueries({ queryKey: adminKeys.analytics });
       queryClient.invalidateQueries({ queryKey: adminKeys.orders });
     },
     onError: (error) => toast.error(getErrorMessage(error)),

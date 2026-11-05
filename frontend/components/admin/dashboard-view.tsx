@@ -17,6 +17,7 @@ import EmptyState from "@/components/ui/empty-state";
 import { formatDate, formatPrice } from "@/lib/format";
 import { itemCount, orderNumber } from "@/lib/orders";
 import { adminStatsOptions } from "@/lib/queries/admin";
+import AnalyticsView from "@/components/admin/analytics-view";
 
 interface StatCardProps {
   label: string;
@@ -99,6 +100,8 @@ export default function DashboardView() {
           </>
         )}
       </div>
+
+      <AnalyticsView />
 
       <section className="card mt-6 overflow-hidden">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">

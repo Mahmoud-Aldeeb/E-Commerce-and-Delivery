@@ -53,6 +53,7 @@ export type OrderMinAggregateOutputType = {
   status: string | null
   deliveryPartnerId: string | null
   deliveryOtp: string | null
+  deliveredAt: Date | null
   isPaid: boolean | null
   paymentIntentId: string | null
   refundId: string | null
@@ -75,6 +76,7 @@ export type OrderMaxAggregateOutputType = {
   status: string | null
   deliveryPartnerId: string | null
   deliveryOtp: string | null
+  deliveredAt: Date | null
   isPaid: boolean | null
   paymentIntentId: string | null
   refundId: string | null
@@ -101,6 +103,7 @@ export type OrderCountAggregateOutputType = {
   deliveryPartnerId: number
   deliveryOtp: number
   liveLocation: number
+  deliveredAt: number
   isPaid: number
   paymentIntentId: number
   refundId: number
@@ -141,6 +144,7 @@ export type OrderMinAggregateInputType = {
   status?: true
   deliveryPartnerId?: true
   deliveryOtp?: true
+  deliveredAt?: true
   isPaid?: true
   paymentIntentId?: true
   refundId?: true
@@ -163,6 +167,7 @@ export type OrderMaxAggregateInputType = {
   status?: true
   deliveryPartnerId?: true
   deliveryOtp?: true
+  deliveredAt?: true
   isPaid?: true
   paymentIntentId?: true
   refundId?: true
@@ -189,6 +194,7 @@ export type OrderCountAggregateInputType = {
   deliveryPartnerId?: true
   deliveryOtp?: true
   liveLocation?: true
+  deliveredAt?: true
   isPaid?: true
   paymentIntentId?: true
   refundId?: true
@@ -302,6 +308,7 @@ export type OrderGroupByOutputType = {
   deliveryPartnerId: string | null
   deliveryOtp: string | null
   liveLocation: runtime.JsonValue | null
+  deliveredAt: Date | null
   isPaid: boolean | null
   paymentIntentId: string | null
   refundId: string | null
@@ -351,6 +358,7 @@ export type OrderWhereInput = {
   deliveryPartnerId?: Prisma.StringNullableFilter<"Order"> | string | null
   deliveryOtp?: Prisma.StringNullableFilter<"Order"> | string | null
   liveLocation?: Prisma.JsonNullableFilter<"Order">
+  deliveredAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   isPaid?: Prisma.BoolNullableFilter<"Order"> | boolean | null
   paymentIntentId?: Prisma.StringNullableFilter<"Order"> | string | null
   refundId?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -380,6 +388,7 @@ export type OrderOrderByWithRelationInput = {
   deliveryPartnerId?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryOtp?: Prisma.SortOrderInput | Prisma.SortOrder
   liveLocation?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isPaid?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   refundId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -412,6 +421,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   deliveryPartnerId?: Prisma.StringNullableFilter<"Order"> | string | null
   deliveryOtp?: Prisma.StringNullableFilter<"Order"> | string | null
   liveLocation?: Prisma.JsonNullableFilter<"Order">
+  deliveredAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   isPaid?: Prisma.BoolNullableFilter<"Order"> | boolean | null
   paymentIntentId?: Prisma.StringNullableFilter<"Order"> | string | null
   refundId?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -441,6 +451,7 @@ export type OrderOrderByWithAggregationInput = {
   deliveryPartnerId?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryOtp?: Prisma.SortOrderInput | Prisma.SortOrder
   liveLocation?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isPaid?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentIntentId?: Prisma.SortOrderInput | Prisma.SortOrder
   refundId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -475,6 +486,7 @@ export type OrderScalarWhereWithAggregatesInput = {
   deliveryPartnerId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   deliveryOtp?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   liveLocation?: Prisma.JsonNullableWithAggregatesFilter<"Order">
+  deliveredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
   isPaid?: Prisma.BoolNullableWithAggregatesFilter<"Order"> | boolean | null
   paymentIntentId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   refundId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
@@ -499,6 +511,7 @@ export type OrderCreateInput = {
   statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -527,6 +540,7 @@ export type OrderUncheckedCreateInput = {
   deliveryPartnerId?: string | null
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -551,6 +565,7 @@ export type OrderUpdateInput = {
   statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -579,6 +594,7 @@ export type OrderUncheckedUpdateInput = {
   deliveryPartnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -605,6 +621,7 @@ export type OrderCreateManyInput = {
   deliveryPartnerId?: string | null
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -629,6 +646,7 @@ export type OrderUpdateManyMutationInput = {
   statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -654,6 +672,7 @@ export type OrderUncheckedUpdateManyInput = {
   deliveryPartnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -690,6 +709,7 @@ export type OrderCountOrderByAggregateInput = {
   deliveryPartnerId?: Prisma.SortOrder
   deliveryOtp?: Prisma.SortOrder
   liveLocation?: Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paymentIntentId?: Prisma.SortOrder
   refundId?: Prisma.SortOrder
@@ -720,6 +740,7 @@ export type OrderMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   deliveryPartnerId?: Prisma.SortOrder
   deliveryOtp?: Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paymentIntentId?: Prisma.SortOrder
   refundId?: Prisma.SortOrder
@@ -742,6 +763,7 @@ export type OrderMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   deliveryPartnerId?: Prisma.SortOrder
   deliveryOtp?: Prisma.SortOrder
+  deliveredAt?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   paymentIntentId?: Prisma.SortOrder
   refundId?: Prisma.SortOrder
@@ -904,6 +926,7 @@ export type OrderCreateWithoutUserInput = {
   statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -930,6 +953,7 @@ export type OrderUncheckedCreateWithoutUserInput = {
   deliveryPartnerId?: string | null
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -985,6 +1009,7 @@ export type OrderScalarWhereInput = {
   deliveryPartnerId?: Prisma.StringNullableFilter<"Order"> | string | null
   deliveryOtp?: Prisma.StringNullableFilter<"Order"> | string | null
   liveLocation?: Prisma.JsonNullableFilter<"Order">
+  deliveredAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   isPaid?: Prisma.BoolNullableFilter<"Order"> | boolean | null
   paymentIntentId?: Prisma.StringNullableFilter<"Order"> | string | null
   refundId?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -1009,6 +1034,7 @@ export type OrderCreateWithoutDeliveryPartnerInput = {
   statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -1035,6 +1061,7 @@ export type OrderUncheckedCreateWithoutDeliveryPartnerInput = {
   statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -1085,6 +1112,7 @@ export type OrderCreateWithoutCouponInput = {
   statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -1112,6 +1140,7 @@ export type OrderUncheckedCreateWithoutCouponInput = {
   deliveryPartnerId?: string | null
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -1162,6 +1191,7 @@ export type OrderCreateManyUserInput = {
   deliveryPartnerId?: string | null
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -1186,6 +1216,7 @@ export type OrderUpdateWithoutUserInput = {
   statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1212,6 +1243,7 @@ export type OrderUncheckedUpdateWithoutUserInput = {
   deliveryPartnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1237,6 +1269,7 @@ export type OrderUncheckedUpdateManyWithoutUserInput = {
   deliveryPartnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1262,6 +1295,7 @@ export type OrderCreateManyDeliveryPartnerInput = {
   statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -1286,6 +1320,7 @@ export type OrderUpdateWithoutDeliveryPartnerInput = {
   statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1312,6 +1347,7 @@ export type OrderUncheckedUpdateWithoutDeliveryPartnerInput = {
   statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1337,6 +1373,7 @@ export type OrderUncheckedUpdateManyWithoutDeliveryPartnerInput = {
   statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1363,6 +1400,7 @@ export type OrderCreateManyCouponInput = {
   deliveryPartnerId?: string | null
   deliveryOtp?: string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
   isPaid?: boolean | null
   paymentIntentId?: string | null
   refundId?: string | null
@@ -1386,6 +1424,7 @@ export type OrderUpdateWithoutCouponInput = {
   statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1413,6 +1452,7 @@ export type OrderUncheckedUpdateWithoutCouponInput = {
   deliveryPartnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1438,6 +1478,7 @@ export type OrderUncheckedUpdateManyWithoutCouponInput = {
   deliveryPartnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1465,6 +1506,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   deliveryPartnerId?: boolean
   deliveryOtp?: boolean
   liveLocation?: boolean
+  deliveredAt?: boolean
   isPaid?: boolean
   paymentIntentId?: boolean
   refundId?: boolean
@@ -1494,6 +1536,7 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   deliveryPartnerId?: boolean
   deliveryOtp?: boolean
   liveLocation?: boolean
+  deliveredAt?: boolean
   isPaid?: boolean
   paymentIntentId?: boolean
   refundId?: boolean
@@ -1523,6 +1566,7 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   deliveryPartnerId?: boolean
   deliveryOtp?: boolean
   liveLocation?: boolean
+  deliveredAt?: boolean
   isPaid?: boolean
   paymentIntentId?: boolean
   refundId?: boolean
@@ -1552,6 +1596,7 @@ export type OrderSelectScalar = {
   deliveryPartnerId?: boolean
   deliveryOtp?: boolean
   liveLocation?: boolean
+  deliveredAt?: boolean
   isPaid?: boolean
   paymentIntentId?: boolean
   refundId?: boolean
@@ -1563,7 +1608,7 @@ export type OrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "items" | "shippingAddress" | "paymentMethod" | "subtotal" | "deliveryFee" | "tax" | "total" | "status" | "statusHistory" | "deliveryPartnerId" | "deliveryOtp" | "liveLocation" | "isPaid" | "paymentIntentId" | "refundId" | "refundStatus" | "discount" | "couponId" | "couponCode" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "items" | "shippingAddress" | "paymentMethod" | "subtotal" | "deliveryFee" | "tax" | "total" | "status" | "statusHistory" | "deliveryPartnerId" | "deliveryOtp" | "liveLocation" | "deliveredAt" | "isPaid" | "paymentIntentId" | "refundId" | "refundStatus" | "discount" | "couponId" | "couponCode" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   deliveryPartner?: boolean | Prisma.Order$deliveryPartnerArgs<ExtArgs>
@@ -1602,6 +1647,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     deliveryPartnerId: string | null
     deliveryOtp: string | null
     liveLocation: runtime.JsonValue | null
+    deliveredAt: Date | null
     isPaid: boolean | null
     paymentIntentId: string | null
     refundId: string | null
@@ -2051,6 +2097,7 @@ export interface OrderFieldRefs {
   readonly deliveryPartnerId: Prisma.FieldRef<"Order", 'String'>
   readonly deliveryOtp: Prisma.FieldRef<"Order", 'String'>
   readonly liveLocation: Prisma.FieldRef<"Order", 'Json'>
+  readonly deliveredAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly isPaid: Prisma.FieldRef<"Order", 'Boolean'>
   readonly paymentIntentId: Prisma.FieldRef<"Order", 'String'>
   readonly refundId: Prisma.FieldRef<"Order", 'String'>

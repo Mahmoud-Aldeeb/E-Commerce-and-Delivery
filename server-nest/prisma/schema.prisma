@@ -28,6 +28,7 @@ model User {
   orders    Order[]
   favorites Favorite[]
   reviews   Review[]
+  cashSettlements CashSettlement[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   role Role @default(USER)
@@ -88,6 +89,7 @@ model Order {
   deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id], onDelete: SetNull)
   deliveryOtp       String?          @default("")
   liveLocation      Json?
+  deliveredAt       DateTime? // when the order became "Delivered" (the cash accounting counts by it)
   isPaid            Boolean?         @default(false)
   paymentIntentId String? // Stripe payment, saved by the webhook: it is needed to refund
   refundId        String? // Stripe refund
@@ -102,7 +104,8 @@ model Order {
   @@index([userId, createdAt])
   @@index([deliveryPartnerId, status])
   @@index([createdAt])
-    @@index([couponId])
+  @@index([deliveredAt])
+  @@index([couponId])
 }
 
 model DeliveryPartner {
@@ -115,6 +118,7 @@ model DeliveryPartner {
   vehicleType String?  @default("bike")
   isActive    Boolean? @default(true)
   orders      Order[]
+  settlements CashSettlement[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -183,4 +187,22 @@ model Review {
   @@unique([userId, productId])
   @@index([productId, isHidden, createdAt])
   @@index([createdAt])
+}
+
+
+// Money a courier handed over to the store. The courier OWES the total of the cash orders he delivered,
+// and every settlement lowers that debt. An entry is never deleted: a wrong one is voided
+model CashSettlement {
+  id           String          @id @default(uuid())
+  partnerId    String
+  partner      DeliveryPartner @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  amount       Float // dollars, above 0
+  note         String?
+  settledAt    DateTime        @default(now()) // when the money changed hands (the admin can choose it)
+  recordedById String?
+  recordedBy   User?           @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  voidedAt     DateTime? // set when the admin cancels a wrong entry: it stops counting
+  createdAt    DateTime        @default(now())
+
+  @@index([partnerId, settledAt])
 }

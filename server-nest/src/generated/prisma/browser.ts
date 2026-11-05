@@ -62,3 +62,8 @@ export type Coupon = Prisma.CouponModel
  * 
  */
 export type Review = Prisma.ReviewModel
+/**
+ * Model CashSettlement
+ * 
+ */
+export type CashSettlement = Prisma.CashSettlementModel

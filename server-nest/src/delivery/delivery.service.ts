@@ -127,6 +127,7 @@ export class DeliveryService {
           'Delivered by partner',
         ),
         deliveryOtp: '', // the code is single-use
+        deliveredAt: new Date(), // the cash accounting counts the order from this moment
       },
       omit: HIDE_OTP,
     });

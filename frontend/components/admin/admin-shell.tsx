@@ -16,6 +16,8 @@ import {
   TagIcon,
   type LucideIcon,
   StarIcon,
+  BanknoteIcon,
+
 } from "lucide-react";
 import RequireAdmin from "@/components/auth/require-admin";
 import Logo from "@/components/layout/logo";
@@ -36,6 +38,7 @@ const NAV: NavItem[] = [
   { href: "/admin/reviews", label: "Reviews", icon: StarIcon },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBagIcon },
   { href: "/admin/delivery-partners", label: "Delivery partners", icon: TruckIcon },
+  { href: "/admin/cash", label: "Cash", icon: BanknoteIcon },
 ];
 
 const itemClass = "flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors";

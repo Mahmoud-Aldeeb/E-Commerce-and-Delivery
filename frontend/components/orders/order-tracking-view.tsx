@@ -20,6 +20,7 @@ import { awaitingPayment, canCustomerCancel, isActiveOrder, orderNumber, toMapPo
 import { orderDetailOptions } from "@/lib/queries/orders";
 import CancelOrderDialog from "@/components/orders/cancel-order-dialog";
 import ReorderButton from "@/components/orders/reorder-button";
+import EtaCard from "@/components/orders/eta-card";
 
 const POLL_LIVE_MS = 10_000; // an order that is on its way: refresh the status and the location
 const POLL_PAYMENT_MS = 2_000; // waiting for the payment confirmation
@@ -162,6 +163,8 @@ export default function OrderTrackingView({ id }: { id: string }) {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <OrderOtpCard order={order} />
+
+          {order.status === "Out for Delivery" && <EtaCard eta={order.eta ?? null} />}
 
           {active && !waitingForPayment && <LiveMap destination={destination} courier={courier} />}
 
