@@ -67,6 +67,13 @@ export class OrderItemDto {
   @IsInt({ message: 'Quantity must be a whole number' })
   @Min(1, { message: 'Quantity must be at least 1' })
   quantity: number;
+
+  @ApiPropertyOptional({
+    description: 'The variant (size/colour) of a product that has options',
+  })
+  @IsOptional()
+  @IsString()
+  variant?: string;
 }
 
 export class CreateOrderDto {

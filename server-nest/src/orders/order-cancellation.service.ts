@@ -10,6 +10,7 @@ import { appendStatusHistory } from '../common/utils/status-history.util.js';
 import type { Order } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StripeService } from '../stripe/stripe.service.js';
+import { restoreStock } from './stock.util.js';
 
 export type CancelledBy = 'customer' | 'admin' | 'courier';
 export type RefundOutcome = 'none' | 'refunded' | 'pending' | 'failed';
@@ -28,8 +29,6 @@ const WHO: Record<CancelledBy, string> = {
   admin: 'Cancelled by the store',
   courier: 'Cancelled by the courier',
 };
-
-type StoredItem = { product: string; quantity: number };
 
 const toRefundStatus = (
   status: string | null,
@@ -92,16 +91,8 @@ export class OrderCancellationService {
         );
       }
 
-      // Put the items back on the shelves (updateMany: a missing product does not abort)
-      const items = Array.isArray(order.items)
-        ? (order.items as unknown as StoredItem[])
-        : [];
-      for (const item of items) {
-        await tx.product.updateMany({
-          where: { id: item.product },
-          data: { stock: { increment: item.quantity } },
-        });
-      }
+      // Put the items back on the shelves (a missing product or variant does not abort)
+      await restoreStock(tx, order.items);
 
       return tx.order.findUniqueOrThrow({ where: { id: order.id } });
     });

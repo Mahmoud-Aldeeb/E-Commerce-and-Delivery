@@ -60,7 +60,8 @@ export const ModelName = {
   Favorite: 'Favorite',
   Coupon: 'Coupon',
   Review: 'Review',
-  CashSettlement: 'CashSettlement'
+  CashSettlement: 'CashSettlement',
+  ProductVariant: 'ProductVariant'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -127,6 +128,7 @@ export const ProductScalarFieldEnum = {
   stock: 'stock',
   rating: 'rating',
   reviewCount: 'reviewCount',
+  images: 'images',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -245,6 +247,22 @@ export const CashSettlementScalarFieldEnum = {
 } as const
 
 export type CashSettlementScalarFieldEnum = (typeof CashSettlementScalarFieldEnum)[keyof typeof CashSettlementScalarFieldEnum]
+
+
+export const ProductVariantScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  size: 'size',
+  color: 'color',
+  colorHex: 'colorHex',
+  stock: 'stock',
+  image: 'image',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductVariantScalarFieldEnum = (typeof ProductVariantScalarFieldEnum)[keyof typeof ProductVariantScalarFieldEnum]
 
 
 export const SortOrder = {

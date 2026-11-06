@@ -32,6 +32,7 @@ import { GetOrdersQueryDto } from './dto/get-orders-query.dto.js';
 import { calculateTotals } from './order-pricing.js';
 import { CouponsService } from '../coupons/coupons.service.js';
 import { estimateDeliveryEta } from './delivery-eta.js';
+import { variantLabel } from '../products/variant-rules.js';
 
 // Card orders stay hidden until Stripe confirms the payment
 export const HIDE_UNPAID_CARD_ORDERS: Prisma.OrderWhereInput = {
@@ -87,13 +88,14 @@ export class OrdersService {
     // Prices always come from the database, never from the client
     const products = await this.prisma.product.findMany({
       where: { id: { in: items.map((item) => item.product) } },
+      include: { variants: true },
     });
     const productMap = new Map(
       products.map((product) => [product.id, product]),
     );
 
     // A first check, only to give a clear message. takeStock below is the real protection
-    for (const item of items) {
+    const lines = items.map((item) => {
       const product = productMap.get(item.product);
       if (!product) {
         throw new NotFoundException(
@@ -101,26 +103,50 @@ export class OrdersService {
         );
       }
 
-      const available = product.stock ?? 0;
+      // A product with sizes/colours is bought by choosing one; a product without them cannot
+      let variant: (typeof product.variants)[number] | null = null;
+      if (product.variants.length > 0) {
+        if (!item.variant) {
+          throw new BadRequestException(
+            `Choose the options of "${product.name}"`,
+          );
+        }
+        variant =
+          product.variants.find((candidate) => candidate.id === item.variant) ??
+          null;
+      }
+      if (product.variants.length > 0 ? !variant : Boolean(item.variant)) {
+        throw new ConflictException(
+          `The options of "${product.name}" changed. Please add it to your cart again`,
+        );
+      }
+
+      // The name the customer sees in the messages: "Shirt (M / Black)"
+      const name = variant
+        ? `${product.name} (${variantLabel(variant)})`
+        : product.name;
+      const available = variant ? variant.stock : (product.stock ?? 0);
       if (available < item.quantity) {
         throw new ConflictException(
           available > 0
-            ? `Only ${available} left of "${product.name}"`
-            : `"${product.name}" is out of stock`,
+            ? `Only ${available} left of "${name}"`
+            : `"${name}" is out of stock`,
         );
       }
-    }
-
-    const orderItems = items.map((item) => {
-      const product = productMap.get(item.product)!; // existence checked above
-      return {
-        product: product.id,
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        quantity: item.quantity,
-      };
+      return { item, product, variant, name };
     });
+
+    const orderItems = lines.map(({ item, product, variant }) => ({
+      product: product.id,
+      // Only an order with options remembers them: an old order, or a product without options, has none
+      ...(variant
+        ? { variant: variant.id, variantLabel: variantLabel(variant) }
+        : {}),
+      name: product.name,
+      image: variant?.image || product.image,
+      price: product.price,
+      quantity: item.quantity,
+    }));
 
     const itemsTotal = orderItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -152,12 +178,12 @@ export class OrdersService {
             shippingAddress: { ...shippingAddress },
             paymentMethod,
             subtotal,
-            deliveryFee,
-            tax,
-            total,
             discount,
             couponId: coupon?.couponId ?? null,
             couponCode: coupon?.code ?? null,
+            deliveryFee,
+            tax,
+            total,
             statusHistory: [
               {
                 status: 'Placed',
@@ -175,9 +201,14 @@ export class OrdersService {
       });
     } catch (error) {
       if (error instanceof InsufficientStockError) {
-        const name =
-          productMap.get(error.productId)?.name ?? 'A product in your cart';
-        throw new ConflictException(`"${name}" was just sold out`);
+        const sold = lines.find(
+          (line) =>
+            line.product.id === error.productId &&
+            (line.variant?.id ?? null) === error.variantId,
+        );
+        throw new ConflictException(
+          `"${sold?.name ?? 'A product in your cart'}" was just sold out`,
+        );
       }
       throw error;
     }
@@ -204,10 +235,12 @@ export class OrdersService {
     }
 
     await this.emitEvents([
-      ...orderItems.map((item) => ({
-        name: 'inventory/stock.updated',
-        data: { productId: item.product },
-      })),
+      ...[...new Set(orderItems.map((item) => item.product))].map(
+        (productId) => ({
+          name: 'inventory/stock.updated',
+          data: { productId },
+        }),
+      ),
       { name: 'order/placed', data: { orderId: order.id } },
     ]);
 

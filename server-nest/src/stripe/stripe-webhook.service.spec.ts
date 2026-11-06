@@ -52,6 +52,7 @@ function setup() {
     },
     // takeStock is the REAL function: it calls this, and counts what comes back
     product: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+    productVariant: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
   };
 
   const prisma = {
@@ -229,6 +230,53 @@ describe('payment_intent.succeeded', () => {
 
     expect(prisma.$transaction).not.toHaveBeenCalled();
     expect(logs.warn).toHaveBeenCalled();
+  });
+
+  it('takes the stock of the options, and sends ONE stock event for the product', async () => {
+    const { service, tx, inngest } = setup();
+    tx.order.findUniqueOrThrow.mockResolvedValue({
+      id: 'o1',
+      items: [
+        { product: 'a', variant: 'v1', quantity: 1 },
+        { product: 'a', variant: 'v2', quantity: 2 },
+      ],
+    });
+
+    await service.handleEvent(paymentEvent('payment_intent.succeeded'));
+
+    expect(tx.productVariant.updateMany).toHaveBeenNthCalledWith(1, {
+      where: { id: 'v1', productId: 'a', stock: { gte: 1 } },
+      data: { stock: { decrement: 1 } },
+    });
+    expect(tx.productVariant.updateMany).toHaveBeenNthCalledWith(2, {
+      where: { id: 'v2', productId: 'a', stock: { gte: 2 } },
+      data: { stock: { decrement: 2 } },
+    });
+    // The total of the product goes down once, by what both options gave
+    expect(tx.product.updateMany).toHaveBeenCalledTimes(1);
+    expect(tx.product.updateMany).toHaveBeenCalledWith({
+      where: { id: 'a' },
+      data: { stock: { decrement: 3 } },
+    });
+    expect(inngest.sendSafely).toHaveBeenCalledWith([
+      { name: 'order/placed', data: { orderId: 'o1' } },
+      { name: 'inventory/stock.updated', data: { productId: 'a' } },
+    ]);
+  });
+
+  it('cancels and refunds when an OPTION sold out after the customer paid', async () => {
+    const { service, tx, inngest, cancellation } = setup();
+    tx.order.findUniqueOrThrow.mockResolvedValue({
+      id: 'o1',
+      items: [{ product: 'a', variant: 'v1', quantity: 1 }],
+    });
+    tx.productVariant.updateMany.mockResolvedValue({ count: 0 });
+
+    await service.handleEvent(paymentEvent('payment_intent.succeeded'));
+
+    expect(cancellation.cancelOutOfStock).toHaveBeenCalledWith('o1', 'pi_1');
+    expect(tx.product.updateMany).not.toHaveBeenCalled();
+    expect(inngest.sendSafely).not.toHaveBeenCalled();
   });
 });
 

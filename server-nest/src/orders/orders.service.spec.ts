@@ -30,15 +30,43 @@ const failureOf = (call: Promise<unknown>) =>
     (caught: unknown) => caught,
   );
 
+// `variants: []` = a product without options. The real database always gives this list,
+// because createOrder asks for it
 const watch = {
   id: 'p1',
   name: 'Watch',
   image: 'watch.png',
   price: 10,
   stock: 20,
+  variants: [],
 };
-const mat = { id: 'p2', name: 'Mat', image: 'mat.png', price: 5, stock: 20 };
+const mat = {
+  id: 'p2',
+  name: 'Mat',
+  image: 'mat.png',
+  price: 5,
+  stock: 20,
+  variants: [],
+};
 
+// A product with options: its stock (15) is the total of its variants (10 + 5)
+const shirt = {
+  id: 'p3',
+  name: 'Shirt',
+  image: 'shirt.png',
+  price: 20,
+  stock: 15,
+  variants: [
+    {
+      id: 'v1',
+      size: 'M',
+      color: 'Black',
+      stock: 10,
+      image: 'shirt-black.png',
+    },
+    { id: 'v2', size: 'L', color: 'Black', stock: 5, image: null },
+  ],
+};
 const address = {
   label: 'Home',
   address: '12 Nile St',
@@ -69,6 +97,7 @@ function setup(
       })),
     },
     product: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+    productVariant: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
   };
   const prisma = {
     user: { findUnique: vi.fn().mockResolvedValue({ phone }) },
@@ -311,6 +340,162 @@ describe('createOrder: the checks before the order exists', () => {
 
     expect(error).toBeInstanceOf(ConflictException);
     expect(error).toHaveProperty('message', '"Watch" was just sold out');
+  });
+});
+describe('createOrder: products with options (size, colour)', () => {
+  // One line of the cart: the shirt, with the option the customer chose (or none)
+  const buy = (variant?: string, quantity = 1) =>
+    makeDto({ items: [{ product: 'p3', quantity, variant }] });
+
+  // The shirt, with only its first option, and that option has this stock
+  const shirtWithStock = (stock: number) => ({
+    ...shirt,
+    variants: [{ ...shirt.variants[0], stock }],
+  });
+
+  it('refuses a product with options when no option was chosen', async () => {
+    const { service, tx } = setup([shirt]);
+
+    const error = await failureOf(service.createOrder('u1', buy()));
+
+    expect(error).toBeInstanceOf(BadRequestException);
+    expect(error).toHaveProperty('message', 'Choose the options of "Shirt"');
+    expect(tx.order.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses an option that is not one of the product (it was changed or deleted)', async () => {
+    const { service, tx } = setup([shirt]);
+
+    const error = await failureOf(service.createOrder('u1', buy('gone')));
+
+    expect(error).toBeInstanceOf(ConflictException);
+    expect(error).toHaveProperty(
+      'message',
+      'The options of "Shirt" changed. Please add it to your cart again',
+    );
+    expect(tx.order.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses an option sent for a product that has none', async () => {
+    const { service } = setup([watch]);
+
+    const error = await failureOf(
+      service.createOrder(
+        'u1',
+        makeDto({ items: [{ product: 'p1', quantity: 1, variant: 'v1' }] }),
+      ),
+    );
+
+    expect(error).toBeInstanceOf(ConflictException);
+    expect(error).toHaveProperty(
+      'message',
+      'The options of "Watch" changed. Please add it to your cart again',
+    );
+  });
+
+  it('checks the stock of the OPTION, not the total of the product', async () => {
+    const { service } = setup([shirt]); // the product has 15, the option L only 5
+
+    const error = await failureOf(service.createOrder('u1', buy('v2', 6)));
+
+    expect(error).toBeInstanceOf(ConflictException);
+    expect(error).toHaveProperty(
+      'message',
+      'Only 5 left of "Shirt (L / Black)"',
+    );
+  });
+
+  it('says when an option is out of stock', async () => {
+    const { service } = setup([shirtWithStock(0)]);
+
+    const error = await failureOf(service.createOrder('u1', buy('v1')));
+
+    expect(error).toHaveProperty(
+      'message',
+      '"Shirt (M / Black)" is out of stock',
+    );
+  });
+
+  it('saves the option on the order, with its label and its own image', async () => {
+    const { service, tx } = setup([shirt]);
+
+    await service.createOrder('u1', buy('v1', 2));
+
+    expect(tx.order.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        subtotal: 40,
+        items: [
+          {
+            product: 'p3',
+            variant: 'v1',
+            variantLabel: 'M / Black',
+            name: 'Shirt',
+            image: 'shirt-black.png',
+            price: 20,
+            quantity: 2,
+          },
+        ],
+      }),
+    });
+  });
+
+  it('uses the image of the product when the option has no image of its own', async () => {
+    const { service, tx } = setup([shirt]);
+
+    await service.createOrder('u1', buy('v2'));
+
+    expect(tx.order.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        items: [expect.objectContaining({ variant: 'v2', image: 'shirt.png' })],
+      }),
+    });
+  });
+
+  it('takes the stock of the option, and the total of the product with it (cash)', async () => {
+    const { service, tx } = setup([shirt]);
+
+    await service.createOrder('u1', buy('v1', 2));
+
+    expect(tx.productVariant.updateMany).toHaveBeenCalledWith({
+      where: { id: 'v1', productId: 'p3', stock: { gte: 2 } },
+      data: { stock: { decrement: 2 } },
+    });
+    expect(tx.product.updateMany).toHaveBeenCalledWith({
+      where: { id: 'p3' },
+      data: { stock: { decrement: 2 } },
+    });
+  });
+
+  it('names the option when it was sold out in the meantime', async () => {
+    const { service, tx } = setup([shirt]);
+    tx.productVariant.updateMany.mockResolvedValue({ count: 0 }); // somebody took the last one first
+
+    const error = await failureOf(service.createOrder('u1', buy('v1')));
+
+    expect(error).toBeInstanceOf(ConflictException);
+    expect(error).toHaveProperty(
+      'message',
+      '"Shirt (M / Black)" was just sold out',
+    );
+  });
+
+  it('sends ONE stock event for a product bought in two sizes', async () => {
+    const { service, inngest } = setup([shirt]);
+
+    await service.createOrder(
+      'u1',
+      makeDto({
+        items: [
+          { product: 'p3', quantity: 1, variant: 'v1' },
+          { product: 'p3', quantity: 1, variant: 'v2' },
+        ],
+      }),
+    );
+
+    expect(inngest.send).toHaveBeenCalledWith([
+      { name: 'inventory/stock.updated', data: { productId: 'p3' } },
+      { name: 'order/placed', data: { orderId: 'o1' } },
+    ]);
   });
 });
 

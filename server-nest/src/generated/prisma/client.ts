@@ -91,3 +91,8 @@ export type Review = Prisma.ReviewModel
  * 
  */
 export type CashSettlement = Prisma.CashSettlementModel
+/**
+ * Model ProductVariant
+ * 
+ */
+export type ProductVariant = Prisma.ProductVariantModel

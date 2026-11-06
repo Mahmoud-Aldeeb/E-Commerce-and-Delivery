@@ -44,14 +44,12 @@ function setup({
   const prisma = {
     deliveryPartner: {
       findMany: vi.fn().mockResolvedValue([]),
-      findUnique: vi
-        .fn()
-        .mockResolvedValue({
-          id: 'd1',
-          name: 'Omar',
-          phone: '0100',
-          isActive: true,
-        }),
+      findUnique: vi.fn().mockResolvedValue({
+        id: 'd1',
+        name: 'Omar',
+        phone: '0100',
+        isActive: true,
+      }),
     },
     order: {
       aggregate: vi.fn().mockResolvedValue({ _sum: { total: collected } }),
@@ -423,9 +421,11 @@ describe('recordSettlement', () => {
       settledAt: yesterday,
     });
 
-    expect(
-      prisma.cashSettlement.create.mock.calls[0][0].data.settledAt,
-    ).toEqual(yesterday);
+    expect(prisma.cashSettlement.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ settledAt: yesterday }),
+      }),
+    );
   });
 
   it.each([[undefined], ['   ']])(
@@ -435,9 +435,11 @@ describe('recordSettlement', () => {
 
       await service.recordSettlement('admin1', 'd1', { amount: 10, note });
 
-      expect(
-        prisma.cashSettlement.create.mock.calls[0][0].data.note,
-      ).toBeNull();
+      expect(prisma.cashSettlement.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ note: null }),
+        }),
+      );
     },
   );
 
