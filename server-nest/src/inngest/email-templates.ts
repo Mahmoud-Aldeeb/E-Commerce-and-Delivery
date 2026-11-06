@@ -108,6 +108,7 @@ export interface OrderEmailItem {
   name: string;
   price: number;
   quantity: number;
+  variantLabel?: string;
 }
 
 export interface OrderEmailData {
@@ -141,7 +142,7 @@ export function orderConfirmationEmail(order: OrderEmailData): string {
     .map(
       (item) => `
         <tr>
-          <td style="padding: 8px 0; font-size: 14px; color: #111827;">${escapeHtml(item.name)} <span style="color: #6b7280;">&times; ${escapeHtml(item.quantity)}</span></td>
+          <td style="padding: 8px 0; font-size: 14px; color: #111827;">${escapeHtml(item.name)}${item.variantLabel ? ` <span style="color: #6b7280;">(${escapeHtml(item.variantLabel)})</span>` : ''} <span style="color: #6b7280;">&times; ${escapeHtml(item.quantity)}</span></td>
           <td style="padding: 8px 0; font-size: 14px; color: #111827; text-align: right; white-space: nowrap;">${money(item.price * item.quantity)}</td>
         </tr>`,
     )

@@ -66,6 +66,8 @@ model Product {
   stock         Int?     @default(0)
   rating        Float?   @default(0)
   reviewCount   Int?     @default(0)
+  images        String[]         @default([]) // more images, besides the main one in `image`
+  variants      ProductVariant[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   @@index([category])
@@ -205,4 +207,24 @@ model CashSettlement {
   createdAt    DateTime        @default(now())
 
   @@index([partnerId, settledAt])
+}
+
+
+// An option of a product with sizes and/or colours. It has its OWN stock: the product keeps the total
+model ProductVariant {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String   @default("") // "" = the product has no sizes
+  color     String   @default("") // "" = the product has no colours
+  colorHex  String? // "#111827": the circle shown for the colour
+  stock     Int      @default(0)
+  image     String? // one of the images of the product, shown when this variant is chosen
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // "" and not NULL: PostgreSQL sees every NULL as different, so a NULL could never be unique
+  @@unique([productId, size, color])
+  @@index([productId])
 }

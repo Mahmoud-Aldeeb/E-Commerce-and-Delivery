@@ -36,10 +36,17 @@ function setup() {
 }
 
 describe('getFavorites', () => {
-  it("lists the user's products in the order the database gives, with their discount", async () => {
+  it("lists the user's products in the order the database gives, with their discount and variant count", async () => {
     const { service, prisma } = setup();
     prisma.favorite.findMany.mockResolvedValue([
-      { product: product({ id: 'p2', price: 10, originalPrice: null }) },
+      {
+        product: product({
+          id: 'p2',
+          price: 10,
+          originalPrice: null,
+          _count: { variants: 3 },
+        }),
+      },
       { product: product() },
     ]);
 
@@ -48,10 +55,16 @@ describe('getFavorites', () => {
     expect(prisma.favorite.findMany).toHaveBeenCalledWith({
       where: { userId: 'u1' },
       orderBy: [{ createdAt: 'desc' }, { productId: 'asc' }],
-      include: { product: true },
+      // Written by hand: the product comes with the NUMBER of its variants, not the variants
+      include: {
+        product: { include: { _count: { select: { variants: true } } } },
+      },
     });
     expect(result.products.map((item) => item.id)).toEqual(['p2', 'p1']);
     expect(result.products.map((item) => item.discount)).toEqual([0, 25]);
+    expect(result.products.map((item) => item.variantCount)).toEqual([3, 0]);
+    // The raw count is never given to the client
+    expect(result.products[0]).not.toHaveProperty('_count');
   });
 
   it('answers an empty list when nothing is saved', async () => {

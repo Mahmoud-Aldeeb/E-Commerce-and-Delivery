@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { withDiscount } from '../products/product-discount.util.js';
+import { LIST_INCLUDE, toPublicProduct } from '../products/product-shape.js';
 
 @Injectable()
 export class FavoritesService {
@@ -12,10 +12,10 @@ export class FavoritesService {
       where: { userId },
       // productId breaks ties, so the order is the same on every request
       orderBy: [{ createdAt: 'desc' }, { productId: 'asc' }],
-      include: { product: true },
+      include: { product: { include: LIST_INCLUDE } },
     });
     return {
-      products: favorites.map((favorite) => withDiscount(favorite.product)),
+      products: favorites.map((favorite) => toPublicProduct(favorite.product)),
     };
   }
 
