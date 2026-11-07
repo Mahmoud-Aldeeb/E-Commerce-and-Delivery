@@ -12,9 +12,11 @@ import { Prisma } from '../generated/prisma/client.js';
 import { StripeService } from './stripe.service.js';
 import type { Order } from '../generated/prisma/client.js';
 import { OrderCancellationService } from '../orders/order-cancellation.service.js';
-import { InsufficientStockError, takeStock } from '../orders/stock.util.js';
-
-type StoredItem = { product: string; quantity: number };
+import {
+  InsufficientStockError,
+  takeStock,
+  type StoredItem,
+} from '../orders/stock.util.js';
 
 @Injectable()
 export class StripeWebhookService {
@@ -136,11 +138,16 @@ export class StripeWebhookService {
       return;
     }
 
+    // One event per PRODUCT: two sizes of the same shirt must not alert the admin twice
+    const productIds = [
+      ...new Set(this.toItems(paidOrder.items).map((item) => item.product)),
+    ];
+
     await this.inngest.sendSafely([
       { name: 'order/placed', data: { orderId } },
-      ...this.toItems(paidOrder.items).map((item) => ({
+      ...productIds.map((productId) => ({
         name: 'inventory/stock.updated',
-        data: { productId: item.product },
+        data: { productId },
       })),
     ]);
   }
