@@ -25,6 +25,16 @@ export interface User {
   updatedAt: string;
 }
 
+// One size/colour of a product that has options. It has its OWN stock
+export interface ProductVariant {
+  id: string;
+  size: string; // "" = the product has no sizes
+  color: string; // "" = the product has no colours
+  colorHex: string | null; // "#111827": the circle shown for the colour
+  stock: number;
+  image: string | null; // one of the images of the product
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -32,11 +42,15 @@ export interface Product {
   price: number;
   originalPrice: number | null;
   image: string;
+  images: string[]; // more images, besides the main one
   category: string;
+  // The total of the stock of the variants when the product has any
   stock: number | null;
   rating: number | null;
   reviewCount: number | null;
   discount: number; // percentage, calculated by the API
+  variantCount: number; // 0 = a product without options. Every list gives this number
+  variants?: ProductVariant[]; // only the page of ONE product gives the variants themselves
   createdAt: string;
 }
 
@@ -47,6 +61,8 @@ export interface CartItem {
 
 export interface OrderItem {
   product: string; // product id
+  variant?: string; // variant id: only an order of a product with options has it
+  variantLabel?: string; // "M / Black"
   name: string;
   image: string;
   price: number;

@@ -169,8 +169,15 @@ export default function ProductsView() {
                           />
                           <div className="min-w-0">
                             <p className="max-w-64 truncate font-medium">{product.name}</p>
-                            <p className="text-xs text-ink-muted">
+                                                        <p className="text-xs text-ink-muted">
                               {product.category}
+                              {product.variantCount > 0 && (
+                                <>
+                                  {" "}
+                                  · {product.variantCount}{" "}
+                                  {product.variantCount === 1 ? "option" : "options"}
+                                </>
+                              )}
                             </p>
                           </div>
                         </div>

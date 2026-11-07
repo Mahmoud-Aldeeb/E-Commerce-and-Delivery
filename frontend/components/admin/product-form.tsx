@@ -1,26 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ImageIcon, PackageIcon, TriangleAlertIcon } from "lucide-react";
+import { PackageIcon, TriangleAlertIcon } from "lucide-react";
 import Field from "@/components/admin/field";
+import ImageGallery from "@/components/admin/image-gallery";
 import PageHeader from "@/components/admin/page-header";
+import VariantsEditor from "@/components/admin/variants-editor";
 import EmptyState from "@/components/ui/empty-state";
 import PageLoader from "@/components/ui/page-loader";
 import { getErrorStatus } from "@/lib/api";
 import { useSaveProduct } from "@/lib/queries/admin";
 import { categoriesOptions } from "@/lib/queries/categories";
 import { productDetailOptions } from "@/lib/queries/products";
+import {
+  checkVariantRows,
+  rowsFromVariants,
+  toPayload,
+  totalStock,
+  type VariantCheck,
+  type VariantRow,
+} from "@/lib/variants";
 import type { Product } from "@/types";
 
-const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // the API refuses bigger uploads
-const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
-
 type FormField = "name" | "description" | "category" | "price" | "originalPrice" | "stock";
-type Errors = Partial<Record<FormField | "image", string>>;
+type Errors = Partial<Record<FormField | "images", string>>;
 
 function ProductFormBody({ product }: { product?: Product }) {
   const router = useRouter();
@@ -30,23 +36,28 @@ function ProductFormBody({ product }: { product?: Product }) {
   const categoriesQuery = useQuery(categoriesOptions());
   const categories = categoriesQuery.data ?? [];
 
+  // The stock of a product with options is the TOTAL of its options, not a number to start from:
+  // if the admin removes every option, the stock must be said again
+  const hadVariants = (product?.variantCount ?? 0) > 0;
+
   const [form, setForm] = useState({
     name: product?.name ?? "",
     description: product?.description ?? "",
     category: product?.category ?? "",
     price: product ? String(product.price) : "",
     originalPrice: product?.originalPrice ? String(product.originalPrice) : "",
-    stock: product?.stock != null ? String(product.stock) : "",
+    stock: product && !hadVariants && product.stock != null ? String(product.stock) : "",
   });
-  const [picked, setPicked] = useState<{ file: File; url: string } | null>(null);
+  // The main image first, then the others
+  const [images, setImages] = useState<string[]>(() =>
+    product ? [product.image, ...product.images] : [],
+  );
+  const [rows, setRows] = useState<VariantRow[]>(() => rowsFromVariants(product?.variants));
+  const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const [variantCheck, setVariantCheck] = useState<VariantCheck | null>(null);
 
-  // Release the temporary preview address when the image changes or the form closes
-  useEffect(() => {
-    return () => {
-      if (picked) URL.revokeObjectURL(picked.url);
-    };
-  }, [picked]);
+  const hasRows = rows.length > 0;
 
   function setField(name: FormField, value: string) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -65,20 +76,24 @@ function ProductFormBody({ product }: { product?: Product }) {
     "aria-describedby": errors[name] ? `${id}-error` : undefined,
   });
 
-  function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  function addImage(url: string) {
+    setImages((current) => (current.includes(url) ? current : [...current, url]));
+    setErrors((current) => ({ ...current, images: undefined }));
+  }
 
-    if (!IMAGE_TYPES.includes(file.type)) {
-      setErrors((current) => ({ ...current, image: "Use a JPEG, PNG, WebP, GIF or AVIF image." }));
-      return;
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      setErrors((current) => ({ ...current, image: "The image must be 4 MB or smaller." }));
-      return;
-    }
-    setErrors((current) => ({ ...current, image: undefined }));
-    setPicked({ file, url: URL.createObjectURL(file) });
+  function makeMain(url: string) {
+    setImages((current) => [url, ...current.filter((image) => image !== url)]);
+  }
+
+  function removeImage(url: string) {
+    setImages((current) => current.filter((image) => image !== url));
+    // An option cannot show an image the product no longer has
+    setRows((current) => current.map((row) => (row.image === url ? { ...row, image: "" } : row)));
+  }
+
+  function changeRows(next: VariantRow[]) {
+    setRows(next);
+    setVariantCheck(null); // the old messages no longer describe what is on the screen
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -97,32 +112,37 @@ function ProductFormBody({ product }: { product?: Product }) {
     if (form.originalPrice !== "" && (!Number.isFinite(originalPrice) || originalPrice <= price)) {
       found.originalPrice = "It must be higher than the price (or leave it empty).";
     }
-    if (form.stock === "" || !Number.isInteger(stock) || stock < 0) {
+    // With options the stock is their total: there is nothing to enter
+    if (!hasRows && (form.stock === "" || !Number.isInteger(stock) || stock < 0)) {
       found.stock = "Enter a whole number, 0 or more.";
     }
-    if (!picked && !product?.image) found.image = "Add a product image.";
+    if (images.length === 0) found.images = "Add at least one product image.";
+
+    const check = checkVariantRows(rows);
 
     setErrors(found);
-    if (Object.keys(found).length > 0) return;
+    setVariantCheck(check);
+    if (Object.keys(found).length > 0 || !check.ok) return;
 
     save.mutate(
       {
         id: product?.id,
-        imageFile: picked?.file,
-        image: product?.image ?? "",
         name: form.name.trim(),
         description: form.description.trim(),
         category: form.category,
         price,
         originalPrice,
-        stock,
+        image: images[0],
+        images: images.slice(1),
+        variants: toPayload(rows, images),
+        // The API refuses a stock that comes with options
+        ...(hasRows ? {} : { stock }),
       },
       { onSuccess: () => router.push("/admin/products") },
     );
   }
 
   const knownCategory = categories.some((item) => item.name === form.category);
-  const previewSrc = picked?.url ?? product?.image;
 
   return (
     <>
@@ -132,107 +152,113 @@ function ProductFormBody({ product }: { product?: Product }) {
       />
 
       <form onSubmit={handleSubmit} noValidate className="grid gap-6 lg:grid-cols-3">
-        <div className="card space-y-4 p-6 lg:col-span-2">
-          <Field id="product-name" label="Name" error={errors.name}>
-            <input {...inputProps("name", "product-name")} />
-          </Field>
+        <div className="space-y-6 lg:col-span-2">
+          <div className="card space-y-4 p-6">
+            <Field id="product-name" label="Name" error={errors.name}>
+              <input {...inputProps("name", "product-name")} />
+            </Field>
 
-          <Field id="product-category" label="Category" error={errors.category}>
-            <select {...inputProps("category", "product-category")} disabled={categoriesQuery.isPending}>
-              <option value="">
-                {categoriesQuery.isPending ? "Loading categories..." : "Select a category"}
-              </option>
-              {!categoriesQuery.isPending && !knownCategory && form.category && (
-                <option value={form.category}>{form.category} (not in the list)</option>
-              )}
-              {categories.map((item) => (
-                <option key={item.name} value={item.name}>
-                  {item.name}
+            <Field id="product-category" label="Category" error={errors.category}>
+              <select {...inputProps("category", "product-category")} disabled={categoriesQuery.isPending}>
+                <option value="">
+                  {categoriesQuery.isPending ? "Loading categories..." : "Select a category"}
                 </option>
-              ))}
-            </select>
-            {categoriesQuery.isError && (
-              <p role="alert" className="field-error">
-                We couldn&apos;t load the categories.{" "}
-                <button
-                  type="button"
-                  onClick={() => categoriesQuery.refetch()}
-                  className="font-medium underline"
-                >
-                  Try again
-                </button>
-              </p>
-            )}
-          </Field>
+                {!categoriesQuery.isPending && !knownCategory && form.category && (
+                  <option value={form.category}>{form.category} (not in the list)</option>
+                )}
+                {categories.map((item) => (
+                  <option key={item.name} value={item.name}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+              {categoriesQuery.isError && (
+                <p role="alert" className="field-error">
+                  We couldn&apos;t load the categories.{" "}
+                  <button
+                    type="button"
+                    onClick={() => categoriesQuery.refetch()}
+                    className="font-medium underline"
+                  >
+                    Try again
+                  </button>
+                </p>
+              )}
+            </Field>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field id="product-price" label="Price ($)" error={errors.price}>
-              <input type="number" step="0.01" min="0" inputMode="decimal" {...inputProps("price", "product-price")} />
-            </Field>
-            <Field
-              id="product-original-price"
-              label="Original price ($)"
-              error={errors.originalPrice}
-              hint="Optional. Shows a discount."
-            >
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                inputMode="decimal"
-                {...inputProps("originalPrice", "product-original-price")}
-              />
-            </Field>
-            <Field id="product-stock" label="Stock" error={errors.stock}>
-              <input type="number" step="1" min="0" inputMode="numeric" {...inputProps("stock", "product-stock")} />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field id="product-price" label="Price ($)" error={errors.price}>
+                <input type="number" step="0.01" min="0" inputMode="decimal" {...inputProps("price", "product-price")} />
+              </Field>
+              <Field
+                id="product-original-price"
+                label="Original price ($)"
+                error={errors.originalPrice}
+                hint="Optional. Shows a discount."
+              >
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  inputMode="decimal"
+                  {...inputProps("originalPrice", "product-original-price")}
+                />
+              </Field>
+              {hasRows ? (
+                <Field id="product-stock" label="Stock" hint="The total of the options below.">
+                  <input id="product-stock" className="input" value={totalStock(rows)} readOnly />
+                </Field>
+              ) : (
+                <Field
+                  id="product-stock"
+                  label="Stock"
+                  error={errors.stock}
+                  hint={hadVariants ? "You removed every option: enter the stock of the product." : undefined}
+                >
+                  <input type="number" step="1" min="0" inputMode="numeric" {...inputProps("stock", "product-stock")} />
+                </Field>
+              )}
+            </div>
+
+            <Field id="product-description" label="Description" error={errors.description}>
+              <textarea rows={5} {...inputProps("description", "product-description")} />
             </Field>
           </div>
 
-          <Field id="product-description" label="Description" error={errors.description}>
-            <textarea rows={5} {...inputProps("description", "product-description")} />
-          </Field>
+          <VariantsEditor
+            rows={rows}
+            onChange={changeRows}
+            images={images}
+            errors={variantCheck?.rows ?? {}}
+            general={variantCheck?.general}
+          />
         </div>
 
         <div className="space-y-6">
           <div className="card p-6">
-            <p className="field-label">Product image</p>
-            <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-card border border-line bg-canvas text-line-strong">
-              {previewSrc ? (
-                <Image
-                  src={previewSrc}
-                  alt="Product preview"
-                  fill
-                  sizes="320px"
-                  unoptimized={Boolean(picked)}
-                  className="object-contain p-2"
-                />
-              ) : (
-                <ImageIcon className="size-12" />
-              )}
-            </div>
-            <input
-              type="file"
-              accept={IMAGE_TYPES.join(",")}
-              onChange={handleFile}
-              aria-label="Choose a product image"
-              aria-invalid={Boolean(errors.image)}
-              className="mt-3 block w-full text-sm file:mr-3 file:cursor-pointer file:rounded-control file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-800 hover:file:bg-primary-100"
+            <p className="field-label">Product images</p>
+            <ImageGallery
+              images={images}
+              onAdd={addImage}
+              onMakeMain={makeMain}
+              onRemove={removeImage}
+              onUploadingChange={setUploading}
+              error={errors.images}
             />
-            {errors.image ? (
-              <p role="alert" className="field-error">
-                {errors.image}
-              </p>
-            ) : (
-              <p className="mt-1 text-xs text-ink-muted">JPEG, PNG, WebP, GIF or AVIF. Up to 4 MB.</p>
-            )}
           </div>
 
           <div className="flex gap-3">
             <Link href="/admin/products" className="btn btn-secondary flex-1">
               Cancel
             </Link>
-            <button type="submit" disabled={save.isPending} className="btn btn-primary flex-1">
-              {save.isPending ? "Saving..." : product ? "Save changes" : "Create product"}
+            <button type="submit" disabled={save.isPending || uploading} className="btn btn-primary flex-1">
+              {uploading
+                ? "Uploading images..."
+                : save.isPending
+                  ? "Saving..."
+                  : product
+                    ? "Save changes"
+                    : "Create product"}
             </button>
           </div>
         </div>

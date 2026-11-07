@@ -11,6 +11,7 @@ import { orderKeys } from "@/lib/queries/orders";
 import { productKeys } from "@/lib/queries/products";
 import type { DeliveryPartner, Order, Product, StoreCategory } from "@/types";
 import { categoryKeys } from "@/lib/queries/categories";
+import type { VariantPayload } from "@/lib/variants";
 
 export interface AdminStats {
   totalOrders: number;
@@ -206,31 +207,36 @@ export interface ProductFields {
   category: string;
   price: number;
   originalPrice: number; // 0 means "no discount"
-  stock: number;
-  image: string; // the current image url (replaced when imageFile is given)
+  image: string; // the main image (an url: images are uploaded as soon as they are picked)
+  images: string[]; // the other images (up to 8)
+  variants: VariantPayload[]; // [] = a product without options
+  // Only for a product WITHOUT options: with options the API works the total out from them
+  // and refuses a stock that is sent
+  stock?: number;
 }
 
 export type SaveProductVariables = ProductFields & {
   id?: string; // present = update, absent = create
-  imageFile?: File | null;
 };
+
+// Uploads ONE image and gives back its url. The form calls it as soon as an image is picked
+export function useUploadImage() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const form = new FormData();
+      form.append("image", file);
+      const { data } = await api.post<{ url: string }>("/upload", form);
+      return data.url;
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
 
 export function useSaveProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, imageFile, ...fields }: SaveProductVariables) => {
-      let image = fields.image;
-
-      // The image is uploaded first, and its url is saved with the product
-      if (imageFile) {
-        const form = new FormData();
-        form.append("image", imageFile);
-        const { data } = await api.post<{ url: string }>("/upload", form);
-        image = data.url;
-      }
-
-      const body = { ...fields, image };
+    mutationFn: async ({ id, ...body }: SaveProductVariables) => {
       const { data } = id
         ? await api.put<{ product: Product }>(`/products/${id}`, body)
         : await api.post<{ product: Product }>("/products", body);
