@@ -25,7 +25,15 @@ import {
 } from "@/lib/variants";
 import type { Product } from "@/types";
 
-type FormField = "name" | "description" | "category" | "price" | "originalPrice" | "stock";
+type FormField =
+  | "name"
+  | "description"
+  | "category"
+  | "price"
+  | "originalPrice"
+  | "stock"
+  | "brand"
+  | "material";
 type Errors = Partial<Record<FormField | "images", string>>;
 
 function ProductFormBody({ product }: { product?: Product }) {
@@ -47,6 +55,8 @@ function ProductFormBody({ product }: { product?: Product }) {
     price: product ? String(product.price) : "",
     originalPrice: product?.originalPrice ? String(product.originalPrice) : "",
     stock: product && !hadVariants && product.stock != null ? String(product.stock) : "",
+    brand: product?.brand ?? "",
+    material: product?.material ?? "",
   });
   // The main image first, then the others
   const [images, setImages] = useState<string[]>(() =>
@@ -106,6 +116,8 @@ function ProductFormBody({ product }: { product?: Product }) {
     const found: Errors = {};
     if (!form.name.trim()) found.name = "Enter the product name.";
     if (!form.category) found.category = "Choose a category.";
+    if (form.brand.trim().length > 60) found.brand = "60 characters or fewer.";
+    if (form.material.trim().length > 100) found.material = "100 characters or fewer.";
     if (form.price === "" || !Number.isFinite(price) || price <= 0) {
       found.price = "Enter a price above 0.";
     }
@@ -129,6 +141,8 @@ function ProductFormBody({ product }: { product?: Product }) {
         id: product?.id,
         name: form.name.trim(),
         description: form.description.trim(),
+        brand: form.brand.trim(),
+        material: form.material.trim(),
         category: form.category,
         price,
         originalPrice,
@@ -218,6 +232,15 @@ function ProductFormBody({ product }: { product?: Product }) {
                   <input type="number" step="1" min="0" inputMode="numeric" {...inputProps("stock", "product-stock")} />
                 </Field>
               )}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field id="product-brand" label="Brand" error={errors.brand} hint="Optional.">
+                <input {...inputProps("brand", "product-brand")} maxLength={60} />
+              </Field>
+              <Field id="product-material" label="Material" error={errors.material} hint="Optional, for example 100% cotton.">
+                <input {...inputProps("material", "product-material")} maxLength={100} />
+              </Field>
             </div>
 
             <Field id="product-description" label="Description" error={errors.description}>

@@ -209,6 +209,8 @@ export interface ProductFields {
   originalPrice: number; // 0 means "no discount"
   image: string; // the main image (an url: images are uploaded as soon as they are picked)
   images: string[]; // the other images (up to 8)
+  brand: string; // "" clears it
+  material: string; // "" clears it
   variants: VariantPayload[]; // [] = a product without options
   // Only for a product WITHOUT options: with options the API works the total out from them
   // and refuses a stock that is sent

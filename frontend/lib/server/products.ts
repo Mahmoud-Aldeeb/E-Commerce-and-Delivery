@@ -2,6 +2,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import api, { getErrorStatus } from "@/lib/api";
 import {
   PAGE_SIZE,
+  type FilterOptions,
   type ProductFilters,
   type ProductListResponse,
 } from "@/lib/queries/products";
@@ -43,6 +44,20 @@ export async function getCatalog(
   const { data } = await api.get<ProductListResponse>("/products", {
     // `search`, `limit` and `page` all have to reach the API, or the list and the paging break
     params: { ...filters, limit: PAGE_SIZE },
+  });
+  return data;
+}
+
+// The sizes and colours in stock, inside the open category (or everywhere when there is none)
+export async function getFilterOptions(
+  category?: string,
+): Promise<FilterOptions> {
+  "use cache: remote";
+  cacheLife("minutes");
+  cacheTag("products");
+
+  const { data } = await api.get<FilterOptions>("/products/filters", {
+    params: { category },
   });
   return data;
 }

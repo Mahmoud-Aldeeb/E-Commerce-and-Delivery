@@ -22,6 +22,10 @@ function toPrice(value: string | undefined): number | undefined {
   return Number.isFinite(number) && number >= 0 ? number : undefined;
 }
 
+// "m" and "M" are the same size, "black" and "Black" the same colour (the API ignores the case too)
+export const sameText = (a?: string, b?: string): boolean =>
+  a !== undefined && b !== undefined && a.toLowerCase() === b.toLowerCase();
+
 // Reads the URL and keeps only valid values: anything else is simply ignored,
 // so a hand-edited or broken link never reaches the API
 export function parseCatalogFilters(query: RawQuery): ProductFilters {
@@ -32,6 +36,9 @@ export function parseCatalogFilters(query: RawQuery): ProductFilters {
   return {
     search: first(query.q)?.trim().slice(0, 100) || undefined,
     category: first(query.category)?.trim().slice(0, 60) || undefined,
+    // The same limits as the API (20 and 30): a longer text would be refused with an error
+    size: first(query.size)?.trim().slice(0, 20) || undefined,
+    color: first(query.color)?.trim().slice(0, 30) || undefined,
     minPrice: toPrice(first(query.minPrice)),
     maxPrice: toPrice(first(query.maxPrice)),
     inStock: inStock === "1" || inStock === "true" ? true : undefined,
@@ -45,6 +52,8 @@ export function toSearchParams(filters: ProductFilters): URLSearchParams {
   const params = new URLSearchParams();
   if (filters.search) params.set("q", filters.search);
   if (filters.category) params.set("category", filters.category);
+  if (filters.size) params.set("size", filters.size);
+  if (filters.color) params.set("color", filters.color);
   if (filters.minPrice !== undefined)
     params.set("minPrice", String(filters.minPrice));
   if (filters.maxPrice !== undefined)
@@ -65,10 +74,12 @@ export function buildHref(basePath: string, filters: ProductFilters): string {
 export const filtersKey = (filters: ProductFilters): string =>
   toSearchParams(filters).toString();
 
-// Category, price and stock count as filters (sort and page do not)
+// Category, size, colour, price and stock count as filters (sort and page do not)
 export const hasActiveFilters = (filters: ProductFilters): boolean =>
   Boolean(
     filters.category ||
+    filters.size ||
+    filters.color ||
     filters.minPrice !== undefined ||
     filters.maxPrice !== undefined ||
     filters.inStock,

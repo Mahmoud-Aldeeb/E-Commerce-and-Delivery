@@ -42,6 +42,21 @@ export const storeInfo = {
   legalUpdatedAt: "October 31, 2026",
 };
 
+// The size chart of the store, in centimetres: ONE chart for every product.
+// These numbers are SAMPLES: replace them with the real measurements of your clothes
+export const sizeGuide = {
+  note: "Body measurements in centimetres. Between two sizes? Take the bigger one.",
+  columns: ["Chest", "Waist", "Hips"],
+  rows: [
+    { size: "XS", values: ["82-87", "66-71", "88-93"] },
+    { size: "S", values: ["88-93", "72-77", "94-99"] },
+    { size: "M", values: ["94-99", "78-83", "100-105"] },
+    { size: "L", values: ["100-105", "84-89", "106-111"] },
+    { size: "XL", values: ["106-113", "90-97", "112-118"] },
+    { size: "XXL", values: ["114-121", "98-105", "119-125"] },
+  ],
+};
+
 // The slugs must match the `category` values stored on the products
 export const categoriesData = [
   { slug: "electronics", name: "Electronics", icon: SmartphoneIcon },

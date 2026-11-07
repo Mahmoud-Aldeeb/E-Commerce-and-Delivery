@@ -13,6 +13,8 @@ export type ProductFilters = {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  size?: string;
+  color?: string;
   sort?: SortOption;
   page?: number;
   limit?: number;
@@ -24,7 +26,16 @@ export interface ProductListResponse {
   page: number;
   pages: number;
 }
+// The sizes and colours the filter panel offers (GET /products/filters)
+export interface FilterColor {
+  name: string;
+  hex: string | null;
+}
 
+export interface FilterOptions {
+  sizes: string[];
+  colors: FilterColor[];
+}
 // One place for all cache keys: invalidating ["products"] refreshes every product query
 export const productKeys = {
   all: ["products"] as const,

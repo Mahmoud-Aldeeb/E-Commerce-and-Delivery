@@ -43,6 +43,8 @@ export interface Product {
   originalPrice: number | null;
   image: string;
   images: string[]; // more images, besides the main one
+  brand: string | null; // the maker, shown on the product page
+  material: string | null; // what the clothes are made of
   category: string;
   // The total of the stock of the variants when the product has any
   stock: number | null;

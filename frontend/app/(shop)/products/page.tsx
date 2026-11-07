@@ -9,7 +9,7 @@ import ResultsSkeleton from "@/components/product/results-skeleton";
 import Breadcrumbs from "@/components/ui/breadcrumbs";
 import { filtersKey, parseCatalogFilters } from "@/lib/product-filters";
 import type { ProductFilters } from "@/lib/queries/products";
-import { getCatalog } from "@/lib/server/products";
+import { getCatalog, getFilterOptions } from "@/lib/server/products";
 import { getCategoryNames } from "@/lib/server/categories";
 import { safely } from "@/lib/server/safely";
 
@@ -42,7 +42,14 @@ async function ProductsResults({ filters }: { filters: ProductFilters }) {
 // Reading the URL is request-time data, so everything that depends on it lives under Suspense
 async function ProductsContent({ searchParams }: { searchParams: SearchParams }) {
   const filters = parseCatalogFilters(await searchParams);
-  const categories = (await safely(getCategoryNames)) ?? [];
+  // The category names and the sizes/colours of the open category do not depend on each other
+  const [categoryNames, optionsResult] = await Promise.all([
+    safely(getCategoryNames),
+    safely(() => getFilterOptions(filters.category)),
+  ]);
+  const categories = categoryNames ?? [];
+  // No options (or a failure): the panel simply has no size and colour sections
+  const options = optionsResult ?? { sizes: [], colors: [] };
 
   return (
     <>
@@ -54,7 +61,7 @@ async function ProductsContent({ searchParams }: { searchParams: SearchParams })
         }
       />
 
-      <ProductsShell filters={filters} categories={categories}>
+      <ProductsShell filters={filters} categories={categories} options={options}>
         {/* A new key = a new boundary: the skeleton shows at once while the next filter loads */}
         <Suspense key={filtersKey(filters)} fallback={<ResultsSkeleton />}>
           <ProductsResults filters={filters} />

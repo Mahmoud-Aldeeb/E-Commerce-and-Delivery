@@ -7,18 +7,21 @@ import BottomSheet from "@/components/ui/bottom-sheet";
 import FilterPanel from "@/components/product/filter-panel";
 import SortSelect from "@/components/product/sort-select";
 import { buildHref, priceRangeLabel } from "@/lib/product-filters";
-import type { ProductFilters } from "@/lib/queries/products";
+import type { FilterOptions, ProductFilters } from "@/lib/queries/products";
 
 const BASE_PATH = "/products";
 
 export default function ProductsShell({
   filters,
   categories,
+  options,
   children,
 }: {
   filters: ProductFilters;
   /** The names of the categories for the filter panel */
   categories: string[];
+  /** The sizes and colours in stock, inside the open category */
+  options: FilterOptions;
   /** The results: a Server Component streamed inside the Suspense of the page */
   children: React.ReactNode;
 }) {
@@ -35,6 +38,12 @@ export default function ProductsShell({
       href: without({ category: undefined }),
     });
   }
+  if (filters.size) {
+    chips.push({ label: `Size ${filters.size}`, href: without({ size: undefined }) });
+  }
+  if (filters.color) {
+    chips.push({ label: `Colour ${filters.color}`, href: without({ color: undefined }) });
+  }
   const price = priceRangeLabel(filters.minPrice, filters.maxPrice);
   if (price) {
     chips.push({ label: price, href: without({ minPrice: undefined, maxPrice: undefined }) });
@@ -50,7 +59,7 @@ export default function ProductsShell({
     <div className="flex gap-8">
       <aside className="hidden w-64 shrink-0 lg:block">
         <div className="card sticky top-32 p-4">
-          <FilterPanel key={panelKey} filters={filters} categories={categories} />
+          <FilterPanel key={panelKey} filters={filters} categories={categories} options={options} />
         </div>
       </aside>
 
@@ -101,6 +110,7 @@ export default function ProductsShell({
           key={panelKey}
           filters={filters}
           categories={categories}
+          options={options}
           onNavigate={() => setSheetOpen(false)}
         />
       </BottomSheet>

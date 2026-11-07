@@ -13,6 +13,7 @@ import { buildHref } from "@/lib/product-filters";
 import { colorHexOf, colorsOf, findVariant, hasStockWith, sizesOf } from "@/lib/variant-options";
 import type { Product } from "@/types";
 import FavoriteButton from "./favorite-button";
+import SizeGuide from "./size-guide";
 
 // Used when there is no stock number to limit the quantity: no limit is known
 const FALLBACK_MAX_QUANTITY = 99;
@@ -159,8 +160,8 @@ export default function ProductDetails({ product }: { product: Product }) {
                   aria-label={`Show image ${index + 1}`}
                   aria-pressed={src === activeImage}
                   className={`relative block aspect-square w-full overflow-hidden rounded-control border bg-surface ${src === activeImage
-                      ? "border-primary-700 ring-1 ring-primary-700"
-                      : "border-line hover:border-line-strong"
+                    ? "border-primary-700 ring-1 ring-primary-700"
+                    : "border-line hover:border-line-strong"
                     }`}
                 >
                   <Image src={src} alt="" fill sizes="80px" className="object-cover" />
@@ -212,6 +213,24 @@ export default function ProductDetails({ product }: { product: Product }) {
           {product.description || "No description available."}
         </p>
 
+
+        {(product.brand || product.material) && (
+          <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+            {product.brand && (
+              <>
+                <dt className="text-ink-muted">Brand</dt>
+                <dd className="font-medium text-ink">{product.brand}</dd>
+              </>
+            )}
+            {product.material && (
+              <>
+                <dt className="text-ink-muted">Material</dt>
+                <dd className="font-medium text-ink">{product.material}</dd>
+              </>
+            )}
+          </dl>
+        )}
+
         {/* Sizes and colours. A choice that has no stock with what is already chosen is disabled */}
         {sizes.length > 0 && (
           <fieldset className="mt-5">
@@ -233,6 +252,12 @@ export default function ProductDetails({ product }: { product: Product }) {
               ))}
             </div>
           </fieldset>
+        )}
+
+        {sizes.length > 0 && (
+          <div className="mt-2">
+            <SizeGuide />
+          </div>
         )}
 
         {colors.length > 0 && (

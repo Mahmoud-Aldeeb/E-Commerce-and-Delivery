@@ -3,26 +3,33 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { buildHref, hasActiveFilters } from "@/lib/product-filters";
-import type { ProductFilters } from "@/lib/queries/products";
-
+import { buildHref, hasActiveFilters, sameText } from "@/lib/product-filters";
+import type { FilterOptions, ProductFilters } from "@/lib/queries/products";
 
 interface FilterPanelProps {
   filters: ProductFilters;
   /** The names of the categories to choose from */
   categories: string[];
+  /** The sizes and colours that the products of the open category have in stock */
+  options: FilterOptions;
   /** Called after any change (the mobile sheet uses it to close itself) */
   onNavigate?: () => void;
 }
 
 const BASE_PATH = "/products";
 
+const pill = "block rounded-control border px-3 py-1.5 text-sm font-medium transition-colors";
+const pillState = (active: boolean) =>
+  active
+    ? "border-primary-700 bg-primary-50 text-primary-800"
+    : "border-line-strong bg-surface text-ink hover:bg-canvas";
+
 const toPrice = (value: string): number | undefined => {
   const number = Number(value);
   return value !== "" && Number.isFinite(number) && number >= 0 ? number : undefined;
 };
 
-export default function FilterPanel({ filters, categories, onNavigate }: FilterPanelProps) {
+export default function FilterPanel({ filters, categories, options, onNavigate }: FilterPanelProps) {
   const router = useRouter();
   const [minPrice, setMinPrice] = useState(filters.minPrice?.toString() ?? "");
   const [maxPrice, setMaxPrice] = useState(filters.maxPrice?.toString() ?? "");
@@ -44,6 +51,17 @@ export default function FilterPanel({ filters, categories, onNavigate }: FilterP
     go(hrefWith({ minPrice: min, maxPrice: max }));
   };
 
+  // A size or a colour that comes from the link stays on the list even when nothing has it in stock
+  // any more: the customer sees that it is chosen, and can remove it
+  const sizes =
+    filters.size && !options.sizes.some((value) => sameText(value, filters.size))
+      ? [...options.sizes, filters.size]
+      : options.sizes;
+  const colors =
+    filters.color && !options.colors.some((color) => sameText(color.name, filters.color))
+      ? [...options.colors, { name: filters.color, hex: null }]
+      : options.colors;
+
   // value "" = no category filter
   const items = [
     { value: "", label: "All categories" },
@@ -60,7 +78,8 @@ export default function FilterPanel({ filters, categories, onNavigate }: FilterP
             return (
               <li key={item.value}>
                 <Link
-                  href={hrefWith({ category: item.value || undefined })}
+                  // The sizes and colours belong to a category: another category starts without them
+                  href={hrefWith({ category: item.value || undefined, size: undefined, color: undefined })}
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={`block rounded-control px-3 py-2 text-sm transition-colors ${active
@@ -75,6 +94,71 @@ export default function FilterPanel({ filters, categories, onNavigate }: FilterP
           })}
         </ul>
       </section>
+
+      {sizes.length > 0 && (
+        <section>
+          <h3 className="mb-3 text-sm font-semibold">Size</h3>
+          <ul className="flex flex-wrap gap-2">
+            {sizes.map((value) => {
+              const active = sameText(filters.size, value);
+              return (
+                <li key={value}>
+                  <Link
+                    href={hrefWith({ size: active ? undefined : value })}
+                    onClick={onNavigate}
+                    aria-current={active ? "true" : undefined}
+                    className={`${pill} ${pillState(active)}`}
+                  >
+                    {value}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {colors.length > 0 && (
+        <section>
+          <h3 className="mb-3 text-sm font-semibold">Colour</h3>
+          <ul className="flex flex-wrap gap-2">
+            {colors.map((color) => {
+              const active = sameText(filters.color, color.name);
+              const href = hrefWith({ color: active ? undefined : color.name });
+
+              return (
+                <li key={color.name}>
+                  {color.hex ? (
+                    <Link
+                      href={href}
+                      onClick={onNavigate}
+                      aria-current={active ? "true" : undefined}
+                      aria-label={color.name}
+                      title={color.name}
+                      className={`block size-8 rounded-full border-2 p-0.5 transition-colors ${active ? "border-primary-700" : "border-line hover:border-line-strong"
+                        }`}
+                    >
+                      <span
+                        className="block size-full rounded-full border border-line"
+                        style={{ backgroundColor: color.hex }}
+                      />
+                    </Link>
+                  ) : (
+                    <Link
+                      href={href}
+                      onClick={onNavigate}
+                      aria-current={active ? "true" : undefined}
+                      className={`${pill} ${pillState(active)}`}
+                    >
+                      {color.name}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <section>
         <h3 className="mb-3 text-sm font-semibold">Price</h3>
