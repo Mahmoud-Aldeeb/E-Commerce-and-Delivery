@@ -42,7 +42,7 @@ async function ProductContent({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: product.image,
+    image: [product.image, ...product.images],
     description: product.description ?? undefined,
     category: product.category,
     // Real ratings now: they come from the verified reviews. A product with no review has none
@@ -79,7 +79,8 @@ async function ProductContent({ params }: Props) {
         ]}
       />
 
-      <ProductDetails product={product} />
+      {/* The key resets the chosen size, colour and image when another product is opened */}
+      <ProductDetails key={product.id} product={product} />
 
       <ReviewsSection productId={product.id} productName={product.name} />
 

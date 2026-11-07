@@ -95,8 +95,12 @@ export default function CheckoutView() {
       if (!address) throw new Error("No delivery address");
 
       const { data } = await api.post<PlaceOrderResponse>("/orders", {
-        items: orderItems.map((item) => ({ product: item.product.id, quantity: item.quantity })),
-        shippingAddress: {
+        items: orderItems.map((item) => ({
+          product: item.product.id,
+          quantity: item.quantity,
+          // A product with sizes/colours is ordered with the one that was chosen
+          ...(item.variant ? { variant: item.variant.id } : {}),
+        })), shippingAddress: {
           label: address.label,
           address: address.address,
           city: address.city,
@@ -122,7 +126,11 @@ export default function CheckoutView() {
 
       setPlaced(true);
       removeOrderedItems(
-        orderItems.map((item) => ({ product: item.product.id, quantity: item.quantity })),
+        orderItems.map((item) => ({
+          product: item.product.id,
+          variant: item.variant?.id ?? null,
+          quantity: item.quantity,
+        })),
       );
       // Stock changed and there is a new order: cached lists are outdated
       queryClient.invalidateQueries({ queryKey: productKeys.all });

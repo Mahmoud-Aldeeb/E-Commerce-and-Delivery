@@ -14,7 +14,7 @@ export function useReorder() {
 
   return useMutation({
     mutationFn: async (order: Order) => {
-      // The CURRENT price and stock of every product (staleTime 0: never an old copy)
+      // The CURRENT price, stock and options of every product (staleTime 0: never an old copy)
       const results = await Promise.allSettled(
         order.items.map((item) =>
           queryClient.fetchQuery({
@@ -39,13 +39,22 @@ export function useReorder() {
     },
 
     onSuccess: (plan) => {
+      const chooseNote =
+        plan.chooseOptions.length > 0
+          ? `Choose the size or colour yourself: ${listNames(plan.chooseOptions)}`
+          : null;
+
       if (plan.add.length === 0) {
-        toast.error("None of the items in this order are available right now.");
+        toast.error(
+          chooseNote ??
+            "None of the items in this order are available right now.",
+        );
         return;
       }
 
-      // addToCart adds to what the cart already holds (never above the stock) and opens the cart
-      for (const line of plan.add) addToCart(line.product, line.quantity);
+      // addToCart adds to what the cart already holds (never above the stock of the option) and opens the cart
+      for (const line of plan.add)
+        addToCart(line.product, line.quantity, line.variant);
 
       const count = plan.add.length;
       toast.success(
@@ -59,6 +68,7 @@ export function useReorder() {
       if (plan.unavailable.length > 0) {
         notes.push(`Not available: ${listNames(plan.unavailable)}`);
       }
+      if (chooseNote) notes.push(chooseNote);
       if (notes.length > 0) toast(notes.join(". "), { duration: 7000 });
     },
 

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCartIcon, StarIcon } from "lucide-react";
+import { ShoppingCartIcon, SlidersHorizontalIcon, StarIcon } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { discountPercent, formatPrice } from "@/lib/format";
 import type { Product } from "@/types";
@@ -16,16 +16,22 @@ interface ProductCardProps {
   eager?: boolean;
 }
 
-
 export default function ProductCard({ product, eager = false }: ProductCardProps) {
   const { items, addToCart } = useCart();
 
-  const inCart = items.find((item) => item.product.id === product.id)?.quantity ?? 0;
+  // A product with sizes/colours is bought on its own page, by choosing one
+  const hasOptions = product.variantCount > 0;
+
+  // Every line of this product, in whatever option
+  const inCart = items
+    .filter((item) => item.product.id === product.id)
+    .reduce((sum, item) => sum + item.quantity, 0);
+  // For a product with options this is the TOTAL of its options: only "nothing left at all" is true to say
   const stock = product.stock;
   const outOfStock = stock !== null && stock <= 0;
-  // The cart never holds more than the available stock
-  const atLimit = stock !== null && inCart >= stock;
-  const lowStock = stock !== null && stock > 0 && stock <= LOW_STOCK_LIMIT;
+  // The cart never holds more than the available stock (a product without options only)
+  const atLimit = !hasOptions && stock !== null && inCart >= stock;
+  const lowStock = !hasOptions && stock !== null && stock > 0 && stock <= LOW_STOCK_LIMIT;
   const discount = discountPercent(product.price, product.originalPrice);
   const hasRating = (product.rating ?? 0) > 0;
 
@@ -63,8 +69,6 @@ export default function ProductCard({ product, eager = false }: ProductCardProps
         className="absolute right-2 top-2 z-10 rounded-full bg-surface/90 shadow-card"
       />
 
-      <div className="flex flex-1 flex-col gap-2 p-4"></div>
-
       <div className="flex flex-1 flex-col gap-2 p-4">
         <Link
           href={`/products/${product.id}`}
@@ -96,15 +100,26 @@ export default function ProductCard({ product, eager = false }: ProductCardProps
           )}
         </div>
 
-        <button
-          onClick={() => addToCart(product)}
-          disabled={outOfStock || atLimit}
-          className="btn btn-primary w-full"
-          aria-label={`Add ${product.name} to cart`}
-        >
-          <ShoppingCartIcon className="size-4" />
-          {outOfStock ? "Out of stock" : atLimit ? "Max in cart" : "Add to cart"}
-        </button>
+        {hasOptions && !outOfStock ? (
+          <Link
+            href={`/products/${product.id}`}
+            className="btn btn-primary w-full"
+            aria-label={`Choose the options of ${product.name}`}
+          >
+            <SlidersHorizontalIcon className="size-4" />
+            Choose options
+          </Link>
+        ) : (
+          <button
+            onClick={() => addToCart(product)}
+            disabled={outOfStock || atLimit}
+            className="btn btn-primary w-full"
+            aria-label={`Add ${product.name} to cart`}
+          >
+            <ShoppingCartIcon className="size-4" />
+            {outOfStock ? "Out of stock" : atLimit ? "Max in cart" : "Add to cart"}
+          </button>
+        )}
       </div>
     </article>
   );

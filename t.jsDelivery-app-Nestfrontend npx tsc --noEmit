@@ -1,0 +1,9 @@
+[35mfrontend/components/checkout/checkout-view.tsx[m
+[35mfrontend/components/layout/cart-sidebar.tsx[m
+[35mfrontend/components/layout/navbar.tsx[m
+[35mfrontend/components/orders/order-tracking-view.tsx[m
+[35mfrontend/components/orders/orders-view.tsx[m
+[35mfrontend/components/product/product-card.tsx[m
+[35mfrontend/components/product/product-details.tsx[m
+[35mfrontend/context/cart-context.tsx[m
+[35mfrontend/lib/queries/reorder.ts[m

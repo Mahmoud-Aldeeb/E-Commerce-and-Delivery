@@ -60,7 +60,11 @@ export default function OrderTrackingView({ id }: { id: string }) {
 
     handledStripeReturn.current = true;
     removeOrderedItems(
-      orderedItems.map((item) => ({ product: item.product, quantity: item.quantity })),
+      orderedItems.map((item) => ({
+        product: item.product,
+        variant: item.variant ?? null,
+        quantity: item.quantity,
+      })),
     );
     router.replace(`/orders/${id}`); // remove the parameter: a refresh must not do it again
   }, [id, orderedItems, removeOrderedItems, router]);

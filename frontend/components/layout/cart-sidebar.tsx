@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { useCart } from "@/context/cart-context";
+import { keyOf, lineImage, maxQuantity, variantLabel } from "@/lib/cart-line";
 import { formatPrice } from "@/lib/format";
 import { calculateTotals } from "@/lib/pricing";
 
@@ -152,11 +153,18 @@ export default function CartSidebar() {
             </div>
           ) : (
             items.map((item) => {
-              const atLimit = item.quantity >= (item.product.stock ?? Infinity);
-              const selected = isSelected(item.product.id);
+              // The same shirt in M and in L are two lines: everything below works by this key
+              const key = keyOf(item);
+              const option = item.variant ? variantLabel(item.variant) : "";
+              // The name the customer knows the line by: "Shirt (M / Black)"
+              const label = option ? `${item.product.name} (${option})` : item.product.name;
+              // The stock of the option, or of the product when it has no options
+              const atLimit = item.quantity >= maxQuantity(item.product, item.variant);
+              const selected = isSelected(key);
+
               return (
                 <div
-                  key={item.product.id}
+                  key={key}
                   className={`flex items-center gap-3 rounded-card border p-3 transition-colors ${selected ? "border-line" : "border-line bg-canvas"
                     }`}
                 >
@@ -164,11 +172,11 @@ export default function CartSidebar() {
                     type="checkbox"
                     className="size-4 shrink-0 accent-primary-700"
                     checked={selected}
-                    onChange={() => toggleSelected(item.product.id)}
-                    aria-label={`Include ${item.product.name} in this order`}
+                    onChange={() => toggleSelected(key)}
+                    aria-label={`Include ${label} in this order`}
                   />
                   <Image
-                    src={item.product.image}
+                    src={lineImage(item)}
                     alt={item.product.name}
                     width={64}
                     height={64}
@@ -183,6 +191,7 @@ export default function CartSidebar() {
                     >
                       {item.product.name}
                     </Link>
+                    {option && <p className="mt-0.5 text-xs text-ink-soft">{option}</p>}
                     <p className="mt-0.5 text-sm text-ink-soft">
                       {formatPrice(item.product.price)}
                     </p>
@@ -190,9 +199,9 @@ export default function CartSidebar() {
                     <div className="mt-2 flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(key, item.quantity - 1)}
                           className="btn btn-secondary size-7 p-0"
-                          aria-label={`Decrease quantity of ${item.product.name}`}
+                          aria-label={`Decrease quantity of ${label}`}
                         >
                           <MinusIcon className="size-3" />
                         </button>
@@ -200,10 +209,10 @@ export default function CartSidebar() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(key, item.quantity + 1)}
                           disabled={atLimit}
                           className="btn btn-secondary size-7 p-0"
-                          aria-label={`Increase quantity of ${item.product.name}`}
+                          aria-label={`Increase quantity of ${label}`}
                           title={atLimit ? "No more stock available" : undefined}
                         >
                           <PlusIcon className="size-3" />
@@ -215,9 +224,9 @@ export default function CartSidebar() {
                           {formatPrice(item.product.price * item.quantity)}
                         </span>
                         <button
-                          onClick={() => removeFromCart(item.product.id)}
+                          onClick={() => removeFromCart(key)}
                           className="rounded p-1 text-ink-muted transition-colors hover:text-danger"
-                          aria-label={`Remove ${item.product.name}`}
+                          aria-label={`Remove ${label}`}
                         >
                           <Trash2Icon className="size-4" />
                         </button>

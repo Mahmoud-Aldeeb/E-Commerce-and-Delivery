@@ -3,6 +3,7 @@ import { CheckIcon, ChevronLeftIcon, Loader2Icon } from "lucide-react";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/components/checkout/payment-methods";
 import type { Step } from "@/components/checkout/step-indicator";
 import { formatAddress, formatPrice } from "@/lib/format";
+import { keyOf, lineImage, variantLabel } from "@/lib/cart-line";
 import type { calculateTotals } from "@/lib/pricing";
 import type { Address, CartItem } from "@/types";
 
@@ -67,9 +68,10 @@ export default function ReviewStep({
 
       <ul className="mb-6 divide-y divide-line">
         {items.map((item) => (
-          <li key={item.product.id} className="flex items-center gap-3 py-3">
+          // The same shirt in M and in L are two lines: the key tells them apart
+          <li key={keyOf(item)} className="flex items-center gap-3 py-3">
             <Image
-              src={item.product.image}
+              src={lineImage(item)}
               alt={item.product.name}
               width={48}
               height={48}
@@ -77,6 +79,9 @@ export default function ReviewStep({
             />
             <div className="min-w-0 flex-1">
               <p className="line-clamp-1 text-sm font-medium">{item.product.name}</p>
+              {item.variant && (
+                <p className="text-xs text-ink-soft">{variantLabel(item.variant)}</p>
+              )}
               <p className="text-xs text-ink-muted">
                 {item.quantity} × {formatPrice(item.product.price)}
               </p>

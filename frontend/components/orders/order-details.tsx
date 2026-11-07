@@ -42,6 +42,7 @@ export function OrderItemsCard({ order }: { order: Order }) {
             />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{item.name}</p>
+              {item.variantLabel && <p className="text-xs text-ink-soft">{item.variantLabel}</p>}
               <p className="text-xs text-ink-muted">
                 {item.quantity} × {formatPrice(item.price)}
               </p>

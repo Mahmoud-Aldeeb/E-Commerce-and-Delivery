@@ -139,9 +139,18 @@ export interface CheckoutCoupon {
 export function useCheckoutCoupon(items: CartItem[]): CheckoutCoupon {
   const [code, setCode] = useState<string | null>(null);
 
-  const lines = items.map((item) => ({
-    product: item.product.id,
-    quantity: item.quantity,
+  // The API prices by PRODUCT (the price is on the product, not on the option), so two options of the
+  // same shirt are ONE line for it, with the sum of their quantities. The option is never sent
+  const quantities = new Map<string, number>();
+  for (const item of items) {
+    quantities.set(
+      item.product.id,
+      (quantities.get(item.product.id) ?? 0) + item.quantity,
+    );
+  }
+  const lines = [...quantities].map(([product, quantity]) => ({
+    product,
+    quantity,
   }));
   const itemsKey = lines
     .map((line) => `${line.product}:${line.quantity}`)

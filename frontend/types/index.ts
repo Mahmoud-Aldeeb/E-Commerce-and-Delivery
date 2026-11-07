@@ -57,6 +57,8 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  // The chosen size/colour, for a product that has options. A cart saved before options existed has none
+  variant?: ProductVariant | null;
 }
 
 export interface OrderItem {
