@@ -65,6 +65,24 @@ export class CreateProductDto {
   category: string;
 
   @ApiPropertyOptional({
+    example: 'Nike',
+    description: 'The brand or maker. An empty text means none',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(60, { message: 'The brand must be 60 characters or fewer' })
+  brand?: string | null;
+
+  @ApiPropertyOptional({
+    example: '100% cotton',
+    description: 'What the clothes are made of. An empty text means none',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100, { message: 'The material must be 100 characters or fewer' })
+  material?: string | null;
+
+  @ApiPropertyOptional({
     example: 100,
     description:
       'Units in stock. Not allowed for a product with variants: its stock is the total of their stock',

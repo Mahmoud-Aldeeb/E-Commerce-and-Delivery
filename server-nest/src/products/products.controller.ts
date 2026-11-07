@@ -32,6 +32,8 @@ import {
 import { MessageResponseDto } from '../common/dto/message-response.dto.js';
 import { AuthGuard } from '../common/guards/auth/auth.guard.js';
 import { AdminGuard } from '../common/guards/admin/admin.guard.js';
+import { GetFilterOptionsQueryDto } from './dto/get-filter-options-query.dto.js';
+import { FilterOptionsResponseDto } from './dto/filter-options-response.dto.js';
 
 @ApiTags('Products')
 @Controller('products') // + prefix 'api' = /api/products
@@ -46,6 +48,17 @@ export class ProductsController {
   getFlashDeals() {
     return this.productsService.getFlashDeals();
   }
+
+  @Get('filters')
+  @ApiOperation({
+    summary:
+      'The sizes and colours that products have in stock, for the filters of the catalog',
+  })
+  @ApiOkResponse({ type: FilterOptionsResponseDto })
+  getFilterOptions(@Query() query: GetFilterOptionsQueryDto) {
+    return this.productsService.getFilterOptions(query.category);
+  }
+
   @Get()
   @ApiOperation({ summary: 'List products with optional filters and sorting' })
   @ApiOkResponse({ type: ProductListResponseDto })

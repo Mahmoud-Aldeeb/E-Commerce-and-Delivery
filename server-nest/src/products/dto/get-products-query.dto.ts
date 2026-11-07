@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -57,6 +58,25 @@ export class GetProductsQueryDto {
   @IsOptional()
   @IsString()
   sort?: string;
+
+  @ApiPropertyOptional({
+    example: 'M',
+    description:
+      'Only products that have this size IN STOCK. With "color", both must be in the same variant',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20, { message: 'size must be 20 characters or fewer' })
+  size?: string;
+
+  @ApiPropertyOptional({
+    example: 'Black',
+    description: 'Only products that have this colour IN STOCK',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30, { message: 'color must be 30 characters or fewer' })
+  color?: string;
 
   @ApiPropertyOptional({
     example: 12,

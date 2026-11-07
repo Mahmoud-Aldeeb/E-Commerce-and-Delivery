@@ -67,6 +67,8 @@ model Product {
   rating        Float?   @default(0)
   reviewCount   Int?     @default(0)
   images        String[]         @default([]) // more images, besides the main one in `image`
+  brand         String? // the maker of the product, shown on its page
+  material      String? // what the clothes are made of
   variants      ProductVariant[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

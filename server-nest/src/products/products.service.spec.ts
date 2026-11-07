@@ -65,14 +65,12 @@ function setup() {
     category: { findUnique: vi.fn().mockResolvedValue({ id: 'c1' }) },
     product: {
       // The answer of getProduct, which every create and update ends with
-      findUnique: vi
-        .fn()
-        .mockResolvedValue({
-          id: 'p1',
-          price: 10,
-          originalPrice: null,
-          variants: [],
-        }),
+      findUnique: vi.fn().mockResolvedValue({
+        id: 'p1',
+        price: 10,
+        originalPrice: null,
+        variants: [],
+      }),
       findMany: vi.fn().mockResolvedValue([]),
       count: vi.fn().mockResolvedValue(0),
       create: vi.fn().mockResolvedValue({ id: 'p1' }),
@@ -84,6 +82,7 @@ function setup() {
       update: vi.fn().mockResolvedValue({}),
       deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
       createMany: vi.fn().mockResolvedValue({ count: 0 }),
+      groupBy: vi.fn().mockResolvedValue([]),
     },
     $transaction: vi.fn(),
   };
@@ -739,5 +738,201 @@ describe('deleteProduct', () => {
       prisma.productVariant.updateMany.mock.invocationCallOrder[0],
     ).toBeLessThan(prisma.product.update.mock.invocationCallOrder[0]);
     expect(result).toEqual({ message: 'Product Updated' });
+  });
+});
+
+describe('getProducts: size and colour', () => {
+  it('asks for a size AND a colour in the SAME variant, and that variant must have stock', async () => {
+    const { service, prisma } = setup();
+
+    await service.getProducts({ size: 'M', color: 'Black' } as never);
+
+    const where = {
+      variants: {
+        some: {
+          stock: { gt: 0 },
+          size: { equals: 'M', mode: 'insensitive' },
+          color: { equals: 'Black', mode: 'insensitive' },
+        },
+      },
+    };
+    expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where }),
+    );
+    expect(prisma.product.count).toHaveBeenCalledWith({ where });
+  });
+
+  it('asks only for the size when there is no colour', async () => {
+    const { service, prisma } = setup();
+
+    await service.getProducts({ size: 'L' } as never);
+
+    expect(prisma.product.count).toHaveBeenCalledWith({
+      where: {
+        variants: {
+          some: {
+            stock: { gt: 0 },
+            size: { equals: 'L', mode: 'insensitive' },
+          },
+        },
+      },
+    });
+  });
+
+  it('asks only for the colour when there is no size', async () => {
+    const { service, prisma } = setup();
+
+    await service.getProducts({ color: 'Red' } as never);
+
+    expect(prisma.product.count).toHaveBeenCalledWith({
+      where: {
+        variants: {
+          some: {
+            stock: { gt: 0 },
+            color: { equals: 'Red', mode: 'insensitive' },
+          },
+        },
+      },
+    });
+  });
+
+  it('cleans the spaces of what it is asked for', async () => {
+    const { service, prisma } = setup();
+
+    await service.getProducts({ size: '  m ', color: 'Light   Blue' } as never);
+
+    expect(prisma.product.count).toHaveBeenCalledWith({
+      where: {
+        variants: {
+          some: {
+            stock: { gt: 0 },
+            size: { equals: 'm', mode: 'insensitive' },
+            color: { equals: 'Light Blue', mode: 'insensitive' },
+          },
+        },
+      },
+    });
+  });
+
+  it('ignores a size and a colour that are blank', async () => {
+    const { service, prisma } = setup();
+
+    await service.getProducts({ size: '   ', color: '' } as never);
+
+    expect(prisma.product.count).toHaveBeenCalledWith({ where: {} });
+  });
+
+  it('works together with the other filters', async () => {
+    const { service, prisma } = setup();
+
+    await service.getProducts({
+      category: 'Fashion',
+      inStock: true,
+      size: 'L',
+    } as never);
+
+    expect(prisma.product.count).toHaveBeenCalledWith({
+      where: {
+        category: 'Fashion',
+        stock: { gt: 0 },
+        variants: {
+          some: {
+            stock: { gt: 0 },
+            size: { equals: 'L', mode: 'insensitive' },
+          },
+        },
+      },
+    });
+  });
+});
+
+describe('getFilterOptions', () => {
+  it('reads the options of the variants that have stock, and gives them sorted', async () => {
+    const { service, prisma } = setup();
+    prisma.productVariant.groupBy.mockResolvedValue([
+      { size: 'L', color: 'Black', colorHex: '#111827' },
+      { size: 'M', color: 'Black', colorHex: null },
+      { size: 'M', color: 'Red', colorHex: '#ff0000' },
+      { size: '', color: 'Red', colorHex: null },
+    ]);
+
+    const result = await service.getFilterOptions();
+
+    expect(prisma.productVariant.groupBy).toHaveBeenCalledWith({
+      by: ['size', 'color', 'colorHex'],
+      where: { stock: { gt: 0 } },
+    });
+    expect(result).toEqual({
+      sizes: ['M', 'L'],
+      colors: [
+        { name: 'Black', hex: '#111827' },
+        { name: 'Red', hex: '#ff0000' },
+      ],
+    });
+  });
+
+  it('looks only inside one category when it is given', async () => {
+    const { service, prisma } = setup();
+
+    await service.getFilterOptions(' Shoes ');
+
+    expect(prisma.productVariant.groupBy).toHaveBeenCalledWith({
+      by: ['size', 'color', 'colorHex'],
+      where: { stock: { gt: 0 }, product: { category: 'Shoes' } },
+    });
+  });
+
+  it('looks in every category for "all", for a blank text and for nothing', async () => {
+    const { service, prisma } = setup();
+
+    await service.getFilterOptions('all');
+    await service.getFilterOptions('   ');
+    await service.getFilterOptions(undefined);
+
+    expect(prisma.productVariant.groupBy).toHaveBeenCalledTimes(3);
+    for (const call of prisma.productVariant.groupBy.mock.calls) {
+      expect(call[0]).toEqual({
+        by: ['size', 'color', 'colorHex'],
+        where: { stock: { gt: 0 } },
+      });
+    }
+  });
+});
+
+describe('brand and material', () => {
+  it('saves them cleaned when a product is created, and an empty text as nothing', async () => {
+    const { service, prisma } = setup();
+
+    await service.createProduct(
+      productDto({ stock: 5, brand: '  Nike ', material: '   ' }),
+    );
+
+    expect(prisma.product.create).toHaveBeenCalledWith({
+      data: {
+        name: 'Tee',
+        price: 10,
+        image: 'main.jpg',
+        category: 'Fashion',
+        stock: 5,
+        images: [],
+        brand: 'Nike',
+        material: null,
+      },
+    });
+  });
+
+  it('changes only the ones that are sent when a product is updated, and an empty text clears one', async () => {
+    const { service, prisma } = setup();
+    prisma.product.findUnique.mockResolvedValueOnce(existingProduct());
+
+    await service.updateProduct('p1', {
+      brand: '',
+      material: ' 100%  cotton ',
+    } as never);
+
+    expect(prisma.product.update).toHaveBeenCalledWith({
+      where: { id: 'p1' },
+      data: { images: ['a.jpg'], brand: null, material: '100% cotton' },
+    });
   });
 });

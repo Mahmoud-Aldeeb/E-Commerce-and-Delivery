@@ -9,6 +9,11 @@ import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { GetProductsQueryDto } from './dto/get-products-query.dto.js';
 import {
+  buildFilterOptions,
+  cleanOption,
+  textOrNull,
+} from './catalog-rules.js';
+import {
   DETAIL_INCLUDE,
   LIST_INCLUDE,
   toPublicProduct,
@@ -25,6 +30,7 @@ const STOCK_FROM_VARIANTS =
 
 const STOCK_WHEN_VARIANTS_REMOVED =
   'You removed every variant: set the stock of the product, because the old total belonged to the variants';
+
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
@@ -162,6 +168,24 @@ export class ProductsService {
     return { products: products.map((product) => toPublicProduct(product)) };
   }
 
+  // GET /api/products/filters: what the filter panel can offer. Only options that a customer can
+  // really buy (a variant with stock), and only inside the category that is open, when it is given
+  async getFilterOptions(category?: string) {
+    const wanted = cleanOption(category);
+
+    const rows = await this.prisma.productVariant.groupBy({
+      by: ['size', 'color', 'colorHex'],
+      where: {
+        stock: { gt: 0 },
+        ...(wanted && wanted !== 'all'
+          ? { product: { category: wanted } }
+          : {}),
+      },
+    });
+
+    return buildFilterOptions(rows);
+  }
+
   // GET /api/products
   async getProducts({
     category,
@@ -169,6 +193,8 @@ export class ProductsService {
     minPrice,
     maxPrice,
     inStock,
+    size,
+    color,
     sort,
     limit,
     page = 1,
@@ -185,6 +211,22 @@ export class ProductsService {
 
     // The stock of a product with variants is the total of theirs, so this works for them too
     if (inStock) where.stock = { gt: 0 };
+
+    // A size and a colour must be found in the SAME variant (M in Black), and that variant must
+    // still have stock. Both conditions live inside ONE `some`: a product that has M in Red and
+    // L in Black does not match "M in Black". A product without variants never matches
+    const wantedSize = cleanOption(size);
+    const wantedColor = cleanOption(color);
+    if (wantedSize || wantedColor) {
+      const variantFilter: Prisma.ProductVariantWhereInput = {
+        stock: { gt: 0 },
+      };
+      if (wantedSize)
+        variantFilter.size = { equals: wantedSize, mode: 'insensitive' };
+      if (wantedColor)
+        variantFilter.color = { equals: wantedColor, mode: 'insensitive' };
+      where.variants = { some: variantFilter };
+    }
 
     // The page and the total come from the same filters, and run at the same time
     const [products, total] = await Promise.all([
@@ -233,13 +275,22 @@ export class ProductsService {
       variants = result.variants;
     }
 
-    const { variants: _variants, images: _images, ...fields } = dto;
+    const {
+      variants: _variants,
+      images: _images,
+      brand,
+      material,
+      ...fields
+    } = dto;
 
     const created = await this.prisma.$transaction(async (tx) => {
       const product = await tx.product.create({
         data: {
           ...fields,
           images,
+          // The cleaned text (an empty one is NULL), or nothing when the field was not sent
+          ...(brand !== undefined ? { brand: textOrNull(brand) } : {}),
+          ...(material !== undefined ? { material: textOrNull(material) } : {}),
           // The product keeps the total of its variants
           ...(variants.length > 0 ? { stock: sumStock(variants) } : {}),
         },
@@ -306,7 +357,13 @@ export class ProductsService {
       throw new BadRequestException(STOCK_WHEN_VARIANTS_REMOVED);
     }
 
-    const { variants: _variants, images: _images, ...fields } = dto;
+    const {
+      variants: _variants,
+      images: _images,
+      brand,
+      material,
+      ...fields
+    } = dto;
 
     await this.prisma.$transaction(async (tx) => {
       // A product that drops an image stops showing it on the variants that used it
@@ -325,6 +382,9 @@ export class ProductsService {
         data: {
           ...fields,
           images,
+          // Not sent = left as it is. Sent empty = cleared (NULL)
+          ...(brand !== undefined ? { brand: textOrNull(brand) } : {}),
+          ...(material !== undefined ? { material: textOrNull(material) } : {}),
           ...(variants && variants.length > 0
             ? { stock: sumStock(variants) }
             : {}),
