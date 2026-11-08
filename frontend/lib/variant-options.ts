@@ -18,14 +18,6 @@ export const findVariant = (
     (variant) => variant.size === size && variant.color === color,
   ) ?? null;
 
-// The circle of a colour: the first option of that colour that has a code
-export const colorHexOf = (
-  variants: ProductVariant[],
-  color: string,
-): string | null =>
-  variants.find((variant) => variant.color === color && variant.colorHex)
-    ?.colorHex ?? null;
-
 // Is there stock for this size (or colour), given what is already chosen in the OTHER field?
 // `other` = "" when nothing is chosen there yet
 export function hasStockWith(

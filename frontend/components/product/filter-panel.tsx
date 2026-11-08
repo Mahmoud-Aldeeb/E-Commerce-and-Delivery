@@ -59,7 +59,7 @@ export default function FilterPanel({ filters, categories, options, onNavigate }
       : options.sizes;
   const colors =
     filters.color && !options.colors.some((color) => sameText(color.name, filters.color))
-      ? [...options.colors, { name: filters.color, hex: null }]
+      ? [...options.colors, { name: filters.color }]
       : options.colors;
 
   // value "" = no category filter
@@ -124,35 +124,16 @@ export default function FilterPanel({ filters, categories, options, onNavigate }
           <ul className="flex flex-wrap gap-2">
             {colors.map((color) => {
               const active = sameText(filters.color, color.name);
-              const href = hrefWith({ color: active ? undefined : color.name });
-
               return (
                 <li key={color.name}>
-                  {color.hex ? (
-                    <Link
-                      href={href}
-                      onClick={onNavigate}
-                      aria-current={active ? "true" : undefined}
-                      aria-label={color.name}
-                      title={color.name}
-                      className={`block size-8 rounded-full border-2 p-0.5 transition-colors ${active ? "border-primary-700" : "border-line hover:border-line-strong"
-                        }`}
-                    >
-                      <span
-                        className="block size-full rounded-full border border-line"
-                        style={{ backgroundColor: color.hex }}
-                      />
-                    </Link>
-                  ) : (
-                    <Link
-                      href={href}
-                      onClick={onNavigate}
-                      aria-current={active ? "true" : undefined}
-                      className={`${pill} ${pillState(active)}`}
-                    >
-                      {color.name}
-                    </Link>
-                  )}
+                  <Link
+                    href={hrefWith({ color: active ? undefined : color.name })}
+                    onClick={onNavigate}
+                    aria-current={active ? "true" : undefined}
+                    className={`${pill} ${pillState(active)}`}
+                  >
+                    {color.name}
+                  </Link>
                 </li>
               );
             })}

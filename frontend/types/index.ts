@@ -30,7 +30,6 @@ export interface ProductVariant {
   id: string;
   size: string; // "" = the product has no sizes
   color: string; // "" = the product has no colours
-  colorHex: string | null; // "#111827": the circle shown for the colour
   stock: number;
   image: string | null; // one of the images of the product
 }

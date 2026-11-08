@@ -26,10 +26,10 @@ export interface ProductListResponse {
   page: number;
   pages: number;
 }
-// The sizes and colours the filter panel offers (GET /products/filters)
+
+// The API also sends a colour code, but colours are shown by name only: it is not read here
 export interface FilterColor {
   name: string;
-  hex: string | null;
 }
 
 export interface FilterOptions {

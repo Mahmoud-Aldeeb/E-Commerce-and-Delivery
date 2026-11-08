@@ -3,14 +3,7 @@
 import { Fragment } from "react";
 import Image from "next/image";
 import { PlusIcon, Trash2Icon } from "lucide-react";
-import {
-  emptyRow,
-  isHexColor,
-  MAX_VARIANTS,
-  totalStock,
-  type RowErrors,
-  type VariantRow,
-} from "@/lib/variants";
+import { emptyRow, MAX_VARIANTS, totalStock, type RowErrors, type VariantRow } from "@/lib/variants";
 
 interface VariantsEditorProps {
   rows: VariantRow[];
@@ -54,12 +47,11 @@ export default function VariantsEditor({ rows, onChange, images, errors, general
 
       {rows.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[44rem] text-left text-sm">
+          <table className="w-full min-w-[36rem] text-left text-sm">
             <thead className="text-xs uppercase text-ink-muted">
               <tr>
                 <th scope="col" className="pb-2 pr-2 font-semibold">Size</th>
                 <th scope="col" className="pb-2 pr-2 font-semibold">Colour</th>
-                <th scope="col" className="pb-2 pr-2 font-semibold">Colour code</th>
                 <th scope="col" className="pb-2 pr-2 font-semibold">Stock</th>
                 <th scope="col" className="pb-2 pr-2 font-semibold">Image</th>
                 <th scope="col" className="pb-2 text-right font-semibold">
@@ -71,7 +63,6 @@ export default function VariantsEditor({ rows, onChange, images, errors, general
               {rows.map((row, index) => {
                 const rowErrors = errors[row.key] ?? {};
                 const messages = Object.values(rowErrors);
-                const hex = row.colorHex.trim();
 
                 return (
                   <Fragment key={row.key}>
@@ -97,24 +88,6 @@ export default function VariantsEditor({ rows, onChange, images, errors, general
                           aria-label={`Colour of option ${index + 1}`}
                           aria-invalid={Boolean(rowErrors.color)}
                         />
-                      </td>
-                      <td className="py-1.5 pr-2 align-top">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="size-6 shrink-0 rounded-full border border-line"
-                            style={{ backgroundColor: isHexColor(hex) ? hex : "transparent" }}
-                            aria-hidden="true"
-                          />
-                          <input
-                            className={inputClass(rowErrors.colorHex)}
-                            value={row.colorHex}
-                            onChange={(event) => update(row.key, { colorHex: event.target.value })}
-                            maxLength={7}
-                            placeholder="#111827"
-                            aria-label={`Colour code of option ${index + 1}`}
-                            aria-invalid={Boolean(rowErrors.colorHex)}
-                          />
-                        </div>
                       </td>
                       <td className="py-1.5 pr-2 align-top">
                         <input
@@ -168,7 +141,7 @@ export default function VariantsEditor({ rows, onChange, images, errors, general
                     </tr>
                     {messages.length > 0 && (
                       <tr>
-                        <td colSpan={6} className="pb-2">
+                        <td colSpan={5} className="pb-2">
                           <p role="alert" className="field-error">
                             Option {index + 1}: {messages.join(" ")}
                           </p>

@@ -10,7 +10,7 @@ import { useCart } from "@/context/cart-context";
 import { keyOf, lineKey } from "@/lib/cart-line";
 import { discountPercent, formatPrice } from "@/lib/format";
 import { buildHref } from "@/lib/product-filters";
-import { colorHexOf, colorsOf, findVariant, hasStockWith, sizesOf } from "@/lib/variant-options";
+import { colorsOf, findVariant, hasStockWith, sizesOf } from "@/lib/variant-options";
 import type { Product } from "@/types";
 import FavoriteButton from "./favorite-button";
 import SizeGuide from "./size-guide";
@@ -213,7 +213,6 @@ export default function ProductDetails({ product }: { product: Product }) {
           {product.description || "No description available."}
         </p>
 
-
         {(product.brand || product.material) && (
           <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
             {product.brand && (
@@ -266,41 +265,18 @@ export default function ProductDetails({ product }: { product: Product }) {
               Colour{color && <span className="font-normal text-ink-soft">: {color}</span>}
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
-              {colors.map((value) => {
-                const hex = colorHexOf(variants, value);
-                const available = hasStockWith(variants, "color", value, size);
-                const active = color === value;
-
-                return hex ? (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => chooseColor(value)}
-                    disabled={!available}
-                    aria-pressed={active}
-                    aria-label={value}
-                    title={available ? value : `${value} (not available)`}
-                    className={`size-9 rounded-full border-2 p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${active ? "border-primary-700" : "border-line"
-                      }`}
-                  >
-                    <span
-                      className="block size-full rounded-full border border-line"
-                      style={{ backgroundColor: hex }}
-                    />
-                  </button>
-                ) : (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => chooseColor(value)}
-                    disabled={!available}
-                    aria-pressed={active}
-                    className={`${pill} ${pillState(active)}`}
-                  >
-                    {value}
-                  </button>
-                );
-              })}
+              {colors.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => chooseColor(value)}
+                  disabled={!hasStockWith(variants, "color", value, size)}
+                  aria-pressed={color === value}
+                  className={`${pill} ${pillState(color === value)}`}
+                >
+                  {value}
+                </button>
+              ))}
             </div>
           </fieldset>
         )}
