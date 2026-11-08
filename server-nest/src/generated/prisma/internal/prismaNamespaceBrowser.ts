@@ -61,7 +61,8 @@ export const ModelName = {
   Coupon: 'Coupon',
   Review: 'Review',
   CashSettlement: 'CashSettlement',
-  ProductVariant: 'ProductVariant'
+  ProductVariant: 'ProductVariant',
+  ReturnRequest: 'ReturnRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -265,6 +266,28 @@ export const ProductVariantScalarFieldEnum = {
 } as const
 
 export type ProductVariantScalarFieldEnum = (typeof ProductVariantScalarFieldEnum)[keyof typeof ProductVariantScalarFieldEnum]
+
+
+export const ReturnRequestScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  userId: 'userId',
+  items: 'items',
+  reason: 'reason',
+  comment: 'comment',
+  status: 'status',
+  statusHistory: 'statusHistory',
+  adminNote: 'adminNote',
+  refundAmount: 'refundAmount',
+  refundStatus: 'refundStatus',
+  refundId: 'refundId',
+  restocked: 'restocked',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReturnRequestScalarFieldEnum = (typeof ReturnRequestScalarFieldEnum)[keyof typeof ReturnRequestScalarFieldEnum]
 
 
 export const SortOrder = {

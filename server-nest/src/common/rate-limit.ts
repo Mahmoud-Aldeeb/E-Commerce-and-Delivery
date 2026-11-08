@@ -3,10 +3,17 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { rateLimit } from 'express-rate-limit';
+import type { RequestHandler } from 'express';
 import { limitWith, type LimitCheck } from './shared-rate-limit.js';
 
 const MINUTE = 60_000;
 const logger = new Logger('RateLimit');
+
+// Only the POST that CREATES a return counts: reading the returns of an order (a GET) must not use up the limit
+const onlyPost =
+  (limiter: RequestHandler): RequestHandler =>
+  (req, res, next) =>
+    req.method === 'POST' ? limiter(req, res, next) : next();
 
 // In memory: each server instance counts on its own. Cheap, but only a partial protection on
 // Vercel (instances do not share their counts). Used for the general limit
@@ -92,6 +99,7 @@ export function applyRateLimits(app: NestExpressApplication) {
   ); // OTP attempts
   app.use('/api/upload', strict('upload', 10, 60));
   app.use('/api/orders/:id/cancel', strict('order-cancel', 10, 60));
+  app.use('/api/orders/:id/returns', onlyPost(strict('order-return', 10, 60)));
   app.use('/api/coupons/validate', strict('coupon-validate', 10, 60)); // stops guessing codes
 
   // General limit for everything else. Stripe and Inngest are server-to-server calls,

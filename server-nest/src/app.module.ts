@@ -20,11 +20,13 @@ import { CategoriesModule } from './categories/categories.module.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { CouponsModule } from './coupons/coupons.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
+import { ReturnsModule } from './returns/returns.module.js';
 @Module({
   imports: [
     FavoritesModule,
     CouponsModule,
     ReviewsModule,
+    ReturnsModule,
     CashModule,
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.registerAsync({

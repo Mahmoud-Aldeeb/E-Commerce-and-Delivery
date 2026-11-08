@@ -29,6 +29,7 @@ model User {
   favorites Favorite[]
   reviews   Review[]
   cashSettlements CashSettlement[]
+  returnRequests ReturnRequest[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   role Role @default(USER)
@@ -102,6 +103,7 @@ model Order {
   couponId        String?
   coupon          Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
   couponCode      String? // the code as it was when the order was placed
+    returnRequests ReturnRequest[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -229,4 +231,50 @@ model ProductVariant {
   // "" and not NULL: PostgreSQL sees every NULL as different, so a NULL could never be unique
   @@unique([productId, size, color])
   @@index([productId])
+}
+
+
+
+
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum ReturnReason {
+  DEFECTIVE
+  WRONG_ITEM
+  NOT_AS_DESCRIBED
+  DOES_NOT_FIT
+  OTHER
+}
+
+// A customer asks to send back items of a DELIVERED order. The refund is fixed when the request is made
+model ReturnRequest {
+  id            String       @id @default(uuid())
+  orderId       String
+  order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         Json // [{ product, variant, variantLabel, name, image, price, quantity }]: the quantities RETURNED
+  reason        ReturnReason
+  comment       String? // up to 500 characters, from the customer
+  status        ReturnStatus @default(REQUESTED)
+  statusHistory Json
+  adminNote     String? // the last thing the store told the customer
+  refundAmount  Float // dollars. Delivery is never part of it
+  refundStatus  String? // card: "refunded" | "pending" | "failed" | "none". Cash: "refunded". null = not refunded yet
+  refundId      String? // Stripe refund (private: the customer never sees it)
+  restocked     Boolean      @default(false) // the items went back on the shelves
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([orderId, status])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
 }

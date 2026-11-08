@@ -371,6 +371,7 @@ export type OrderWhereInput = {
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   deliveryPartner?: Prisma.XOR<Prisma.DeliveryPartnerNullableScalarRelationFilter, Prisma.DeliveryPartnerWhereInput> | null
   coupon?: Prisma.XOR<Prisma.CouponNullableScalarRelationFilter, Prisma.CouponWhereInput> | null
+  returnRequests?: Prisma.ReturnRequestListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -401,6 +402,7 @@ export type OrderOrderByWithRelationInput = {
   user?: Prisma.UserOrderByWithRelationInput
   deliveryPartner?: Prisma.DeliveryPartnerOrderByWithRelationInput
   coupon?: Prisma.CouponOrderByWithRelationInput
+  returnRequests?: Prisma.ReturnRequestOrderByRelationAggregateInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -434,6 +436,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   deliveryPartner?: Prisma.XOR<Prisma.DeliveryPartnerNullableScalarRelationFilter, Prisma.DeliveryPartnerWhereInput> | null
   coupon?: Prisma.XOR<Prisma.CouponNullableScalarRelationFilter, Prisma.CouponWhereInput> | null
+  returnRequests?: Prisma.ReturnRequestListRelationFilter
 }, "id">
 
 export type OrderOrderByWithAggregationInput = {
@@ -523,6 +526,7 @@ export type OrderCreateInput = {
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
   deliveryPartner?: Prisma.DeliveryPartnerCreateNestedOneWithoutOrdersInput
   coupon?: Prisma.CouponCreateNestedOneWithoutOrdersInput
+  returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -550,6 +554,7 @@ export type OrderUncheckedCreateInput = {
   couponCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -577,6 +582,7 @@ export type OrderUpdateInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
   deliveryPartner?: Prisma.DeliveryPartnerUpdateOneWithoutOrdersNestedInput
   coupon?: Prisma.CouponUpdateOneWithoutOrdersNestedInput
+  returnRequests?: Prisma.ReturnRequestUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -604,6 +610,7 @@ export type OrderUncheckedUpdateInput = {
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -783,6 +790,11 @@ export type OrderSumOrderByAggregateInput = {
   discount?: Prisma.SortOrder
 }
 
+export type OrderScalarRelationFilter = {
+  is?: Prisma.OrderWhereInput
+  isNot?: Prisma.OrderWhereInput
+}
+
 export type OrderCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutUserInput, Prisma.OrderUncheckedCreateWithoutUserInput> | Prisma.OrderCreateWithoutUserInput[] | Prisma.OrderUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutUserInput | Prisma.OrderCreateOrConnectWithoutUserInput[]
@@ -913,6 +925,20 @@ export type OrderUncheckedUpdateManyWithoutCouponNestedInput = {
   deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
 }
 
+export type OrderCreateNestedOneWithoutReturnRequestsInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReturnRequestsInput, Prisma.OrderUncheckedCreateWithoutReturnRequestsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReturnRequestsInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutReturnRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReturnRequestsInput, Prisma.OrderUncheckedCreateWithoutReturnRequestsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReturnRequestsInput
+  upsert?: Prisma.OrderUpsertWithoutReturnRequestsInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutReturnRequestsInput, Prisma.OrderUpdateWithoutReturnRequestsInput>, Prisma.OrderUncheckedUpdateWithoutReturnRequestsInput>
+}
+
 export type OrderCreateWithoutUserInput = {
   id?: string
   items: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -937,6 +963,7 @@ export type OrderCreateWithoutUserInput = {
   updatedAt?: Date | string
   deliveryPartner?: Prisma.DeliveryPartnerCreateNestedOneWithoutOrdersInput
   coupon?: Prisma.CouponCreateNestedOneWithoutOrdersInput
+  returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutUserInput = {
@@ -963,6 +990,7 @@ export type OrderUncheckedCreateWithoutUserInput = {
   couponCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutUserInput = {
@@ -1045,6 +1073,7 @@ export type OrderCreateWithoutDeliveryPartnerInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
   coupon?: Prisma.CouponCreateNestedOneWithoutOrdersInput
+  returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutDeliveryPartnerInput = {
@@ -1071,6 +1100,7 @@ export type OrderUncheckedCreateWithoutDeliveryPartnerInput = {
   couponCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutDeliveryPartnerInput = {
@@ -1123,6 +1153,7 @@ export type OrderCreateWithoutCouponInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
   deliveryPartner?: Prisma.DeliveryPartnerCreateNestedOneWithoutOrdersInput
+  returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutCouponInput = {
@@ -1149,6 +1180,7 @@ export type OrderUncheckedCreateWithoutCouponInput = {
   couponCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutCouponInput = {
@@ -1175,6 +1207,130 @@ export type OrderUpdateWithWhereUniqueWithoutCouponInput = {
 export type OrderUpdateManyWithWhereWithoutCouponInput = {
   where: Prisma.OrderScalarWhereInput
   data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutCouponInput>
+}
+
+export type OrderCreateWithoutReturnRequestsInput = {
+  id?: string
+  items: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  shippingAddress: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  paymentMethod?: string
+  subtotal: number
+  deliveryFee?: number | null
+  tax?: number | null
+  total: number
+  status?: string
+  statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  deliveryOtp?: string | null
+  liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
+  isPaid?: boolean | null
+  paymentIntentId?: string | null
+  refundId?: string | null
+  refundStatus?: string | null
+  discount?: number
+  couponCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  deliveryPartner?: Prisma.DeliveryPartnerCreateNestedOneWithoutOrdersInput
+  coupon?: Prisma.CouponCreateNestedOneWithoutOrdersInput
+}
+
+export type OrderUncheckedCreateWithoutReturnRequestsInput = {
+  id?: string
+  userId: string
+  items: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  shippingAddress: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  paymentMethod?: string
+  subtotal: number
+  deliveryFee?: number | null
+  tax?: number | null
+  total: number
+  status?: string
+  statusHistory: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  deliveryPartnerId?: string | null
+  deliveryOtp?: string | null
+  liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Date | string | null
+  isPaid?: boolean | null
+  paymentIntentId?: string | null
+  refundId?: string | null
+  refundStatus?: string | null
+  discount?: number
+  couponId?: string | null
+  couponCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type OrderCreateOrConnectWithoutReturnRequestsInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReturnRequestsInput, Prisma.OrderUncheckedCreateWithoutReturnRequestsInput>
+}
+
+export type OrderUpsertWithoutReturnRequestsInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutReturnRequestsInput, Prisma.OrderUncheckedUpdateWithoutReturnRequestsInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReturnRequestsInput, Prisma.OrderUncheckedCreateWithoutReturnRequestsInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutReturnRequestsInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutReturnRequestsInput, Prisma.OrderUncheckedUpdateWithoutReturnRequestsInput>
+}
+
+export type OrderUpdateWithoutReturnRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  items?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  shippingAddress?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotal?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  tax?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  total?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount?: Prisma.FloatFieldUpdateOperationsInput | number
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  deliveryPartner?: Prisma.DeliveryPartnerUpdateOneWithoutOrdersNestedInput
+  coupon?: Prisma.CouponUpdateOneWithoutOrdersNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutReturnRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  items?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  shippingAddress?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  paymentMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  subtotal?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  tax?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  total?: Prisma.FloatFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusHistory?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  deliveryPartnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liveLocation?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isPaid?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  paymentIntentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount?: Prisma.FloatFieldUpdateOperationsInput | number
+  couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type OrderCreateManyUserInput = {
@@ -1227,6 +1383,7 @@ export type OrderUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deliveryPartner?: Prisma.DeliveryPartnerUpdateOneWithoutOrdersNestedInput
   coupon?: Prisma.CouponUpdateOneWithoutOrdersNestedInput
+  returnRequests?: Prisma.ReturnRequestUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutUserInput = {
@@ -1253,6 +1410,7 @@ export type OrderUncheckedUpdateWithoutUserInput = {
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutUserInput = {
@@ -1331,6 +1489,7 @@ export type OrderUpdateWithoutDeliveryPartnerInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
   coupon?: Prisma.CouponUpdateOneWithoutOrdersNestedInput
+  returnRequests?: Prisma.ReturnRequestUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutDeliveryPartnerInput = {
@@ -1357,6 +1516,7 @@ export type OrderUncheckedUpdateWithoutDeliveryPartnerInput = {
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutDeliveryPartnerInput = {
@@ -1435,6 +1595,7 @@ export type OrderUpdateWithoutCouponInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
   deliveryPartner?: Prisma.DeliveryPartnerUpdateOneWithoutOrdersNestedInput
+  returnRequests?: Prisma.ReturnRequestUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutCouponInput = {
@@ -1461,6 +1622,7 @@ export type OrderUncheckedUpdateWithoutCouponInput = {
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutCouponInput = {
@@ -1489,6 +1651,35 @@ export type OrderUncheckedUpdateManyWithoutCouponInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type OrderCountOutputType
+ */
+
+export type OrderCountOutputType = {
+  returnRequests: number
+}
+
+export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  returnRequests?: boolean | OrderCountOutputTypeCountReturnRequestsArgs
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderCountOutputType
+   */
+  select?: Prisma.OrderCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountReturnRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReturnRequestWhereInput
+}
 
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1519,6 +1710,8 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   deliveryPartner?: boolean | Prisma.Order$deliveryPartnerArgs<ExtArgs>
   coupon?: boolean | Prisma.Order$couponArgs<ExtArgs>
+  returnRequests?: boolean | Prisma.Order$returnRequestsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1613,6 +1806,8 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   deliveryPartner?: boolean | Prisma.Order$deliveryPartnerArgs<ExtArgs>
   coupon?: boolean | Prisma.Order$couponArgs<ExtArgs>
+  returnRequests?: boolean | Prisma.Order$returnRequestsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1631,6 +1826,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     user: Prisma.$UserPayload<ExtArgs>
     deliveryPartner: Prisma.$DeliveryPartnerPayload<ExtArgs> | null
     coupon: Prisma.$CouponPayload<ExtArgs> | null
+    returnRequests: Prisma.$ReturnRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2054,6 +2250,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   deliveryPartner<T extends Prisma.Order$deliveryPartnerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$deliveryPartnerArgs<ExtArgs>>): Prisma.Prisma__DeliveryPartnerClient<runtime.Types.Result.GetResult<Prisma.$DeliveryPartnerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   coupon<T extends Prisma.Order$couponArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$couponArgs<ExtArgs>>): Prisma.Prisma__CouponClient<runtime.Types.Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  returnRequests<T extends Prisma.Order$returnRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$returnRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReturnRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2543,6 +2740,30 @@ export type Order$couponArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    */
   include?: Prisma.CouponInclude<ExtArgs> | null
   where?: Prisma.CouponWhereInput
+}
+
+/**
+ * Order.returnRequests
+ */
+export type Order$returnRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReturnRequest
+   */
+  select?: Prisma.ReturnRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReturnRequest
+   */
+  omit?: Prisma.ReturnRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReturnRequestInclude<ExtArgs> | null
+  where?: Prisma.ReturnRequestWhereInput
+  orderBy?: Prisma.ReturnRequestOrderByWithRelationInput | Prisma.ReturnRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ReturnRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReturnRequestScalarFieldEnum | Prisma.ReturnRequestScalarFieldEnum[]
 }
 
 /**

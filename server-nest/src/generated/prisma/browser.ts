@@ -72,3 +72,8 @@ export type CashSettlement = Prisma.CashSettlementModel
  * 
  */
 export type ProductVariant = Prisma.ProductVariantModel
+/**
+ * Model ReturnRequest
+ * 
+ */
+export type ReturnRequest = Prisma.ReturnRequestModel
