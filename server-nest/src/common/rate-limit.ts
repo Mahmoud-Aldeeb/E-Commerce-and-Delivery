@@ -10,7 +10,7 @@ const MINUTE = 60_000;
 const logger = new Logger('RateLimit');
 
 // Only the POST that CREATES a return counts: reading the returns of an order (a GET) must not use up the limit
-const onlyPost =
+export const onlyPost =
   (limiter: RequestHandler): RequestHandler =>
   (req, res, next) =>
     req.method === 'POST' ? limiter(req, res, next) : next();
