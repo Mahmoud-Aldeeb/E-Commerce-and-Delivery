@@ -28,10 +28,12 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   tokenVersion: number | null
+  walletBalanceCents: number | null
 }
 
 export type UserSumAggregateOutputType = {
   tokenVersion: number | null
+  walletBalanceCents: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -45,6 +47,7 @@ export type UserMinAggregateOutputType = {
   tokenVersion: number | null
   phone: string | null
   avatar: string | null
+  walletBalanceCents: number | null
   createdAt: Date | null
   updatedAt: Date | null
   role: $Enums.Role | null
@@ -61,6 +64,7 @@ export type UserMaxAggregateOutputType = {
   tokenVersion: number | null
   phone: string | null
   avatar: string | null
+  walletBalanceCents: number | null
   createdAt: Date | null
   updatedAt: Date | null
   role: $Enums.Role | null
@@ -77,6 +81,7 @@ export type UserCountAggregateOutputType = {
   tokenVersion: number
   phone: number
   avatar: number
+  walletBalanceCents: number
   createdAt: number
   updatedAt: number
   role: number
@@ -86,10 +91,12 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   tokenVersion?: true
+  walletBalanceCents?: true
 }
 
 export type UserSumAggregateInputType = {
   tokenVersion?: true
+  walletBalanceCents?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -103,6 +110,7 @@ export type UserMinAggregateInputType = {
   tokenVersion?: true
   phone?: true
   avatar?: true
+  walletBalanceCents?: true
   createdAt?: true
   updatedAt?: true
   role?: true
@@ -119,6 +127,7 @@ export type UserMaxAggregateInputType = {
   tokenVersion?: true
   phone?: true
   avatar?: true
+  walletBalanceCents?: true
   createdAt?: true
   updatedAt?: true
   role?: true
@@ -135,6 +144,7 @@ export type UserCountAggregateInputType = {
   tokenVersion?: true
   phone?: true
   avatar?: true
+  walletBalanceCents?: true
   createdAt?: true
   updatedAt?: true
   role?: true
@@ -238,6 +248,7 @@ export type UserGroupByOutputType = {
   tokenVersion: number
   phone: string | null
   avatar: string | null
+  walletBalanceCents: number
   createdAt: Date
   updatedAt: Date
   role: $Enums.Role
@@ -277,6 +288,7 @@ export type UserWhereInput = {
   tokenVersion?: Prisma.IntFilter<"User"> | number
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
+  walletBalanceCents?: Prisma.IntFilter<"User"> | number
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
@@ -286,6 +298,7 @@ export type UserWhereInput = {
   reviews?: Prisma.ReviewListRelationFilter
   cashSettlements?: Prisma.CashSettlementListRelationFilter
   returnRequests?: Prisma.ReturnRequestListRelationFilter
+  walletTransactions?: Prisma.WalletTransactionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -299,6 +312,7 @@ export type UserOrderByWithRelationInput = {
   tokenVersion?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  walletBalanceCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -308,6 +322,7 @@ export type UserOrderByWithRelationInput = {
   reviews?: Prisma.ReviewOrderByRelationAggregateInput
   cashSettlements?: Prisma.CashSettlementOrderByRelationAggregateInput
   returnRequests?: Prisma.ReturnRequestOrderByRelationAggregateInput
+  walletTransactions?: Prisma.WalletTransactionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -324,6 +339,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   tokenVersion?: Prisma.IntFilter<"User"> | number
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
+  walletBalanceCents?: Prisma.IntFilter<"User"> | number
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
@@ -333,6 +349,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   reviews?: Prisma.ReviewListRelationFilter
   cashSettlements?: Prisma.CashSettlementListRelationFilter
   returnRequests?: Prisma.ReturnRequestListRelationFilter
+  walletTransactions?: Prisma.WalletTransactionListRelationFilter
 }, "id" | "email" | "googleId">
 
 export type UserOrderByWithAggregationInput = {
@@ -346,6 +363,7 @@ export type UserOrderByWithAggregationInput = {
   tokenVersion?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  walletBalanceCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -370,6 +388,7 @@ export type UserScalarWhereWithAggregatesInput = {
   tokenVersion?: Prisma.IntWithAggregatesFilter<"User"> | number
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   avatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  walletBalanceCents?: Prisma.IntWithAggregatesFilter<"User"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
@@ -386,6 +405,7 @@ export type UserCreateInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -395,6 +415,7 @@ export type UserCreateInput = {
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -408,6 +429,7 @@ export type UserUncheckedCreateInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -417,6 +439,7 @@ export type UserUncheckedCreateInput = {
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -430,6 +453,7 @@ export type UserUpdateInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -439,6 +463,7 @@ export type UserUpdateInput = {
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -452,6 +477,7 @@ export type UserUncheckedUpdateInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -461,6 +487,7 @@ export type UserUncheckedUpdateInput = {
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -474,6 +501,7 @@ export type UserCreateManyInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -490,6 +518,7 @@ export type UserUpdateManyMutationInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -506,6 +535,7 @@ export type UserUncheckedUpdateManyInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -522,6 +552,7 @@ export type UserCountOrderByAggregateInput = {
   tokenVersion?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  walletBalanceCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -529,6 +560,7 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   tokenVersion?: Prisma.SortOrder
+  walletBalanceCents?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -542,6 +574,7 @@ export type UserMaxOrderByAggregateInput = {
   tokenVersion?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  walletBalanceCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -558,6 +591,7 @@ export type UserMinOrderByAggregateInput = {
   tokenVersion?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
+  walletBalanceCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -565,6 +599,7 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   tokenVersion?: Prisma.SortOrder
+  walletBalanceCents?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -691,6 +726,20 @@ export type UserUpdateOneRequiredWithoutReturnRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReturnRequestsInput, Prisma.UserUpdateWithoutReturnRequestsInput>, Prisma.UserUncheckedUpdateWithoutReturnRequestsInput>
 }
 
+export type UserCreateNestedOneWithoutWalletTransactionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWalletTransactionsInput, Prisma.UserUncheckedCreateWithoutWalletTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWalletTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutWalletTransactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWalletTransactionsInput, Prisma.UserUncheckedCreateWithoutWalletTransactionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWalletTransactionsInput
+  upsert?: Prisma.UserUpsertWithoutWalletTransactionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWalletTransactionsInput, Prisma.UserUpdateWithoutWalletTransactionsInput>, Prisma.UserUncheckedUpdateWithoutWalletTransactionsInput>
+}
+
 export type UserCreateWithoutAddressesInput = {
   id?: string
   name: string
@@ -702,6 +751,7 @@ export type UserCreateWithoutAddressesInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -710,6 +760,7 @@ export type UserCreateWithoutAddressesInput = {
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAddressesInput = {
@@ -723,6 +774,7 @@ export type UserUncheckedCreateWithoutAddressesInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -731,6 +783,7 @@ export type UserUncheckedCreateWithoutAddressesInput = {
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAddressesInput = {
@@ -760,6 +813,7 @@ export type UserUpdateWithoutAddressesInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -768,6 +822,7 @@ export type UserUpdateWithoutAddressesInput = {
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAddressesInput = {
@@ -781,6 +836,7 @@ export type UserUncheckedUpdateWithoutAddressesInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -789,6 +845,7 @@ export type UserUncheckedUpdateWithoutAddressesInput = {
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOrdersInput = {
@@ -802,6 +859,7 @@ export type UserCreateWithoutOrdersInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -810,6 +868,7 @@ export type UserCreateWithoutOrdersInput = {
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOrdersInput = {
@@ -823,6 +882,7 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -831,6 +891,7 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOrdersInput = {
@@ -860,6 +921,7 @@ export type UserUpdateWithoutOrdersInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -868,6 +930,7 @@ export type UserUpdateWithoutOrdersInput = {
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrdersInput = {
@@ -881,6 +944,7 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -889,6 +953,7 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFavoritesInput = {
@@ -902,6 +967,7 @@ export type UserCreateWithoutFavoritesInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -910,6 +976,7 @@ export type UserCreateWithoutFavoritesInput = {
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFavoritesInput = {
@@ -923,6 +990,7 @@ export type UserUncheckedCreateWithoutFavoritesInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -931,6 +999,7 @@ export type UserUncheckedCreateWithoutFavoritesInput = {
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFavoritesInput = {
@@ -960,6 +1029,7 @@ export type UserUpdateWithoutFavoritesInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -968,6 +1038,7 @@ export type UserUpdateWithoutFavoritesInput = {
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFavoritesInput = {
@@ -981,6 +1052,7 @@ export type UserUncheckedUpdateWithoutFavoritesInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -989,6 +1061,7 @@ export type UserUncheckedUpdateWithoutFavoritesInput = {
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReviewsInput = {
@@ -1002,6 +1075,7 @@ export type UserCreateWithoutReviewsInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -1010,6 +1084,7 @@ export type UserCreateWithoutReviewsInput = {
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewsInput = {
@@ -1023,6 +1098,7 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -1031,6 +1107,7 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutRecordedByInput
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewsInput = {
@@ -1060,6 +1137,7 @@ export type UserUpdateWithoutReviewsInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -1068,6 +1146,7 @@ export type UserUpdateWithoutReviewsInput = {
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsInput = {
@@ -1081,6 +1160,7 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -1089,6 +1169,7 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutRecordedByNestedInput
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCashSettlementsInput = {
@@ -1102,6 +1183,7 @@ export type UserCreateWithoutCashSettlementsInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -1110,6 +1192,7 @@ export type UserCreateWithoutCashSettlementsInput = {
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
   returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCashSettlementsInput = {
@@ -1123,6 +1206,7 @@ export type UserUncheckedCreateWithoutCashSettlementsInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -1131,6 +1215,7 @@ export type UserUncheckedCreateWithoutCashSettlementsInput = {
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutUserInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCashSettlementsInput = {
@@ -1160,6 +1245,7 @@ export type UserUpdateWithoutCashSettlementsInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -1168,6 +1254,7 @@ export type UserUpdateWithoutCashSettlementsInput = {
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   returnRequests?: Prisma.ReturnRequestUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCashSettlementsInput = {
@@ -1181,6 +1268,7 @@ export type UserUncheckedUpdateWithoutCashSettlementsInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -1189,6 +1277,7 @@ export type UserUncheckedUpdateWithoutCashSettlementsInput = {
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutUserNestedInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReturnRequestsInput = {
@@ -1202,6 +1291,7 @@ export type UserCreateWithoutReturnRequestsInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -1210,6 +1300,7 @@ export type UserCreateWithoutReturnRequestsInput = {
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementCreateNestedManyWithoutRecordedByInput
+  walletTransactions?: Prisma.WalletTransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReturnRequestsInput = {
@@ -1223,6 +1314,7 @@ export type UserUncheckedCreateWithoutReturnRequestsInput = {
   tokenVersion?: number
   phone?: string | null
   avatar?: string | null
+  walletBalanceCents?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   role?: $Enums.Role
@@ -1231,6 +1323,7 @@ export type UserUncheckedCreateWithoutReturnRequestsInput = {
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   cashSettlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutRecordedByInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReturnRequestsInput = {
@@ -1260,6 +1353,7 @@ export type UserUpdateWithoutReturnRequestsInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -1268,6 +1362,7 @@ export type UserUpdateWithoutReturnRequestsInput = {
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUpdateManyWithoutRecordedByNestedInput
+  walletTransactions?: Prisma.WalletTransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReturnRequestsInput = {
@@ -1281,6 +1376,7 @@ export type UserUncheckedUpdateWithoutReturnRequestsInput = {
   tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
@@ -1289,6 +1385,115 @@ export type UserUncheckedUpdateWithoutReturnRequestsInput = {
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   cashSettlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutRecordedByNestedInput
+  walletTransactions?: Prisma.WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutWalletTransactionsInput = {
+  id?: string
+  name: string
+  email: string
+  password?: string | null
+  googleId?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpires?: Date | string | null
+  tokenVersion?: number
+  phone?: string | null
+  avatar?: string | null
+  walletBalanceCents?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: $Enums.Role
+  addresses?: Prisma.AddressCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  cashSettlements?: Prisma.CashSettlementCreateNestedManyWithoutRecordedByInput
+  returnRequests?: Prisma.ReturnRequestCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutWalletTransactionsInput = {
+  id?: string
+  name: string
+  email: string
+  password?: string | null
+  googleId?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpires?: Date | string | null
+  tokenVersion?: number
+  phone?: string | null
+  avatar?: string | null
+  walletBalanceCents?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role?: $Enums.Role
+  addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  cashSettlements?: Prisma.CashSettlementUncheckedCreateNestedManyWithoutRecordedByInput
+  returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutWalletTransactionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWalletTransactionsInput, Prisma.UserUncheckedCreateWithoutWalletTransactionsInput>
+}
+
+export type UserUpsertWithoutWalletTransactionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWalletTransactionsInput, Prisma.UserUncheckedUpdateWithoutWalletTransactionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWalletTransactionsInput, Prisma.UserUncheckedCreateWithoutWalletTransactionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWalletTransactionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWalletTransactionsInput, Prisma.UserUncheckedUpdateWithoutWalletTransactionsInput>
+}
+
+export type UserUpdateWithoutWalletTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  cashSettlements?: Prisma.CashSettlementUpdateManyWithoutRecordedByNestedInput
+  returnRequests?: Prisma.ReturnRequestUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWalletTransactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletBalanceCents?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  cashSettlements?: Prisma.CashSettlementUncheckedUpdateManyWithoutRecordedByNestedInput
+  returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1303,6 +1508,7 @@ export type UserCountOutputType = {
   reviews: number
   cashSettlements: number
   returnRequests: number
+  walletTransactions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1312,6 +1518,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   reviews?: boolean | UserCountOutputTypeCountReviewsArgs
   cashSettlements?: boolean | UserCountOutputTypeCountCashSettlementsArgs
   returnRequests?: boolean | UserCountOutputTypeCountReturnRequestsArgs
+  walletTransactions?: boolean | UserCountOutputTypeCountWalletTransactionsArgs
 }
 
 /**
@@ -1366,6 +1573,13 @@ export type UserCountOutputTypeCountReturnRequestsArgs<ExtArgs extends runtime.T
   where?: Prisma.ReturnRequestWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWalletTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WalletTransactionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1378,6 +1592,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   tokenVersion?: boolean
   phone?: boolean
   avatar?: boolean
+  walletBalanceCents?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   role?: boolean
@@ -1387,6 +1602,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>
   cashSettlements?: boolean | Prisma.User$cashSettlementsArgs<ExtArgs>
   returnRequests?: boolean | Prisma.User$returnRequestsArgs<ExtArgs>
+  walletTransactions?: boolean | Prisma.User$walletTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1401,6 +1617,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   tokenVersion?: boolean
   phone?: boolean
   avatar?: boolean
+  walletBalanceCents?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   role?: boolean
@@ -1417,6 +1634,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   tokenVersion?: boolean
   phone?: boolean
   avatar?: boolean
+  walletBalanceCents?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   role?: boolean
@@ -1433,12 +1651,13 @@ export type UserSelectScalar = {
   tokenVersion?: boolean
   phone?: boolean
   avatar?: boolean
+  walletBalanceCents?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   role?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "googleId" | "passwordResetToken" | "passwordResetExpires" | "tokenVersion" | "phone" | "avatar" | "createdAt" | "updatedAt" | "role", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "googleId" | "passwordResetToken" | "passwordResetExpires" | "tokenVersion" | "phone" | "avatar" | "walletBalanceCents" | "createdAt" | "updatedAt" | "role", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   addresses?: boolean | Prisma.User$addressesArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
@@ -1446,6 +1665,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>
   cashSettlements?: boolean | Prisma.User$cashSettlementsArgs<ExtArgs>
   returnRequests?: boolean | Prisma.User$returnRequestsArgs<ExtArgs>
+  walletTransactions?: boolean | Prisma.User$walletTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1460,6 +1680,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     reviews: Prisma.$ReviewPayload<ExtArgs>[]
     cashSettlements: Prisma.$CashSettlementPayload<ExtArgs>[]
     returnRequests: Prisma.$ReturnRequestPayload<ExtArgs>[]
+    walletTransactions: Prisma.$WalletTransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1472,6 +1693,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     tokenVersion: number
     phone: string | null
     avatar: string | null
+    walletBalanceCents: number
     createdAt: Date
     updatedAt: Date
     role: $Enums.Role
@@ -1875,6 +2097,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   reviews<T extends Prisma.User$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cashSettlements<T extends Prisma.User$cashSettlementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cashSettlementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CashSettlementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   returnRequests<T extends Prisma.User$returnRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$returnRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReturnRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  walletTransactions<T extends Prisma.User$walletTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$walletTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1914,6 +2137,7 @@ export interface UserFieldRefs {
   readonly tokenVersion: Prisma.FieldRef<"User", 'Int'>
   readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly avatar: Prisma.FieldRef<"User", 'String'>
+  readonly walletBalanceCents: Prisma.FieldRef<"User", 'Int'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
@@ -2451,6 +2675,30 @@ export type User$returnRequestsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.ReturnRequestScalarFieldEnum | Prisma.ReturnRequestScalarFieldEnum[]
+}
+
+/**
+ * User.walletTransactions
+ */
+export type User$walletTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WalletTransaction
+   */
+  select?: Prisma.WalletTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WalletTransaction
+   */
+  omit?: Prisma.WalletTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WalletTransactionInclude<ExtArgs> | null
+  where?: Prisma.WalletTransactionWhereInput
+  orderBy?: Prisma.WalletTransactionOrderByWithRelationInput | Prisma.WalletTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.WalletTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WalletTransactionScalarFieldEnum | Prisma.WalletTransactionScalarFieldEnum[]
 }
 
 /**

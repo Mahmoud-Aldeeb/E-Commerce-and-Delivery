@@ -30,6 +30,9 @@ model User {
   reviews   Review[]
   cashSettlements CashSettlement[]
   returnRequests ReturnRequest[]
+    // The store wallet, in whole CENTS (an integer never drifts). The API speaks dollars
+  walletBalanceCents Int                 @default(0)
+  walletTransactions WalletTransaction[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   role Role @default(USER)
@@ -103,7 +106,11 @@ model Order {
   couponId        String?
   coupon          Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
   couponCode      String? // the code as it was when the order was placed
-    returnRequests ReturnRequest[]
+  returnRequests ReturnRequest[]
+  // What the wallet paid when the order was placed (dollars). The rest, by card or in cash, is finalAmountPaid
+  walletAmountUsed Float  @default(0)
+  // total - walletAmountUsed. null on orders placed before the wallet existed: read it as `total`
+  finalAmountPaid  Float?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -267,8 +274,11 @@ model ReturnRequest {
   statusHistory Json
   adminNote     String? // the last thing the store told the customer
   refundAmount  Float // dollars. Delivery is never part of it
-  refundStatus  String? // card: "refunded" | "pending" | "failed" | "none". Cash: "refunded". null = not refunded yet
+  refundStatus  String? // "refunded" | "pending" | "failed" | "none" | "manual-pending" (finance has to pay it by hand). null = not refunded yet
   refundId      String? // Stripe refund (private: the customer never sees it)
+  refundMethod             ReturnRefundMethod @default(ORIGINAL_PAYMENT)
+  refundDestinationDetails String? // a mobile number (MOBILE_WALLET) or an IPA / account (INSTAPAY)
+  walletRefundAmount       Float              @default(0) // the part of refundAmount that goes to the store wallet
   restocked     Boolean      @default(false) // the items went back on the shelves
   completedAt   DateTime?
   createdAt     DateTime     @default(now())
@@ -277,4 +287,36 @@ model ReturnRequest {
   @@index([orderId, status])
   @@index([userId, createdAt])
   @@index([status, createdAt])
+}
+
+
+enum ReturnRefundMethod {
+  ORIGINAL_PAYMENT // back to where the money came from: the card (Stripe)
+  STORE_WALLET
+  MOBILE_WALLET
+  INSTAPAY
+}
+
+enum WalletTransactionType {
+  RETURN_REFUND // a completed return credited the wallet
+  ORDER_PAYMENT // an order paid (a part of) its total from the wallet
+  ORDER_REFUND // a cancelled order gave back what the wallet paid
+}
+
+// Every movement of the wallet. Never edited, never deleted
+model WalletTransaction {
+  id                String                @id @default(uuid())
+  userId            String
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              WalletTransactionType
+  amountCents       Int // + credit, - debit
+  balanceAfterCents Int
+  // One real event, one reference: "return:<id>", "order:<id>", "order-refund:<id>".
+  // It is unique: a retry (or a double click) can never credit or debit twice
+  reference         String                @unique
+  orderId           String?
+  returnId          String?
+  createdAt         DateTime              @default(now())
+
+  @@index([userId, createdAt])
 }

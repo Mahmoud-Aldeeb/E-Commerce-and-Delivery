@@ -21,12 +21,14 @@ import { FavoritesModule } from './favorites/favorites.module.js';
 import { CouponsModule } from './coupons/coupons.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { ReturnsModule } from './returns/returns.module.js';
+import { WalletModule } from './wallet/wallet.module.js';
 @Module({
   imports: [
     FavoritesModule,
     CouponsModule,
     ReviewsModule,
     ReturnsModule,
+    WalletModule,
     CashModule,
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.registerAsync({

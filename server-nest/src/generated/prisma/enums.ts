@@ -45,3 +45,22 @@ export const ReturnReason = {
 } as const
 
 export type ReturnReason = (typeof ReturnReason)[keyof typeof ReturnReason]
+
+
+export const ReturnRefundMethod = {
+  ORIGINAL_PAYMENT: 'ORIGINAL_PAYMENT',
+  STORE_WALLET: 'STORE_WALLET',
+  MOBILE_WALLET: 'MOBILE_WALLET',
+  INSTAPAY: 'INSTAPAY'
+} as const
+
+export type ReturnRefundMethod = (typeof ReturnRefundMethod)[keyof typeof ReturnRefundMethod]
+
+
+export const WalletTransactionType = {
+  RETURN_REFUND: 'RETURN_REFUND',
+  ORDER_PAYMENT: 'ORDER_PAYMENT',
+  ORDER_REFUND: 'ORDER_REFUND'
+} as const
+
+export type WalletTransactionType = (typeof WalletTransactionType)[keyof typeof WalletTransactionType]

@@ -28,10 +28,12 @@ export type AggregateReturnRequest = {
 
 export type ReturnRequestAvgAggregateOutputType = {
   refundAmount: number | null
+  walletRefundAmount: number | null
 }
 
 export type ReturnRequestSumAggregateOutputType = {
   refundAmount: number | null
+  walletRefundAmount: number | null
 }
 
 export type ReturnRequestMinAggregateOutputType = {
@@ -45,6 +47,9 @@ export type ReturnRequestMinAggregateOutputType = {
   refundAmount: number | null
   refundStatus: string | null
   refundId: string | null
+  refundMethod: $Enums.ReturnRefundMethod | null
+  refundDestinationDetails: string | null
+  walletRefundAmount: number | null
   restocked: boolean | null
   completedAt: Date | null
   createdAt: Date | null
@@ -62,6 +67,9 @@ export type ReturnRequestMaxAggregateOutputType = {
   refundAmount: number | null
   refundStatus: string | null
   refundId: string | null
+  refundMethod: $Enums.ReturnRefundMethod | null
+  refundDestinationDetails: string | null
+  walletRefundAmount: number | null
   restocked: boolean | null
   completedAt: Date | null
   createdAt: Date | null
@@ -81,6 +89,9 @@ export type ReturnRequestCountAggregateOutputType = {
   refundAmount: number
   refundStatus: number
   refundId: number
+  refundMethod: number
+  refundDestinationDetails: number
+  walletRefundAmount: number
   restocked: number
   completedAt: number
   createdAt: number
@@ -91,10 +102,12 @@ export type ReturnRequestCountAggregateOutputType = {
 
 export type ReturnRequestAvgAggregateInputType = {
   refundAmount?: true
+  walletRefundAmount?: true
 }
 
 export type ReturnRequestSumAggregateInputType = {
   refundAmount?: true
+  walletRefundAmount?: true
 }
 
 export type ReturnRequestMinAggregateInputType = {
@@ -108,6 +121,9 @@ export type ReturnRequestMinAggregateInputType = {
   refundAmount?: true
   refundStatus?: true
   refundId?: true
+  refundMethod?: true
+  refundDestinationDetails?: true
+  walletRefundAmount?: true
   restocked?: true
   completedAt?: true
   createdAt?: true
@@ -125,6 +141,9 @@ export type ReturnRequestMaxAggregateInputType = {
   refundAmount?: true
   refundStatus?: true
   refundId?: true
+  refundMethod?: true
+  refundDestinationDetails?: true
+  walletRefundAmount?: true
   restocked?: true
   completedAt?: true
   createdAt?: true
@@ -144,6 +163,9 @@ export type ReturnRequestCountAggregateInputType = {
   refundAmount?: true
   refundStatus?: true
   refundId?: true
+  refundMethod?: true
+  refundDestinationDetails?: true
+  walletRefundAmount?: true
   restocked?: true
   completedAt?: true
   createdAt?: true
@@ -250,6 +272,9 @@ export type ReturnRequestGroupByOutputType = {
   refundAmount: number
   refundStatus: string | null
   refundId: string | null
+  refundMethod: $Enums.ReturnRefundMethod
+  refundDestinationDetails: string | null
+  walletRefundAmount: number
   restocked: boolean
   completedAt: Date | null
   createdAt: Date
@@ -292,6 +317,9 @@ export type ReturnRequestWhereInput = {
   refundAmount?: Prisma.FloatFilter<"ReturnRequest"> | number
   refundStatus?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
   refundId?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFilter<"ReturnRequest"> | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
+  walletRefundAmount?: Prisma.FloatFilter<"ReturnRequest"> | number
   restocked?: Prisma.BoolFilter<"ReturnRequest"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"ReturnRequest"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ReturnRequest"> | Date | string
@@ -313,6 +341,9 @@ export type ReturnRequestOrderByWithRelationInput = {
   refundAmount?: Prisma.SortOrder
   refundStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   refundId?: Prisma.SortOrderInput | Prisma.SortOrder
+  refundMethod?: Prisma.SortOrder
+  refundDestinationDetails?: Prisma.SortOrderInput | Prisma.SortOrder
+  walletRefundAmount?: Prisma.SortOrder
   restocked?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -337,6 +368,9 @@ export type ReturnRequestWhereUniqueInput = Prisma.AtLeast<{
   refundAmount?: Prisma.FloatFilter<"ReturnRequest"> | number
   refundStatus?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
   refundId?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFilter<"ReturnRequest"> | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
+  walletRefundAmount?: Prisma.FloatFilter<"ReturnRequest"> | number
   restocked?: Prisma.BoolFilter<"ReturnRequest"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"ReturnRequest"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ReturnRequest"> | Date | string
@@ -358,6 +392,9 @@ export type ReturnRequestOrderByWithAggregationInput = {
   refundAmount?: Prisma.SortOrder
   refundStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   refundId?: Prisma.SortOrderInput | Prisma.SortOrder
+  refundMethod?: Prisma.SortOrder
+  refundDestinationDetails?: Prisma.SortOrderInput | Prisma.SortOrder
+  walletRefundAmount?: Prisma.SortOrder
   restocked?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -385,6 +422,9 @@ export type ReturnRequestScalarWhereWithAggregatesInput = {
   refundAmount?: Prisma.FloatWithAggregatesFilter<"ReturnRequest"> | number
   refundStatus?: Prisma.StringNullableWithAggregatesFilter<"ReturnRequest"> | string | null
   refundId?: Prisma.StringNullableWithAggregatesFilter<"ReturnRequest"> | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodWithAggregatesFilter<"ReturnRequest"> | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.StringNullableWithAggregatesFilter<"ReturnRequest"> | string | null
+  walletRefundAmount?: Prisma.FloatWithAggregatesFilter<"ReturnRequest"> | number
   restocked?: Prisma.BoolWithAggregatesFilter<"ReturnRequest"> | boolean
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ReturnRequest"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ReturnRequest"> | Date | string
@@ -402,6 +442,9 @@ export type ReturnRequestCreateInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -423,6 +466,9 @@ export type ReturnRequestUncheckedCreateInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -440,6 +486,9 @@ export type ReturnRequestUpdateInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -461,6 +510,9 @@ export type ReturnRequestUncheckedUpdateInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -480,6 +532,9 @@ export type ReturnRequestCreateManyInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -497,6 +552,9 @@ export type ReturnRequestUpdateManyMutationInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -516,6 +574,9 @@ export type ReturnRequestUncheckedUpdateManyInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -545,6 +606,9 @@ export type ReturnRequestCountOrderByAggregateInput = {
   refundAmount?: Prisma.SortOrder
   refundStatus?: Prisma.SortOrder
   refundId?: Prisma.SortOrder
+  refundMethod?: Prisma.SortOrder
+  refundDestinationDetails?: Prisma.SortOrder
+  walletRefundAmount?: Prisma.SortOrder
   restocked?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -553,6 +617,7 @@ export type ReturnRequestCountOrderByAggregateInput = {
 
 export type ReturnRequestAvgOrderByAggregateInput = {
   refundAmount?: Prisma.SortOrder
+  walletRefundAmount?: Prisma.SortOrder
 }
 
 export type ReturnRequestMaxOrderByAggregateInput = {
@@ -566,6 +631,9 @@ export type ReturnRequestMaxOrderByAggregateInput = {
   refundAmount?: Prisma.SortOrder
   refundStatus?: Prisma.SortOrder
   refundId?: Prisma.SortOrder
+  refundMethod?: Prisma.SortOrder
+  refundDestinationDetails?: Prisma.SortOrder
+  walletRefundAmount?: Prisma.SortOrder
   restocked?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -583,6 +651,9 @@ export type ReturnRequestMinOrderByAggregateInput = {
   refundAmount?: Prisma.SortOrder
   refundStatus?: Prisma.SortOrder
   refundId?: Prisma.SortOrder
+  refundMethod?: Prisma.SortOrder
+  refundDestinationDetails?: Prisma.SortOrder
+  walletRefundAmount?: Prisma.SortOrder
   restocked?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -591,6 +662,7 @@ export type ReturnRequestMinOrderByAggregateInput = {
 
 export type ReturnRequestSumOrderByAggregateInput = {
   refundAmount?: Prisma.SortOrder
+  walletRefundAmount?: Prisma.SortOrder
 }
 
 export type ReturnRequestCreateNestedManyWithoutUserInput = {
@@ -685,6 +757,10 @@ export type EnumReturnStatusFieldUpdateOperationsInput = {
   set?: $Enums.ReturnStatus
 }
 
+export type EnumReturnRefundMethodFieldUpdateOperationsInput = {
+  set?: $Enums.ReturnRefundMethod
+}
+
 export type ReturnRequestCreateWithoutUserInput = {
   id?: string
   items: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -696,6 +772,9 @@ export type ReturnRequestCreateWithoutUserInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -715,6 +794,9 @@ export type ReturnRequestUncheckedCreateWithoutUserInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -763,6 +845,9 @@ export type ReturnRequestScalarWhereInput = {
   refundAmount?: Prisma.FloatFilter<"ReturnRequest"> | number
   refundStatus?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
   refundId?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFilter<"ReturnRequest"> | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.StringNullableFilter<"ReturnRequest"> | string | null
+  walletRefundAmount?: Prisma.FloatFilter<"ReturnRequest"> | number
   restocked?: Prisma.BoolFilter<"ReturnRequest"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"ReturnRequest"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ReturnRequest"> | Date | string
@@ -780,6 +865,9 @@ export type ReturnRequestCreateWithoutOrderInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -799,6 +887,9 @@ export type ReturnRequestUncheckedCreateWithoutOrderInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -843,6 +934,9 @@ export type ReturnRequestCreateManyUserInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -860,6 +954,9 @@ export type ReturnRequestUpdateWithoutUserInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -879,6 +976,9 @@ export type ReturnRequestUncheckedUpdateWithoutUserInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -897,6 +997,9 @@ export type ReturnRequestUncheckedUpdateManyWithoutUserInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -915,6 +1018,9 @@ export type ReturnRequestCreateManyOrderInput = {
   refundAmount: number
   refundStatus?: string | null
   refundId?: string | null
+  refundMethod?: $Enums.ReturnRefundMethod
+  refundDestinationDetails?: string | null
+  walletRefundAmount?: number
   restocked?: boolean
   completedAt?: Date | string | null
   createdAt?: Date | string
@@ -932,6 +1038,9 @@ export type ReturnRequestUpdateWithoutOrderInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -951,6 +1060,9 @@ export type ReturnRequestUncheckedUpdateWithoutOrderInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -969,6 +1081,9 @@ export type ReturnRequestUncheckedUpdateManyWithoutOrderInput = {
   refundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   refundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refundMethod?: Prisma.EnumReturnRefundMethodFieldUpdateOperationsInput | $Enums.ReturnRefundMethod
+  refundDestinationDetails?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletRefundAmount?: Prisma.FloatFieldUpdateOperationsInput | number
   restocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -990,6 +1105,9 @@ export type ReturnRequestSelect<ExtArgs extends runtime.Types.Extensions.Interna
   refundAmount?: boolean
   refundStatus?: boolean
   refundId?: boolean
+  refundMethod?: boolean
+  refundDestinationDetails?: boolean
+  walletRefundAmount?: boolean
   restocked?: boolean
   completedAt?: boolean
   createdAt?: boolean
@@ -1011,6 +1129,9 @@ export type ReturnRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   refundAmount?: boolean
   refundStatus?: boolean
   refundId?: boolean
+  refundMethod?: boolean
+  refundDestinationDetails?: boolean
+  walletRefundAmount?: boolean
   restocked?: boolean
   completedAt?: boolean
   createdAt?: boolean
@@ -1032,6 +1153,9 @@ export type ReturnRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   refundAmount?: boolean
   refundStatus?: boolean
   refundId?: boolean
+  refundMethod?: boolean
+  refundDestinationDetails?: boolean
+  walletRefundAmount?: boolean
   restocked?: boolean
   completedAt?: boolean
   createdAt?: boolean
@@ -1053,13 +1177,16 @@ export type ReturnRequestSelectScalar = {
   refundAmount?: boolean
   refundStatus?: boolean
   refundId?: boolean
+  refundMethod?: boolean
+  refundDestinationDetails?: boolean
+  walletRefundAmount?: boolean
   restocked?: boolean
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ReturnRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "userId" | "items" | "reason" | "comment" | "status" | "statusHistory" | "adminNote" | "refundAmount" | "refundStatus" | "refundId" | "restocked" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["returnRequest"]>
+export type ReturnRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "userId" | "items" | "reason" | "comment" | "status" | "statusHistory" | "adminNote" | "refundAmount" | "refundStatus" | "refundId" | "refundMethod" | "refundDestinationDetails" | "walletRefundAmount" | "restocked" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["returnRequest"]>
 export type ReturnRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1092,6 +1219,9 @@ export type $ReturnRequestPayload<ExtArgs extends runtime.Types.Extensions.Inter
     refundAmount: number
     refundStatus: string | null
     refundId: string | null
+    refundMethod: $Enums.ReturnRefundMethod
+    refundDestinationDetails: string | null
+    walletRefundAmount: number
     restocked: boolean
     completedAt: Date | null
     createdAt: Date
@@ -1533,6 +1663,9 @@ export interface ReturnRequestFieldRefs {
   readonly refundAmount: Prisma.FieldRef<"ReturnRequest", 'Float'>
   readonly refundStatus: Prisma.FieldRef<"ReturnRequest", 'String'>
   readonly refundId: Prisma.FieldRef<"ReturnRequest", 'String'>
+  readonly refundMethod: Prisma.FieldRef<"ReturnRequest", 'ReturnRefundMethod'>
+  readonly refundDestinationDetails: Prisma.FieldRef<"ReturnRequest", 'String'>
+  readonly walletRefundAmount: Prisma.FieldRef<"ReturnRequest", 'Float'>
   readonly restocked: Prisma.FieldRef<"ReturnRequest", 'Boolean'>
   readonly completedAt: Prisma.FieldRef<"ReturnRequest", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ReturnRequest", 'DateTime'>

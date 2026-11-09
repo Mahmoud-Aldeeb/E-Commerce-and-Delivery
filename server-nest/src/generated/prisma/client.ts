@@ -101,3 +101,8 @@ export type ProductVariant = Prisma.ProductVariantModel
  * 
  */
 export type ReturnRequest = Prisma.ReturnRequestModel
+/**
+ * Model WalletTransaction
+ * 
+ */
+export type WalletTransaction = Prisma.WalletTransactionModel

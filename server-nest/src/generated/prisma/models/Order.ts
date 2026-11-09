@@ -32,6 +32,8 @@ export type OrderAvgAggregateOutputType = {
   tax: number | null
   total: number | null
   discount: number | null
+  walletAmountUsed: number | null
+  finalAmountPaid: number | null
 }
 
 export type OrderSumAggregateOutputType = {
@@ -40,6 +42,8 @@ export type OrderSumAggregateOutputType = {
   tax: number | null
   total: number | null
   discount: number | null
+  walletAmountUsed: number | null
+  finalAmountPaid: number | null
 }
 
 export type OrderMinAggregateOutputType = {
@@ -61,6 +65,8 @@ export type OrderMinAggregateOutputType = {
   discount: number | null
   couponId: string | null
   couponCode: string | null
+  walletAmountUsed: number | null
+  finalAmountPaid: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -84,6 +90,8 @@ export type OrderMaxAggregateOutputType = {
   discount: number | null
   couponId: string | null
   couponCode: string | null
+  walletAmountUsed: number | null
+  finalAmountPaid: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -111,6 +119,8 @@ export type OrderCountAggregateOutputType = {
   discount: number
   couponId: number
   couponCode: number
+  walletAmountUsed: number
+  finalAmountPaid: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -123,6 +133,8 @@ export type OrderAvgAggregateInputType = {
   tax?: true
   total?: true
   discount?: true
+  walletAmountUsed?: true
+  finalAmountPaid?: true
 }
 
 export type OrderSumAggregateInputType = {
@@ -131,6 +143,8 @@ export type OrderSumAggregateInputType = {
   tax?: true
   total?: true
   discount?: true
+  walletAmountUsed?: true
+  finalAmountPaid?: true
 }
 
 export type OrderMinAggregateInputType = {
@@ -152,6 +166,8 @@ export type OrderMinAggregateInputType = {
   discount?: true
   couponId?: true
   couponCode?: true
+  walletAmountUsed?: true
+  finalAmountPaid?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -175,6 +191,8 @@ export type OrderMaxAggregateInputType = {
   discount?: true
   couponId?: true
   couponCode?: true
+  walletAmountUsed?: true
+  finalAmountPaid?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -202,6 +220,8 @@ export type OrderCountAggregateInputType = {
   discount?: true
   couponId?: true
   couponCode?: true
+  walletAmountUsed?: true
+  finalAmountPaid?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -316,6 +336,8 @@ export type OrderGroupByOutputType = {
   discount: number
   couponId: string | null
   couponCode: string | null
+  walletAmountUsed: number
+  finalAmountPaid: number | null
   createdAt: Date
   updatedAt: Date
   _count: OrderCountAggregateOutputType | null
@@ -366,6 +388,8 @@ export type OrderWhereInput = {
   discount?: Prisma.FloatFilter<"Order"> | number
   couponId?: Prisma.StringNullableFilter<"Order"> | string | null
   couponCode?: Prisma.StringNullableFilter<"Order"> | string | null
+  walletAmountUsed?: Prisma.FloatFilter<"Order"> | number
+  finalAmountPaid?: Prisma.FloatNullableFilter<"Order"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -397,6 +421,8 @@ export type OrderOrderByWithRelationInput = {
   discount?: Prisma.SortOrder
   couponId?: Prisma.SortOrderInput | Prisma.SortOrder
   couponCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  walletAmountUsed?: Prisma.SortOrder
+  finalAmountPaid?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -431,6 +457,8 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   discount?: Prisma.FloatFilter<"Order"> | number
   couponId?: Prisma.StringNullableFilter<"Order"> | string | null
   couponCode?: Prisma.StringNullableFilter<"Order"> | string | null
+  walletAmountUsed?: Prisma.FloatFilter<"Order"> | number
+  finalAmountPaid?: Prisma.FloatNullableFilter<"Order"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -462,6 +490,8 @@ export type OrderOrderByWithAggregationInput = {
   discount?: Prisma.SortOrder
   couponId?: Prisma.SortOrderInput | Prisma.SortOrder
   couponCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  walletAmountUsed?: Prisma.SortOrder
+  finalAmountPaid?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
@@ -497,6 +527,8 @@ export type OrderScalarWhereWithAggregatesInput = {
   discount?: Prisma.FloatWithAggregatesFilter<"Order"> | number
   couponId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   couponCode?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  walletAmountUsed?: Prisma.FloatWithAggregatesFilter<"Order"> | number
+  finalAmountPaid?: Prisma.FloatNullableWithAggregatesFilter<"Order"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
 }
@@ -521,6 +553,8 @@ export type OrderCreateInput = {
   refundStatus?: string | null
   discount?: number
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -552,6 +586,8 @@ export type OrderUncheckedCreateInput = {
   discount?: number
   couponId?: string | null
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
@@ -577,6 +613,8 @@ export type OrderUpdateInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -608,6 +646,8 @@ export type OrderUncheckedUpdateInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
@@ -636,6 +676,8 @@ export type OrderCreateManyInput = {
   discount?: number
   couponId?: string | null
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -660,6 +702,8 @@ export type OrderUpdateManyMutationInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -687,6 +731,8 @@ export type OrderUncheckedUpdateManyInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -724,6 +770,8 @@ export type OrderCountOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   couponId?: Prisma.SortOrder
   couponCode?: Prisma.SortOrder
+  walletAmountUsed?: Prisma.SortOrder
+  finalAmountPaid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -734,6 +782,8 @@ export type OrderAvgOrderByAggregateInput = {
   tax?: Prisma.SortOrder
   total?: Prisma.SortOrder
   discount?: Prisma.SortOrder
+  walletAmountUsed?: Prisma.SortOrder
+  finalAmountPaid?: Prisma.SortOrder
 }
 
 export type OrderMaxOrderByAggregateInput = {
@@ -755,6 +805,8 @@ export type OrderMaxOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   couponId?: Prisma.SortOrder
   couponCode?: Prisma.SortOrder
+  walletAmountUsed?: Prisma.SortOrder
+  finalAmountPaid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -778,6 +830,8 @@ export type OrderMinOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   couponId?: Prisma.SortOrder
   couponCode?: Prisma.SortOrder
+  walletAmountUsed?: Prisma.SortOrder
+  finalAmountPaid?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -788,6 +842,8 @@ export type OrderSumOrderByAggregateInput = {
   tax?: Prisma.SortOrder
   total?: Prisma.SortOrder
   discount?: Prisma.SortOrder
+  walletAmountUsed?: Prisma.SortOrder
+  finalAmountPaid?: Prisma.SortOrder
 }
 
 export type OrderScalarRelationFilter = {
@@ -959,6 +1015,8 @@ export type OrderCreateWithoutUserInput = {
   refundStatus?: string | null
   discount?: number
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deliveryPartner?: Prisma.DeliveryPartnerCreateNestedOneWithoutOrdersInput
@@ -988,6 +1046,8 @@ export type OrderUncheckedCreateWithoutUserInput = {
   discount?: number
   couponId?: string | null
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
@@ -1045,6 +1105,8 @@ export type OrderScalarWhereInput = {
   discount?: Prisma.FloatFilter<"Order"> | number
   couponId?: Prisma.StringNullableFilter<"Order"> | string | null
   couponCode?: Prisma.StringNullableFilter<"Order"> | string | null
+  walletAmountUsed?: Prisma.FloatFilter<"Order"> | number
+  finalAmountPaid?: Prisma.FloatNullableFilter<"Order"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
 }
@@ -1069,6 +1131,8 @@ export type OrderCreateWithoutDeliveryPartnerInput = {
   refundStatus?: string | null
   discount?: number
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1098,6 +1162,8 @@ export type OrderUncheckedCreateWithoutDeliveryPartnerInput = {
   discount?: number
   couponId?: string | null
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
@@ -1149,6 +1215,8 @@ export type OrderCreateWithoutCouponInput = {
   refundStatus?: string | null
   discount?: number
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1178,6 +1246,8 @@ export type OrderUncheckedCreateWithoutCouponInput = {
   refundStatus?: string | null
   discount?: number
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedCreateNestedManyWithoutOrderInput
@@ -1229,6 +1299,8 @@ export type OrderCreateWithoutReturnRequestsInput = {
   refundStatus?: string | null
   discount?: number
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1259,6 +1331,8 @@ export type OrderUncheckedCreateWithoutReturnRequestsInput = {
   discount?: number
   couponId?: string | null
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1299,6 +1373,8 @@ export type OrderUpdateWithoutReturnRequestsInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1329,6 +1405,8 @@ export type OrderUncheckedUpdateWithoutReturnRequestsInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1355,6 +1433,8 @@ export type OrderCreateManyUserInput = {
   discount?: number
   couponId?: string | null
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1379,6 +1459,8 @@ export type OrderUpdateWithoutUserInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deliveryPartner?: Prisma.DeliveryPartnerUpdateOneWithoutOrdersNestedInput
@@ -1408,6 +1490,8 @@ export type OrderUncheckedUpdateWithoutUserInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
@@ -1435,6 +1519,8 @@ export type OrderUncheckedUpdateManyWithoutUserInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1461,6 +1547,8 @@ export type OrderCreateManyDeliveryPartnerInput = {
   discount?: number
   couponId?: string | null
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1485,6 +1573,8 @@ export type OrderUpdateWithoutDeliveryPartnerInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1514,6 +1604,8 @@ export type OrderUncheckedUpdateWithoutDeliveryPartnerInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
@@ -1541,6 +1633,8 @@ export type OrderUncheckedUpdateManyWithoutDeliveryPartnerInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1567,6 +1661,8 @@ export type OrderCreateManyCouponInput = {
   refundStatus?: string | null
   discount?: number
   couponCode?: string | null
+  walletAmountUsed?: number
+  finalAmountPaid?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1591,6 +1687,8 @@ export type OrderUpdateWithoutCouponInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1620,6 +1718,8 @@ export type OrderUncheckedUpdateWithoutCouponInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   returnRequests?: Prisma.ReturnRequestUncheckedUpdateManyWithoutOrderNestedInput
@@ -1647,6 +1747,8 @@ export type OrderUncheckedUpdateManyWithoutCouponInput = {
   refundStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   couponCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  walletAmountUsed?: Prisma.FloatFieldUpdateOperationsInput | number
+  finalAmountPaid?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1705,6 +1807,8 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   discount?: boolean
   couponId?: boolean
   couponCode?: boolean
+  walletAmountUsed?: boolean
+  finalAmountPaid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1737,6 +1841,8 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   discount?: boolean
   couponId?: boolean
   couponCode?: boolean
+  walletAmountUsed?: boolean
+  finalAmountPaid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1767,6 +1873,8 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   discount?: boolean
   couponId?: boolean
   couponCode?: boolean
+  walletAmountUsed?: boolean
+  finalAmountPaid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1797,11 +1905,13 @@ export type OrderSelectScalar = {
   discount?: boolean
   couponId?: boolean
   couponCode?: boolean
+  walletAmountUsed?: boolean
+  finalAmountPaid?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "items" | "shippingAddress" | "paymentMethod" | "subtotal" | "deliveryFee" | "tax" | "total" | "status" | "statusHistory" | "deliveryPartnerId" | "deliveryOtp" | "liveLocation" | "deliveredAt" | "isPaid" | "paymentIntentId" | "refundId" | "refundStatus" | "discount" | "couponId" | "couponCode" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "items" | "shippingAddress" | "paymentMethod" | "subtotal" | "deliveryFee" | "tax" | "total" | "status" | "statusHistory" | "deliveryPartnerId" | "deliveryOtp" | "liveLocation" | "deliveredAt" | "isPaid" | "paymentIntentId" | "refundId" | "refundStatus" | "discount" | "couponId" | "couponCode" | "walletAmountUsed" | "finalAmountPaid" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   deliveryPartner?: boolean | Prisma.Order$deliveryPartnerArgs<ExtArgs>
@@ -1851,6 +1961,8 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     discount: number
     couponId: string | null
     couponCode: string | null
+    walletAmountUsed: number
+    finalAmountPaid: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["order"]>
@@ -2302,6 +2414,8 @@ export interface OrderFieldRefs {
   readonly discount: Prisma.FieldRef<"Order", 'Float'>
   readonly couponId: Prisma.FieldRef<"Order", 'String'>
   readonly couponCode: Prisma.FieldRef<"Order", 'String'>
+  readonly walletAmountUsed: Prisma.FieldRef<"Order", 'Float'>
+  readonly finalAmountPaid: Prisma.FieldRef<"Order", 'Float'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
 }

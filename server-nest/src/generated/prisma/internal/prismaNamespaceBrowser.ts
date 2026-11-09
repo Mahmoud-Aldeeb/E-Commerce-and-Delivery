@@ -62,7 +62,8 @@ export const ModelName = {
   Review: 'Review',
   CashSettlement: 'CashSettlement',
   ProductVariant: 'ProductVariant',
-  ReturnRequest: 'ReturnRequest'
+  ReturnRequest: 'ReturnRequest',
+  WalletTransaction: 'WalletTransaction'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -92,6 +93,7 @@ export const UserScalarFieldEnum = {
   tokenVersion: 'tokenVersion',
   phone: 'phone',
   avatar: 'avatar',
+  walletBalanceCents: 'walletBalanceCents',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   role: 'role'
@@ -162,6 +164,8 @@ export const OrderScalarFieldEnum = {
   discount: 'discount',
   couponId: 'couponId',
   couponCode: 'couponCode',
+  walletAmountUsed: 'walletAmountUsed',
+  finalAmountPaid: 'finalAmountPaid',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -281,6 +285,9 @@ export const ReturnRequestScalarFieldEnum = {
   refundAmount: 'refundAmount',
   refundStatus: 'refundStatus',
   refundId: 'refundId',
+  refundMethod: 'refundMethod',
+  refundDestinationDetails: 'refundDestinationDetails',
+  walletRefundAmount: 'walletRefundAmount',
   restocked: 'restocked',
   completedAt: 'completedAt',
   createdAt: 'createdAt',
@@ -288,6 +295,21 @@ export const ReturnRequestScalarFieldEnum = {
 } as const
 
 export type ReturnRequestScalarFieldEnum = (typeof ReturnRequestScalarFieldEnum)[keyof typeof ReturnRequestScalarFieldEnum]
+
+
+export const WalletTransactionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  amountCents: 'amountCents',
+  balanceAfterCents: 'balanceAfterCents',
+  reference: 'reference',
+  orderId: 'orderId',
+  returnId: 'returnId',
+  createdAt: 'createdAt'
+} as const
+
+export type WalletTransactionScalarFieldEnum = (typeof WalletTransactionScalarFieldEnum)[keyof typeof WalletTransactionScalarFieldEnum]
 
 
 export const SortOrder = {

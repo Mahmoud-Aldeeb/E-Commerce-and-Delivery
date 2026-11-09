@@ -419,6 +419,13 @@ export type EnumReturnStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumReturnStatusFilter<$PrismaModel> | $Enums.ReturnStatus
 }
 
+export type EnumReturnRefundMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnRefundMethod | Prisma.EnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReturnRefundMethodFilter<$PrismaModel> | $Enums.ReturnRefundMethod
+}
+
 export type EnumReturnReasonWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ReturnReason | Prisma.EnumReturnReasonFieldRefInput<$PrismaModel>
   in?: $Enums.ReturnReason[] | Prisma.ListEnumReturnReasonFieldRefInput<$PrismaModel>
@@ -437,6 +444,33 @@ export type EnumReturnStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumReturnStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumReturnStatusFilter<$PrismaModel>
+}
+
+export type EnumReturnRefundMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnRefundMethod | Prisma.EnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReturnRefundMethodWithAggregatesFilter<$PrismaModel> | $Enums.ReturnRefundMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumReturnRefundMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumReturnRefundMethodFilter<$PrismaModel>
+}
+
+export type EnumWalletTransactionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletTransactionType | Prisma.EnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletTransactionTypeFilter<$PrismaModel> | $Enums.WalletTransactionType
+}
+
+export type EnumWalletTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletTransactionType | Prisma.EnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.WalletTransactionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWalletTransactionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWalletTransactionTypeFilter<$PrismaModel>
 }
 
 export type NestedStringFilter<$PrismaModel = never> = {
@@ -781,6 +815,13 @@ export type NestedEnumReturnStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumReturnStatusFilter<$PrismaModel> | $Enums.ReturnStatus
 }
 
+export type NestedEnumReturnRefundMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnRefundMethod | Prisma.EnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReturnRefundMethodFilter<$PrismaModel> | $Enums.ReturnRefundMethod
+}
+
 export type NestedEnumReturnReasonWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ReturnReason | Prisma.EnumReturnReasonFieldRefInput<$PrismaModel>
   in?: $Enums.ReturnReason[] | Prisma.ListEnumReturnReasonFieldRefInput<$PrismaModel>
@@ -799,6 +840,33 @@ export type NestedEnumReturnStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumReturnStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumReturnStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumReturnRefundMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ReturnRefundMethod | Prisma.EnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ReturnRefundMethod[] | Prisma.ListEnumReturnRefundMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumReturnRefundMethodWithAggregatesFilter<$PrismaModel> | $Enums.ReturnRefundMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumReturnRefundMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumReturnRefundMethodFilter<$PrismaModel>
+}
+
+export type NestedEnumWalletTransactionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletTransactionType | Prisma.EnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletTransactionTypeFilter<$PrismaModel> | $Enums.WalletTransactionType
+}
+
+export type NestedEnumWalletTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WalletTransactionType | Prisma.EnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WalletTransactionType[] | Prisma.ListEnumWalletTransactionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWalletTransactionTypeWithAggregatesFilter<$PrismaModel> | $Enums.WalletTransactionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWalletTransactionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWalletTransactionTypeFilter<$PrismaModel>
 }
 
 
