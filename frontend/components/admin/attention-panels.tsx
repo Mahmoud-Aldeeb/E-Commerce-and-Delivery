@@ -231,7 +231,7 @@ export function CancelledPanel({ products }: { products: CancelledProduct[] }) {
           <p className="mt-2 text-xs text-ink-muted">
             A cancelled order is not always the fault of the product: the customer may have changed their mind.
             Look at a product marked Check (3 cancelled orders or more, a quarter of its units or more) for a pattern.
-            Returns after delivery are not recorded here.
+            Returns after delivery are listed in the Returns page, not here.
           </p>
         </>
       )}
