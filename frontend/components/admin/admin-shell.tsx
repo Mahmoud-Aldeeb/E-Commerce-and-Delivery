@@ -3,25 +3,27 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import {
+  BanknoteIcon,
   BarChart3Icon,
   LayoutGridIcon,
   LogOutIcon,
   MenuIcon,
   PackageSearchIcon,
   ShoppingBagIcon,
-  StoreIcon,
-  TruckIcon,
-  XIcon,
-  TagIcon,
-  type LucideIcon,
   StarIcon,
-  BanknoteIcon,
-
+  StoreIcon,
+  TagIcon,
+  TruckIcon,
+  Undo2Icon,
+  XIcon,
+  type LucideIcon,
 } from "lucide-react";
 import RequireAdmin from "@/components/auth/require-admin";
 import Logo from "@/components/layout/logo";
 import { useAuth } from "@/context/auth-context";
+import { adminReturnCountsOptions } from "@/lib/queries/returns";
 
 interface NavItem {
   href: string;
@@ -37,6 +39,7 @@ const NAV: NavItem[] = [
   { href: "/admin/coupons", label: "Coupons", icon: TagIcon },
   { href: "/admin/reviews", label: "Reviews", icon: StarIcon },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBagIcon },
+  { href: "/admin/returns", label: "Returns", icon: Undo2Icon },
   { href: "/admin/delivery-partners", label: "Delivery partners", icon: TruckIcon },
   { href: "/admin/cash", label: "Cash", icon: BanknoteIcon },
 ];
@@ -46,6 +49,10 @@ const itemClass = "flex w-full items-center gap-3 rounded-control px-3 py-2.5 te
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+
+  // New return requests and refunds that failed: the store has to act on them
+  const { data: returnCounts } = useQuery(adminReturnCountsOptions());
+  const returnsToDo = (returnCounts?.requested ?? 0) + (returnCounts?.["refund-failed"] ?? 0);
 
   return (
     <div className="flex h-full flex-col">
@@ -57,6 +64,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <nav aria-label="Admin" className="flex-1 space-y-1 p-3">
         {NAV.map((item) => {
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+          const badge = item.href === "/admin/returns" ? returnsToDo : 0;
+
           return (
             <Link
               key={item.href}
@@ -68,6 +77,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             >
               <item.icon className="size-4" />
               {item.label}
+              {badge > 0 && (
+                <span
+                  className="badge badge-danger ml-auto"
+                  aria-label={`${badge} ${badge === 1 ? "return needs" : "returns need"} attention`}
+                >
+                  {badge}
+                </span>
+              )}
             </Link>
           );
         })}

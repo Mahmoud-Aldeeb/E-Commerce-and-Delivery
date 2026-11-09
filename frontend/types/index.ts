@@ -144,3 +144,45 @@ export interface StoreCategory {
   createdAt: string;
   updatedAt: string;
 }
+
+export type ReturnStatus =
+  | "REQUESTED"
+  | "APPROVED"
+  | "COMPLETED"
+  | "REJECTED"
+  | "CANCELLED";
+export type ReturnReason =
+  | "DEFECTIVE"
+  | "WRONG_ITEM"
+  | "NOT_AS_DESCRIBED"
+  | "DOES_NOT_FIT"
+  | "OTHER";
+
+// One line of a return: the quantity that is sent BACK
+export interface ReturnLine {
+  product: string;
+  variant: string | null;
+  variantLabel: string | null;
+  name: string;
+  image: string;
+  price: number;
+  quantity: number;
+}
+
+export interface ReturnRequest {
+  id: string;
+  orderId: string;
+  userId: string;
+  items: ReturnLine[];
+  reason: ReturnReason;
+  comment: string | null;
+  status: ReturnStatus;
+  statusHistory: { status: string; timestamp: string; note: string }[];
+  adminNote: string | null; // the last thing the store told the customer
+  refundAmount: number;
+  refundStatus: string | null; // "refunded" | "pending" | "failed" | "none". null = not refunded yet
+  restocked: boolean;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
