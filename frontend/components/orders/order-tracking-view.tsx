@@ -21,6 +21,7 @@ import { orderDetailOptions } from "@/lib/queries/orders";
 import CancelOrderDialog from "@/components/orders/cancel-order-dialog";
 import ReorderButton from "@/components/orders/reorder-button";
 import EtaCard from "@/components/orders/eta-card";
+import ReturnsSection from "@/components/orders/returns-section";
 
 const POLL_LIVE_MS = 10_000; // an order that is on its way: refresh the status and the location
 const POLL_PAYMENT_MS = 2_000; // waiting for the payment confirmation
@@ -226,6 +227,8 @@ export default function OrderTrackingView({ id }: { id: string }) {
               <ReorderButton order={order} className="btn-sm mt-3 w-full" />
             </section>
           )}
+
+          {order.status === "Delivered" && <ReturnsSection order={order} />}
         </div>
       </div>
       {cancelling && <CancelOrderDialog order={order} onClose={() => setCancelling(false)} />}
