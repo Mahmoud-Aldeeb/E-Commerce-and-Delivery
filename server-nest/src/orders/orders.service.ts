@@ -33,6 +33,15 @@ import { calculateTotals } from './order-pricing.js';
 import { CouponsService } from '../coupons/coupons.service.js';
 import { estimateDeliveryEta } from './delivery-eta.js';
 import { variantLabel } from '../products/variant-rules.js';
+import {
+  debitWallet,
+  InsufficientWalletError,
+} from '../wallet/wallet.ledger.js';
+import {
+  isBelowCardMinimum,
+  splitPayment,
+  toCents,
+} from '../wallet/wallet-rules.js';
 
 // Card orders stay hidden until Stripe confirms the payment
 export const HIDE_UNPAID_CARD_ORDERS: Prisma.OrderWhereInput = {
@@ -72,12 +81,12 @@ export class OrdersService {
 
   // POST /api/orders
   async createOrder(userId: string, dto: CreateOrderDto, origin?: string) {
-    const { items, shippingAddress, paymentMethod } = dto;
+    const { items, shippingAddress } = dto;
 
     // The courier calls the customer: no phone number, no order
     const customer = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { phone: true },
+      select: { phone: true, walletBalanceCents: true },
     });
     if (!customer?.phone) {
       throw new BadRequestException(
@@ -165,11 +174,38 @@ export class OrdersService {
       coupon?.discount ?? 0,
     );
 
+    // How the order is paid. The wallet is used only when the customer asks for it, and the SERVER
+    // works out how much it pays: the client never sends an amount
+    const walletBalance = customer.walletBalanceCents ?? 0;
+    const useWallet = dto.useWallet === true;
+    if (useWallet && walletBalance <= 0) {
+      throw new BadRequestException('Your wallet is empty');
+    }
+    const split = splitPayment(total, walletBalance, useWallet);
+
+    // When the wallet pays everything the order is a "wallet" order, whatever the client sent.
+    // "wallet" is never a way to pay the REST of an order
+    let paymentMethod = dto.paymentMethod;
+    if (split.coversAll) {
+      paymentMethod = 'wallet';
+    } else if (paymentMethod === 'wallet') {
+      throw new BadRequestException(
+        'Your wallet does not cover this order: choose how to pay the rest',
+      );
+    }
+
     const isCard = paymentMethod === 'card';
+    const isWalletOnly = paymentMethod === 'wallet';
+
+    if (isCard && isBelowCardMinimum(split.remaining)) {
+      throw new BadRequestException(
+        'A card payment cannot be under $0.50. Pay the rest in cash, or do not use the wallet',
+      );
+    }
 
     let order: Order;
     try {
-      // The order and (for cash) its stock are saved together: both happen, or neither
+      // The order, its stock and its wallet money are saved together: all of them happen, or none
       order = await this.prisma.$transaction(async (tx) => {
         const created = await tx.order.create({
           data: {
@@ -184,6 +220,10 @@ export class OrdersService {
             deliveryFee,
             tax,
             total,
+            walletAmountUsed: split.walletAmount,
+            finalAmountPaid: split.remaining,
+            // An order the wallet pays in full is paid the moment it is placed
+            isPaid: isWalletOnly,
             statusHistory: [
               {
                 status: 'Placed',
@@ -194,8 +234,21 @@ export class OrdersService {
           },
         });
 
-        // Cash orders take their stock now. Card orders take it when Stripe confirms the payment
-        if (!isCard) await takeStock(tx, orderItems);
+        // Cash and wallet orders become real now: they take their stock, then their wallet money
+        // (the stock first: the same lock order everywhere). A card order takes both when Stripe
+        // confirms the payment, so a checkout that is abandoned never holds anything
+        if (!isCard) {
+          await takeStock(tx, orderItems);
+          if (split.walletAmount > 0) {
+            await debitWallet(tx, {
+              userId,
+              cents: toCents(split.walletAmount),
+              type: 'ORDER_PAYMENT',
+              reference: `order:${created.id}`,
+              orderId: created.id,
+            });
+          }
+        }
 
         return created;
       });
@@ -210,6 +263,11 @@ export class OrdersService {
           `"${sold?.name ?? 'A product in your cart'}" was just sold out`,
         );
       }
+      if (error instanceof InsufficientWalletError) {
+        throw new ConflictException(
+          'Your wallet balance changed. Please check it and try again',
+        );
+      }
       throw error;
     }
 
@@ -222,7 +280,8 @@ export class OrdersService {
             price_data: {
               currency: 'usd',
               product_data: { name: 'Order payment' },
-              unit_amount: Math.round(total * 100),
+              // Only what the wallet does not pay goes to the card
+              unit_amount: toCents(split.remaining),
             },
             quantity: 1,
           },
@@ -233,7 +292,6 @@ export class OrdersService {
 
       return { url: session.url };
     }
-
     await this.emitEvents([
       ...[...new Set(orderItems.map((item) => item.product))].map(
         (productId) => ({

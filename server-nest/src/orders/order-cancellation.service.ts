@@ -11,6 +11,8 @@ import type { Order } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StripeService } from '../stripe/stripe.service.js';
 import { restoreStock } from './stock.util.js';
+import { creditWallet } from '../wallet/wallet.ledger.js';
+import { toCents } from '../wallet/wallet-rules.js';
 
 export type CancelledBy = 'customer' | 'admin' | 'courier';
 export type RefundOutcome = 'none' | 'refunded' | 'pending' | 'failed';
@@ -29,6 +31,9 @@ const WHO: Record<CancelledBy, string> = {
   admin: 'Cancelled by the store',
   courier: 'Cancelled by the courier',
 };
+
+const OUT_OF_STOCK_NOTE =
+  'Cancelled automatically: an item sold out before the payment arrived';
 
 const toRefundStatus = (
   status: string | null,
@@ -91,8 +96,20 @@ export class OrderCancellationService {
         );
       }
 
-      // Put the items back on the shelves (a missing product or variant does not abort)
       await restoreStock(tx, order.items);
+
+      // The wallet paid a part of it: that part goes back to the wallet. A card order that is not
+      // paid cannot get here (refused above), and a card order took its wallet money when it was paid.
+      // The reference is unique: this can never credit twice
+      if (order.walletAmountUsed > 0) {
+        await creditWallet(tx, {
+          userId: order.userId,
+          cents: toCents(order.walletAmountUsed),
+          type: 'ORDER_REFUND',
+          reference: `order-refund:${order.id}`,
+          orderId: order.id,
+        });
+      }
 
       return tx.order.findUniqueOrThrow({ where: { id: order.id } });
     });
@@ -102,7 +119,13 @@ export class OrderCancellationService {
   }
 
   // Used by the Stripe webhook: the payment arrived, but the item sold out in the meantime
-  async cancelOutOfStock(orderId: string, paymentIntentId: string) {
+  // Nothing goes back to the wallet here: the transaction of the webhook was rolled back, so the
+  // wallet was never debited for this order
+  async cancelOutOfStock(
+    orderId: string,
+    paymentIntentId: string,
+    note: string = OUT_OF_STOCK_NOTE,
+  ) {
     const cancelled = await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({ where: { id: orderId } });
       if (!order) return null;
@@ -118,7 +141,7 @@ export class OrderCancellationService {
           statusHistory: appendStatusHistory(
             order.statusHistory,
             'Cancelled',
-            'Cancelled automatically: an item sold out before the payment arrived',
+            note,
           ),
         },
       });

@@ -26,7 +26,10 @@ const failureOf = (call: Promise<unknown>) =>
   );
 
 // A delivered order that was paid in cash
-const CASH_DELIVERED = { status: 'Delivered', paymentMethod: { not: 'card' } };
+const CASH_DELIVERED = {
+  status: 'Delivered',
+  paymentMethod: { notIn: ['card', 'wallet'] },
+};
 
 const SETTLEMENT_FIELDS = {
   id: true,
@@ -143,7 +146,7 @@ describe('getOverview', () => {
     expect(prisma.order.groupBy).toHaveBeenCalledWith({
       by: ['deliveryPartnerId'],
       where: { deliveryPartnerId: { not: null }, ...CASH_DELIVERED },
-      _sum: { total: true },
+      _sum: { total: true, walletAmountUsed: true },
       _count: { _all: true },
     });
     expect(prisma.cashSettlement.groupBy).toHaveBeenCalledWith({
@@ -586,7 +589,7 @@ describe('getMyCash', () => {
         ...CASH_DELIVERED,
         deliveredAt: { gte: new Date('2026-10-30T22:00:00.000Z') }, // Saturday Oct 31 00:00 in Cairo
       },
-      select: { total: true, deliveredAt: true },
+      select: { total: true, walletAmountUsed: true, deliveredAt: true },
     });
     expect(prisma.cashSettlement.findMany).toHaveBeenCalledWith({
       where: { partnerId: 'd1', voidedAt: null },

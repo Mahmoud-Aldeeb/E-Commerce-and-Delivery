@@ -13,6 +13,8 @@ import {
   IsLongitude,
   IsOptional,
   MaxLength,
+  IsBoolean,
+  IsIn,
 } from 'class-validator';
 
 const ADDRESS_MESSAGE = 'Shipping address is incomplete';
@@ -96,11 +98,15 @@ export class CreateOrderDto {
 
   @ApiProperty({
     example: 'card',
+    enum: ['card', 'cash', 'wallet'],
     description:
-      '"card" starts a Stripe checkout; any other value places the order directly',
+      '"card" starts a Stripe checkout and "cash" is paid to the courier. "wallet" is only for an order the wallet pays in full: the server sets it itself when `useWallet` covers the whole order',
   })
   @IsString({ message: 'Payment method is required' })
   @IsNotEmpty({ message: 'Payment method is required' })
+  @IsIn(['card', 'cash', 'wallet'], {
+    message: 'Payment method must be card, cash or wallet',
+  })
   paymentMethod: string;
 
   @ApiPropertyOptional({
@@ -112,4 +118,13 @@ export class CreateOrderDto {
   @IsString()
   @MaxLength(32)
   couponCode?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description:
+      'Pay with the store wallet first. The server works out how much it pays (never more than the total): the rest is paid the way paymentMethod says',
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'useWallet must be true or false' })
+  useWallet?: boolean;
 }

@@ -34,3 +34,9 @@ export function splitPayment(
     coversAll: walletCents > 0 && remainingCents === 0,
   };
 }
+
+// The smallest card payment Stripe takes in USD is $0.50: a card part under it cannot be charged
+export const MIN_CARD_PAYMENT = 0.5;
+
+export const isBelowCardMinimum = (amount: number): boolean =>
+  amount > 0 && toCents(amount) < toCents(MIN_CARD_PAYMENT);

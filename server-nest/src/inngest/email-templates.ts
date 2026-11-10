@@ -123,6 +123,8 @@ export interface OrderEmailData {
   tax: number;
   total: number;
   paymentMethod: string;
+  /** What the store wallet paid (missing or 0: nothing) */
+  walletAmountUsed?: number;
   address: {
     label: string;
     address: string;
@@ -154,17 +156,30 @@ export function orderConfirmationEmail(order: OrderEmailData): string {
           <td style="padding: 4px 0; font-size: ${strong ? 16 : 14}px; text-align: right; ${strong ? 'font-weight: 700; color: #111827;' : 'color: #374151;'}">${value}</td>
         </tr>`;
 
-  const payment = paidByCard
-    ? `<strong>Paid by card.</strong> Nothing more to pay.`
-    : `<strong>Pay ${money(order.total)} in cash</strong> to the courier when your order arrives.`;
+  // What the store wallet paid (it may be nothing), and what is left for the card or for the courier
+  const wallet = order.walletAmountUsed ?? 0;
+  const remaining = Math.max(Math.round((order.total - wallet) * 100) / 100, 0);
+
+  const payment =
+    order.paymentMethod === 'wallet'
+      ? `<strong>Paid from your store wallet.</strong> Nothing more to pay.`
+      : paidByCard
+        ? wallet > 0
+          ? `<strong>${money(wallet)} from your store wallet and ${money(remaining)} by card.</strong> Nothing more to pay.`
+          : `<strong>Paid by card.</strong> Nothing more to pay.`
+        : wallet > 0
+          ? `<strong>${money(wallet)} was paid from your store wallet. Pay ${money(remaining)} in cash</strong> to the courier when your order arrives.`
+          : `<strong>Pay ${money(order.total)} in cash</strong> to the courier when your order arrives.`;
 
   const phone = order.customerPhone
     ? `<p style="margin: 8px 0 0; font-size: 13px; color: #6b7280;">The courier may call you on <strong>${escapeHtml(order.customerPhone)}</strong>.</p>`
     : '';
 
-  const cancelNote = paidByCard
-    ? 'You can cancel from My orders until the order is packed, and a card payment is refunded in full.'
-    : 'You can cancel from My orders until the order is packed.';
+  const cancelNote =
+    (paidByCard
+      ? 'You can cancel from My orders until the order is packed, and a card payment is refunded in full.'
+      : 'You can cancel from My orders until the order is packed.') +
+    (wallet > 0 ? ' What your wallet paid goes back to your wallet.' : '');
 
   return `
   <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: auto; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden;">
@@ -179,12 +194,13 @@ export function orderConfirmationEmail(order: OrderEmailData): string {
       <table width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">${itemRows}</table>
 
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px;">
-        ${totalRow('Subtotal', money(order.subtotal))}
-        ${order.discount > 0 ? totalRow('Discount', `-${money(order.discount)}`) : ''}
-        ${totalRow('Delivery', order.deliveryFee === 0 ? 'Free' : money(order.deliveryFee))}
-        ${totalRow('Tax', money(order.tax))}
-        ${totalRow('Total', money(order.total), true)}
-      </table>
+  ${totalRow('Subtotal', money(order.subtotal))}
+  ${order.discount > 0 ? totalRow('Discount', `-${money(order.discount)}`) : ''}
+  ${totalRow('Delivery', order.deliveryFee === 0 ? 'Free' : money(order.deliveryFee))}
+  ${totalRow('Tax', money(order.tax))}
+  ${wallet > 0 ? totalRow('Paid from your wallet', `-${money(wallet)}`) : ''}
+  ${totalRow('Total', money(order.total), true)}
+</table>
 
       <div style="margin-top: 20px; background: #f9fafb; border-radius: 12px; padding: 16px;">
         <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase;">Payment</p>

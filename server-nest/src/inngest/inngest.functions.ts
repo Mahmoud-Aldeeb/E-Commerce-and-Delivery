@@ -252,6 +252,7 @@ export function createInngestFunctions({ prisma, mail, config }: InngestDeps) {
             deliveryFee: order.deliveryFee ?? 0,
             tax: order.tax ?? 0,
             total: order.total,
+            walletAmountUsed: order.walletAmountUsed,
             paymentMethod: order.paymentMethod,
             address: {
               label: text(address.label),

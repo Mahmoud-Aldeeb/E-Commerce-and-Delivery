@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { splitPayment, toCents, toDollars } from './wallet-rules.js';
+import {
+  isBelowCardMinimum,
+  splitPayment,
+  toCents,
+  toDollars,
+} from './wallet-rules.js';
 
 describe('toCents', () => {
   it.each([
@@ -70,5 +75,18 @@ describe('splitPayment', () => {
       remaining: 0,
       coversAll: true,
     });
+  });
+});
+
+describe('isBelowCardMinimum', () => {
+  it.each([
+    [0, false], // nothing is left to pay by card
+    [0.01, true],
+    [0.49, true],
+    [0.5, false],
+    [0.51, false],
+    [23.59, false],
+  ])('says %j dollars is below the card minimum: %j', (amount, expected) => {
+    expect(isBelowCardMinimum(amount)).toBe(expected);
   });
 });

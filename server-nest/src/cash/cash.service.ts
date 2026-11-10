@@ -22,11 +22,11 @@ import {
 import { CashRangeQueryDto } from './dto/cash-range-query.dto.js';
 import { RecordSettlementDto } from './dto/record-settlement.dto.js';
 
-// A cash order that was delivered: its courier collected the total.
-// "Cash" is every method that is not the card (the same rule as the web app)
+// A cash order that was delivered: its courier collected what the store wallet did NOT pay.
+// Cash is every method except the card and the wallet (an order the wallet paid in full has no cash)
 const CASH_DELIVERED = {
   status: 'Delivered',
-  paymentMethod: { not: 'card' },
+  paymentMethod: { notIn: ['card', 'wallet'] },
 } satisfies Prisma.OrderWhereInput;
 
 const SETTLEMENT_FIELDS = {
@@ -43,6 +43,12 @@ const FUTURE_TOLERANCE_MS = 5 * 60_000; // two clocks never agree exactly
 
 const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
+// What the courier took from the hand of the customer: the total minus what the wallet paid
+const collectedOf = (
+  total: number | null | undefined,
+  walletUsed: number | null | undefined,
+) => fromCents(toCents(total ?? 0) - toCents(walletUsed ?? 0));
+
 @Injectable()
 export class CashService {
   constructor(private prisma: PrismaService) {}
@@ -52,14 +58,17 @@ export class CashService {
     const [collected, settled] = await Promise.all([
       this.prisma.order.aggregate({
         where: { deliveryPartnerId: partnerId, ...CASH_DELIVERED },
-        _sum: { total: true },
+        _sum: { total: true, walletAmountUsed: true },
       }),
       this.prisma.cashSettlement.aggregate({
         where: { partnerId, voidedAt: null },
         _sum: { amount: true },
       }),
     ]);
-    return makeBalance(collected._sum.total ?? 0, settled._sum.amount ?? 0);
+    return makeBalance(
+      collectedOf(collected._sum.total, collected._sum.walletAmountUsed),
+      settled._sum.amount ?? 0,
+    );
   }
 
   private async ensurePartner(partnerId: string) {
@@ -86,7 +95,7 @@ export class CashService {
       this.prisma.order.groupBy({
         by: ['deliveryPartnerId'],
         where: { deliveryPartnerId: { not: null }, ...CASH_DELIVERED },
-        _sum: { total: true },
+        _sum: { total: true, walletAmountUsed: true },
         _count: { _all: true },
       }),
       this.prisma.cashSettlement.groupBy({
@@ -108,7 +117,10 @@ export class CashService {
       return {
         ...partner,
         cashOrders: cash?._count._all ?? 0,
-        ...makeBalance(cash?._sum.total ?? 0, handed?._sum.amount ?? 0),
+        ...makeBalance(
+          collectedOf(cash?._sum.total, cash?._sum.walletAmountUsed),
+          handed?._sum.amount ?? 0,
+        ),
         lastSettledAt: handed?._max.settledAt ?? null,
       };
     });
@@ -150,6 +162,7 @@ export class CashService {
         select: {
           id: true,
           total: true,
+          walletAmountUsed: true,
           deliveredAt: true,
           user: { select: { name: true } },
         },
@@ -170,7 +183,8 @@ export class CashService {
         ? [
             {
               id: order.id,
-              total: order.total,
+              // What the courier collected on this order (the wallet part is not cash)
+              total: collectedOf(order.total, order.walletAmountUsed),
               deliveredAt: order.deliveredAt,
               customer: order.user.name,
             },
@@ -273,7 +287,7 @@ export class CashService {
           ...CASH_DELIVERED,
           deliveredAt: { gte: startOfDay(weekStart) },
         },
-        select: { total: true, deliveredAt: true },
+        select: { total: true, walletAmountUsed: true, deliveredAt: true },
       }),
       this.prisma.cashSettlement.findMany({
         where: { partnerId, voidedAt: null },
@@ -285,7 +299,12 @@ export class CashService {
 
     const lines = recent.flatMap((order) =>
       order.deliveredAt
-        ? [{ total: order.total, deliveredAt: order.deliveredAt }]
+        ? [
+            {
+              total: collectedOf(order.total, order.walletAmountUsed),
+              deliveredAt: order.deliveredAt,
+            },
+          ]
         : [],
     );
     const todayLines = lines.filter(

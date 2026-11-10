@@ -17,7 +17,14 @@ import {
   takeStock,
   type StoredItem,
 } from '../orders/stock.util.js';
+import {
+  debitWallet,
+  InsufficientWalletError,
+} from '../wallet/wallet.ledger.js';
+import { toCents } from '../wallet/wallet-rules.js';
 
+const WALLET_SHORT_NOTE =
+  'Cancelled automatically: the wallet balance was no longer enough when the payment arrived';
 @Injectable()
 export class StripeWebhookService {
   private readonly logger = new Logger(StripeWebhookService.name);
@@ -119,18 +126,38 @@ export class StripeWebhookService {
         const order = await tx.order.findUniqueOrThrow({
           where: { id: orderId },
         });
+
         await takeStock(tx, this.toItems(order.items));
+
+        // The wallet pays its part now, with the stock: an abandoned card checkout never holds money
+        if (order.walletAmountUsed > 0) {
+          await debitWallet(tx, {
+            userId: order.userId,
+            cents: toCents(order.walletAmountUsed),
+            type: 'ORDER_PAYMENT',
+            reference: `order:${order.id}`,
+            orderId: order.id,
+          });
+        }
         return order;
       });
     } catch (error) {
-      if (!(error instanceof InsufficientStockError)) throw error;
-
       // The transaction was rolled back, so the order is still unpaid in the database.
       // The customer HAS paid: cancel the order and give the money back
-      await this.cancellation.cancelOutOfStock(orderId, paymentIntent.id);
-      return;
+      if (error instanceof InsufficientStockError) {
+        await this.cancellation.cancelOutOfStock(orderId, paymentIntent.id);
+        return;
+      }
+      if (error instanceof InsufficientWalletError) {
+        await this.cancellation.cancelOutOfStock(
+          orderId,
+          paymentIntent.id,
+          WALLET_SHORT_NOTE,
+        );
+        return;
+      }
+      throw error;
     }
-
     if (!paidOrder) {
       this.logger.log(
         `Order ${orderId} was already processed (or does not exist)`,
