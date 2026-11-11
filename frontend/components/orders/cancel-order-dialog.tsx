@@ -20,7 +20,16 @@ export default function CancelOrderDialog({ order, onClose }: { order: Order; on
   const [choice, setChoice] = useState(REASONS[0]);
   const [details, setDetails] = useState("");
 
-  const isCard = order.paymentMethod === "card";
+  // What goes back where: the card gets what it paid, and the wallet gets what it paid
+  const wallet = order.walletAmountUsed ?? 0;
+  const cardPart = order.paymentMethod === "card" ? Math.round((order.total - wallet) * 100) / 100 : 0;
+  const refundText = [
+    cardPart > 0 &&
+    `${formatPrice(cardPart)} goes back to the card you paid with. Banks usually take 5 to 10 business days to show it.`,
+    wallet > 0 && `${formatPrice(wallet)} goes back to your store wallet at once.`,
+  ]
+    .filter(Boolean)
+    .join(" ");
   // The reason is optional: "Other" without details sends no reason
   const reason = choice === "Other" ? details.trim() : choice;
 
@@ -35,9 +44,7 @@ export default function CancelOrderDialog({ order, onClose }: { order: Order; on
         <p className="text-sm text-ink-soft">Order {orderNumber(order.id)}.</p>
 
         <p className="mt-3 rounded-control bg-canvas px-3 py-2 text-sm text-ink-soft">
-          {isCard
-            ? `You will get ${formatPrice(order.total)} back on the card you paid with. Banks usually take 5 to 10 business days to show it.`
-            : "You have not paid anything, so nothing is charged."}
+          {refundText || "You have not paid anything, so nothing is charged."}
         </p>
 
         <fieldset className="mt-4">

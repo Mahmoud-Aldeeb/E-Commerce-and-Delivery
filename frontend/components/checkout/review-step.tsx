@@ -2,14 +2,21 @@ import Image from "next/image";
 import { CheckIcon, ChevronLeftIcon, Loader2Icon } from "lucide-react";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/components/checkout/payment-methods";
 import type { Step } from "@/components/checkout/step-indicator";
-import { formatAddress, formatPrice } from "@/lib/format";
 import { keyOf, lineImage, variantLabel } from "@/lib/cart-line";
+import { formatAddress, formatPrice } from "@/lib/format";
 import type { calculateTotals } from "@/lib/pricing";
 import type { Address, CartItem } from "@/types";
 
 interface ReviewStepProps {
   address: Address;
+  /** How the rest is paid (it does not matter when the wallet pays everything) */
   paymentMethod: PaymentMethod;
+  /** What the store wallet pays (0 = it is not used) */
+  walletAmount: number;
+  /** What is left to pay by card or in cash */
+  toPay: number;
+  /** The wallet pays the whole order */
+  coversAll: boolean;
   items: CartItem[];
   totals: ReturnType<typeof calculateTotals>;
   busy: boolean;
@@ -23,6 +30,9 @@ interface ReviewStepProps {
 export default function ReviewStep({
   address,
   paymentMethod,
+  walletAmount,
+  toPay,
+  coversAll,
   items,
   totals,
   busy,
@@ -32,7 +42,13 @@ export default function ReviewStep({
   onPlaceOrder,
 }: ReviewStepProps) {
   const method = PAYMENT_METHODS.find((item) => item.value === paymentMethod);
-  const isCard = paymentMethod === "card";
+  const isCard = paymentMethod === "card" && !coversAll;
+
+  const paymentText = coversAll
+    ? `Store wallet (${formatPrice(walletAmount)})`
+    : walletAmount > 0
+      ? `Store wallet ${formatPrice(walletAmount)} + ${method?.label} ${formatPrice(toPay)}`
+      : method?.label;
 
   return (
     <section className="card animate-fade-in p-6">
@@ -62,7 +78,7 @@ export default function ReviewStep({
               Change
             </button>
           </div>
-          <p className="text-sm text-ink-soft">{method?.label}</p>
+          <p className="text-sm text-ink-soft">{paymentText}</p>
         </div>
       </div>
 
@@ -79,9 +95,7 @@ export default function ReviewStep({
             />
             <div className="min-w-0 flex-1">
               <p className="line-clamp-1 text-sm font-medium">{item.product.name}</p>
-              {item.variant && (
-                <p className="text-xs text-ink-soft">{variantLabel(item.variant)}</p>
-              )}
+              {item.variant && <p className="text-xs text-ink-soft">{variantLabel(item.variant)}</p>}
               <p className="text-xs text-ink-muted">
                 {item.quantity} × {formatPrice(item.product.price)}
               </p>
@@ -116,7 +130,9 @@ export default function ReviewStep({
             ? isCard
               ? "Taking you to payment..."
               : "Placing your order..."
-            : `Place order · ${formatPrice(totals.total)}`}
+            : coversAll
+              ? "Place order · paid from your wallet"
+              : `Place order · ${formatPrice(walletAmount > 0 ? toPay : totals.total)}`}
         </button>
       </div>
     </section>

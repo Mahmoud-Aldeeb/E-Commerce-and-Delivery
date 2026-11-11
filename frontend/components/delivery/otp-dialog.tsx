@@ -4,14 +4,15 @@ import { useState } from "react";
 import Modal from "@/components/ui/modal";
 import { getErrorMessage } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
-import { orderNumber } from "@/lib/orders";
+import { cashToCollect, orderNumber } from "@/lib/orders";
 import { useCompleteDelivery } from "@/lib/queries/delivery";
 import type { Order } from "@/types";
 
 export default function OtpDialog({ order, onClose }: { order: Order; onClose: () => void }) {
   const complete = useCompleteDelivery();
   const [otp, setOtp] = useState("");
-  const isCash = order.paymentMethod !== "card";
+  // const isCash = order.paymentMethod !== "card";
+  const cash = cashToCollect(order);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,9 +28,9 @@ export default function OtpDialog({ order, onClose }: { order: Order; onClose: (
           tracking page.
         </p>
 
-        {isCash && (
+        {cash > 0 && (
           <p className="mt-3 rounded-control bg-warning-soft px-3 py-2 text-sm font-medium text-warning">
-            Collect {formatPrice(order.total)} in cash before you confirm.
+            Collect {formatPrice(cash)} in cash before you confirm.
           </p>
         )}
 

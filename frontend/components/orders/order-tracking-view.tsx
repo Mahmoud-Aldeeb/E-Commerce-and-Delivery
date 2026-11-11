@@ -207,7 +207,7 @@ export default function OrderTrackingView({ id }: { id: string }) {
               <h2 className="text-sm font-semibold">Need to cancel?</h2>
               <p className="mt-1 text-xs text-ink-muted">
                 You can cancel until the order is packed.
-                {order.paymentMethod === "card" && " You get a full refund."}
+                {(order.paymentMethod === "card" || order.paymentMethod === "wallet") && " You get a full refund."}
               </p>
               <button
                 onClick={() => setCancelling(true)}

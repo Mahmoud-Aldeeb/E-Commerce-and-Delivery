@@ -7,6 +7,10 @@ interface OrderSummaryProps {
   totals: ReturnType<typeof calculateTotals>;
   /** The coupon that gives the discount, shown next to it */
   couponCode?: string | null;
+  /** What the store wallet pays of the total (0 = it is not used) */
+  walletAmount?: number;
+  /** What is left to pay by card or in cash */
+  toPay?: number;
   /** Lines of the cart that are NOT part of this order */
   leftInCart?: number;
   /** Opens the cart, to change what is ticked */
@@ -19,6 +23,8 @@ export default function OrderSummary({
   itemCount,
   totals,
   couponCode,
+  walletAmount = 0,
+  toPay = 0,
   leftInCart = 0,
   onEditCart,
   children,
@@ -56,6 +62,18 @@ export default function OrderSummary({
           <dt>Total</dt>
           <dd>{formatPrice(totals.total)}</dd>
         </div>
+        {walletAmount > 0 && (
+          <>
+            <div className="flex justify-between">
+              <dt className="text-ink-soft">Paid from your wallet</dt>
+              <dd className="text-success">-{formatPrice(walletAmount)}</dd>
+            </div>
+            <div className="flex justify-between font-semibold">
+              <dt>Left to pay</dt>
+              <dd>{formatPrice(toPay)}</dd>
+            </div>
+          </>
+        )}
       </dl>
 
       {children && <div className="mt-4 border-t border-line pt-4">{children}</div>}

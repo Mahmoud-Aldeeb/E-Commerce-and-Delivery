@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import OrderStatusBadge from "@/components/orders/order-status-badge";
 import { formatAddress, formatDateTime, formatPrice } from "@/lib/format";
-import { itemCount, orderNumber, toMapPoint } from "@/lib/orders";
+import { cashToCollect, itemCount, orderNumber, toMapPoint } from "@/lib/orders";
 import type { DeliveryTab } from "@/lib/queries/delivery";
 import type { Order } from "@/types";
 
@@ -40,7 +40,9 @@ export default function DeliveryCard({
 }: DeliveryCardProps) {
   const customer = order.user;
   const advanceLabel = ADVANCE_LABELS[order.status];
-  const isCash = order.paymentMethod !== "card";
+  // What he takes from the hand of the customer: the wallet part is not cash
+  const cash = cashToCollect(order);
+  const isCash = order.paymentMethod !== "card" && order.paymentMethod !== "wallet";
   const count = itemCount(order);
 
   // Exact coordinates when the order has them, the written address otherwise
@@ -97,7 +99,12 @@ export default function DeliveryCard({
 
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {isCash ? (
-            <span className="badge badge-warning">Collect {formatPrice(order.total)} in cash</span>
+            <span className="badge badge-warning">
+              Collect {formatPrice(cash)} in cash
+              {(order.walletAmountUsed ?? 0) > 0 && ` (the wallet paid ${formatPrice(order.walletAmountUsed)})`}
+            </span>
+          ) : order.paymentMethod === "wallet" ? (
+            <span className="badge badge-success">Paid from the store wallet</span>
           ) : (
             <span className={`badge ${order.isPaid ? "badge-success" : "badge-warning"}`}>
               {order.isPaid ? "Paid online" : "Card payment pending"}

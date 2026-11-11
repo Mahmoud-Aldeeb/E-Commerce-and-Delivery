@@ -43,7 +43,7 @@ const CONFIRMATIONS: Record<string, { title: string; description: string; label:
   Cancelled: {
     title: "Cancel this order?",
     description:
-      "The items go back to stock, and a card payment is refunded in full automatically. The customer sees the order as cancelled.",
+      "The items go back to stock, a card payment is refunded in full automatically, and what the wallet paid goes back to the wallet of the customer. The customer sees the order as cancelled.",
     label: "Cancel order",
     danger: true,
   },
@@ -205,8 +205,8 @@ export default function OrdersView() {
               onClick={() => changeTab(item.key)}
               aria-pressed={tab === item.key}
               className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${tab === item.key
-                  ? "bg-primary-700 text-white"
-                  : "bg-surface text-ink-soft ring-1 ring-line hover:bg-canvas"
+                ? "bg-primary-700 text-white"
+                : "bg-surface text-ink-soft ring-1 ring-line hover:bg-canvas"
                 }`}
             >
               {item.label}
@@ -292,6 +292,9 @@ export default function OrdersView() {
                         <p className="font-medium">{formatPrice(order.total)}</p>
                         <p className="text-xs text-ink-muted">
                           {itemCount(order)} items · {paymentLabel(order.paymentMethod)}
+                          {order.paymentMethod !== "wallet" &&
+                            (order.walletAmountUsed ?? 0) > 0 &&
+                            ` · wallet ${formatPrice(order.walletAmountUsed)}`}
                         </p>
                       </td>
                       <td className="px-5 py-3">

@@ -129,6 +129,8 @@ export interface Order {
   liveLocation?: { lat: number; lng: number; updatedAt?: string } | null;
   eta?: DeliveryEta | null;
   isPaid: boolean | null;
+  walletAmountUsed?: number; // what the store wallet paid (dollars). 0 or missing = nothing
+  finalAmountPaid?: number | null; // total - walletAmountUsed. null on orders placed before the wallet
   refundStatus?: "refunded" | "pending" | "failed" | null; // card orders: what happened to the money
   createdAt: string;
   updatedAt: string;

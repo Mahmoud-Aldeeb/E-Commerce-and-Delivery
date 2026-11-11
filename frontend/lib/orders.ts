@@ -19,7 +19,24 @@ export const awaitingPayment = (
 ): boolean => order.paymentMethod === "card" && !order.isPaid;
 
 export const paymentLabel = (method: string): string =>
-  method === "card" ? "Card" : "Cash on delivery";
+  method === "card"
+    ? "Card"
+    : method === "wallet"
+      ? "Store wallet"
+      : "Cash on delivery";
+
+// What the courier takes from the hand of the customer: nothing for a card order or for an order the
+// wallet paid in full, and for a cash order the total minus what the wallet paid (in cents)
+export const cashToCollect = (
+  order: Pick<Order, "paymentMethod" | "total" | "walletAmountUsed">,
+): number => {
+  if (order.paymentMethod === "card" || order.paymentMethod === "wallet")
+    return 0;
+  const cents =
+    Math.round(order.total * 100) -
+    Math.round((order.walletAmountUsed ?? 0) * 100);
+  return Math.max(cents, 0) / 100;
+};
 
 // Total quantity, not the number of lines: 2 lines of 3 each = 6 items
 export const itemCount = (order: Pick<Order, "items">): number =>

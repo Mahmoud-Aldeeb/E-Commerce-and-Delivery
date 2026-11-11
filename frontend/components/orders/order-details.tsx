@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { MapPinIcon } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { awaitingPayment, paymentLabel } from "@/lib/orders";
+import { awaitingPayment, cashToCollect, paymentLabel } from "@/lib/orders";
 import type { Order } from "@/types";
 import Link from "next/link";
 
@@ -85,11 +85,23 @@ export function OrderItemsCard({ order }: { order: Order }) {
           <dt>Total</dt>
           <dd>{formatPrice(order.total)}</dd>
         </div>
+        {(order.walletAmountUsed ?? 0) > 0 && (
+          <div className="flex justify-between">
+            <dt className="text-ink-soft">Paid from your wallet</dt>
+            <dd className="text-success">-{formatPrice(order.walletAmountUsed)}</dd>
+          </div>
+        )}
+        {(order.walletAmountUsed ?? 0) > 0 && cashToCollect(order) > 0 && (
+          <div className="flex justify-between">
+            <dt className="text-ink-soft">To pay the courier</dt>
+            <dd className="font-medium">{formatPrice(cashToCollect(order))}</dd>
+          </div>
+        )}
         <div className="flex items-center justify-between pt-1">
           <dt className="text-ink-soft">Payment</dt>
           <dd className="flex items-center gap-2">
             {paymentLabel(order.paymentMethod)}
-            {order.paymentMethod === "card" && (
+            {(order.paymentMethod === "card" || order.paymentMethod === "wallet") && (
               <span className={`badge ${awaitingPayment(order) ? "badge-warning" : "badge-success"}`}>
                 {awaitingPayment(order) ? "Awaiting payment" : "Paid"}
               </span>

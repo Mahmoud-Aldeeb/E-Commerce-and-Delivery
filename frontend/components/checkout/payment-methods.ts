@@ -23,3 +23,7 @@ export const PAYMENT_METHODS: {
     icon: BanknoteIcon,
   },
 ];
+
+// What an ORDER is paid with. The wallet pays an order alone only when it covers the whole total:
+// the customer never picks "wallet" as a method, the toggle of the payment step does it
+export type OrderPaymentMethod = PaymentMethod | "wallet";

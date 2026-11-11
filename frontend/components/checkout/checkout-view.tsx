@@ -17,10 +17,12 @@ import EmptyState from "@/components/ui/empty-state";
 import PageLoader from "@/components/ui/page-loader";
 import { useCart } from "@/context/cart-context";
 import api, { getErrorMessage } from "@/lib/api";
+import { isBelowCardMinimum, splitPayment } from "@/lib/payment";
 import { calculateTotals } from "@/lib/pricing";
 import { addressesOptions } from "@/lib/queries/addresses";
 import { couponKeys, useCheckoutCoupon } from "@/lib/queries/coupons";
 import { productKeys } from "@/lib/queries/products";
+import { walletBalanceOptions, walletKeys } from "@/lib/queries/wallet";
 import type { CartItem, Order } from "@/types";
 import { useAuth } from "@/context/auth-context";
 
@@ -47,10 +49,14 @@ export default function CheckoutView() {
   const hasPhone = Boolean(user?.phone);
   // The discount of the coupon, worked out by the API for the items that are ticked right now
   const coupon = useCheckoutCoupon(selectedItems);
+  // The checkout never depends on the wallet: if it cannot be read, it is simply not offered
+  const walletQuery = useQuery({ ...walletBalanceOptions(), enabled: Boolean(user) });
 
   const [step, setStep] = useState<Step>("address");
   const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  // The wallet is used only when the customer asks for it
+  const [useWallet, setUseWallet] = useState(false);
   // Set right after a cash order: shows a loader instead of a flash of "empty cart"
   const [placed, setPlaced] = useState(false);
 
@@ -65,6 +71,15 @@ export default function CheckoutView() {
 
   // Only the ticked lines are ordered, so only they are priced
   const totals = calculateTotals(selectedTotal, coupon.discount);
+
+  // How the wallet and the rest share the total. Derived on every render: a coupon, or a change of
+  // what is ticked, moves the numbers without any effect to keep them in step
+  const walletBalance = walletQuery.data ?? 0;
+  const walletOn = useWallet && walletBalance > 0;
+  const split = splitPayment(totals.total, walletBalance, walletOn);
+  // A card cannot take a rest under $0.50: cash is shown as chosen instead, and the page says why
+  const cardTooSmall = !split.coversAll && isBelowCardMinimum(split.remaining);
+  const method: PaymentMethod = cardTooSmall && paymentMethod === "card" ? "cash" : paymentMethod;
 
   // A step opens only when the steps before it are complete
   const reachable: Record<Step, boolean> = {
@@ -84,13 +99,17 @@ export default function CheckoutView() {
         : null;
 
   const placeOrder = useMutation({
-    // What is ordered is passed in (not read inside): it is exactly what is removed afterwards
+    // What is ordered and how it is paid are passed in (not read inside): it is exactly what was shown
     mutationFn: async ({
       orderItems,
       couponCode,
+      method: orderMethod,
+      useWallet: orderUsesWallet,
     }: {
       orderItems: CartItem[];
       couponCode: string | null;
+      method: string;
+      useWallet: boolean;
     }) => {
       if (!address) throw new Error("No delivery address");
 
@@ -100,7 +119,8 @@ export default function CheckoutView() {
           quantity: item.quantity,
           // A product with sizes/colours is ordered with the one that was chosen
           ...(item.variant ? { variant: item.variant.id } : {}),
-        })), shippingAddress: {
+        })),
+        shippingAddress: {
           label: address.label,
           address: address.address,
           city: address.city,
@@ -109,7 +129,9 @@ export default function CheckoutView() {
           lat: address.lat,
           lng: address.lng,
         },
-        paymentMethod,
+        paymentMethod: orderMethod,
+        // Only the wish goes: the API works out how much the wallet pays, from its own balance
+        ...(orderUsesWallet ? { useWallet: true } : {}),
         // Only the code goes: the API works the discount out again on its own
         ...(couponCode ? { couponCode } : {}),
       });
@@ -132,16 +154,19 @@ export default function CheckoutView() {
           quantity: item.quantity,
         })),
       );
-      // Stock changed and there is a new order: cached lists are outdated
+      // Stock and the wallet changed and there is a new order: cached data is outdated
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: walletKeys.all });
       toast.success("Order placed!");
       router.replace(`/orders/${data.order.id}`);
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
-      // The coupon may be the reason (it expired, or its limit was reached): check it again
+      // The coupon may be the reason (it expired, or its limit was reached): check it again.
+      // The wallet may be too: the balance can have changed since the page opened
       queryClient.invalidateQueries({ queryKey: couponKeys.all });
+      queryClient.invalidateQueries({ queryKey: walletKeys.all });
     },
   });
 
@@ -223,8 +248,14 @@ export default function CheckoutView() {
 
           {activeStep === "payment" && (
             <PaymentStep
-              value={paymentMethod}
+              value={method}
               onChange={setPaymentMethod}
+              total={totals.total}
+              walletBalance={walletBalance}
+              useWallet={walletOn}
+              onUseWalletChange={setUseWallet}
+              split={split}
+              cardTooSmall={cardTooSmall}
               onBack={() => setStep("address")}
               onContinue={() => setStep("review")}
             />
@@ -233,7 +264,10 @@ export default function CheckoutView() {
           {activeStep === "review" && address && (
             <ReviewStep
               address={address}
-              paymentMethod={paymentMethod}
+              paymentMethod={method}
+              walletAmount={split.walletAmount}
+              toPay={split.remaining}
+              coversAll={split.coversAll}
               items={selectedItems}
               totals={totals}
               busy={busy}
@@ -244,6 +278,9 @@ export default function CheckoutView() {
                 placeOrder.mutate({
                   orderItems: selectedItems,
                   couponCode: coupon.status === "applied" ? coupon.code : null,
+                  // A wallet that pays everything makes the order a "wallet" order: the API does the same
+                  method: split.coversAll ? "wallet" : method,
+                  useWallet: walletOn,
                 })
               }
             />
@@ -254,6 +291,8 @@ export default function CheckoutView() {
           itemCount={selectedCount}
           totals={totals}
           couponCode={coupon.discount > 0 ? coupon.code : null}
+          walletAmount={split.walletAmount}
+          toPay={split.remaining}
           leftInCart={items.length - selectedItems.length}
           onEditCart={() => setIsCartOpen(true)}
         >
