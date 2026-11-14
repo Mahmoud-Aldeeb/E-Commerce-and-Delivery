@@ -28,6 +28,7 @@ import {
 import { GetAdminReturnsQueryDto } from './dto/get-admin-returns-query.dto.js';
 import { AuthGuard } from '../common/guards/auth/auth.guard.js';
 import { AdminGuard } from '../common/guards/admin/admin.guard.js';
+import { AnalyticsQueryDto } from '../admin/dto/analytics-query.dto.js';
 
 @ApiTags('Admin')
 @ApiBearerAuth()
@@ -38,6 +39,17 @@ import { AdminGuard } from '../common/guards/admin/admin.guard.js';
 @Controller('admin/returns')
 export class AdminReturnsController {
   constructor(private readonly returnsService: ReturnsService) {}
+
+  // Declared before any route with an :id, so "insights" is never read as an id
+  @Get('insights')
+  @ApiOperation({
+    summary:
+      'Returns indicators for the analytics page: the return rate and the products that come back most',
+  })
+  @ApiOkResponse({ description: '{ range, truncated, summary, products }' })
+  getInsights(@Query() query: AnalyticsQueryDto) {
+    return this.returnsService.getInsights(query);
+  }
 
   @Get()
   @ApiOperation({

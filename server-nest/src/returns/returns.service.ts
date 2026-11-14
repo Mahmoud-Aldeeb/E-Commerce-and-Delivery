@@ -46,6 +46,23 @@ import {
   type ReturnTab,
 } from './return-tabs.js';
 
+import { AnalyticsQueryDto } from '../admin/dto/analytics-query.dto.js';
+import {
+  addDays,
+  dayKey,
+  startOfDay,
+  STORE_TIME_ZONE,
+} from '../cash/cash-rules.js';
+import {
+  INSIGHT_PRODUCTS_LIMIT,
+  MAX_INSIGHT_ORDERS,
+  MAX_INSIGHT_RETURNS,
+  rankReturnedProducts,
+  returnRate,
+  sumUnits,
+  unitsByProduct,
+} from './return-insights.js';
+
 // What the admin sees with a return: its order (the money) and its customer
 const ADMIN_INCLUDE = {
   order: {
@@ -475,6 +492,74 @@ export class ReturnsService {
       );
     }
     return this.adminView(id);
+  }
+
+  // GET /api/admin/returns/insights?days=30: how many items come back, and which products
+  async getInsights({ days = 30 }: AnalyticsQueryDto) {
+    // The last `days` calendar days of the store, today included (the same period as the analytics page)
+    const to = dayKey(new Date());
+    const from = addDays(to, -(days - 1));
+    const start = startOfDay(from);
+    const end = startOfDay(addDays(to, 1));
+
+    const [requested, completed, delivered] = await Promise.all([
+      this.prisma.returnRequest.findMany({
+        where: { createdAt: { gte: start, lt: end } },
+        select: { status: true, items: true },
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        take: MAX_INSIGHT_RETURNS + 1, // one more than the limit: it tells there is more
+      }),
+      this.prisma.returnRequest.aggregate({
+        where: { status: 'COMPLETED', completedAt: { gte: start, lt: end } },
+        _sum: { refundAmount: true },
+        _count: { _all: true },
+      }),
+      this.prisma.order.findMany({
+        where: { status: 'Delivered', deliveredAt: { gte: start, lt: end } },
+        select: { items: true },
+        orderBy: [{ deliveredAt: 'desc' }, { id: 'asc' }],
+        take: MAX_INSIGHT_ORDERS + 1,
+      }),
+    ]);
+
+    const truncated =
+      requested.length > MAX_INSIGHT_RETURNS ||
+      delivered.length > MAX_INSIGHT_ORDERS;
+    const returns = requested.slice(0, MAX_INSIGHT_RETURNS);
+    const orders = delivered.slice(0, MAX_INSIGHT_ORDERS);
+
+    // A refused or a cancelled return is not an item that came back
+    const active = returns.filter((row) =>
+      ACTIVE_RETURN_STATUSES.includes(row.status),
+    );
+    const returnedUnits = active.reduce(
+      (sum, row) => sum + sumUnits(row.items),
+      0,
+    );
+    const deliveredUnits = orders.reduce(
+      (sum, row) => sum + sumUnits(row.items),
+      0,
+    );
+
+    return {
+      range: { from, to, days, timeZone: STORE_TIME_ZONE },
+      truncated,
+      summary: {
+        requests: returns.length,
+        refused: returns.filter((row) => row.status === 'REJECTED').length,
+        cancelled: returns.filter((row) => row.status === 'CANCELLED').length,
+        returnedUnits,
+        deliveredUnits,
+        returnRate: returnRate(returnedUnits, deliveredUnits),
+        refundedCount: completed._count._all,
+        refundedAmount: roundToCents(completed._sum.refundAmount ?? 0),
+      },
+      products: rankReturnedProducts(
+        unitsByProduct(active),
+        unitsByProduct(orders),
+        INSIGHT_PRODUCTS_LIMIT,
+      ),
+    };
   }
 
   // ---------- Inside ----------

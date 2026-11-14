@@ -342,3 +342,47 @@ export function useMarkReturnRefundPaid() {
     },
   });
 }
+
+// ---------- The indicators of the analytics page ----------
+
+export interface ReturnInsights {
+  range: { from: string; to: string; days: number; timeZone: string };
+  /** There were more rows than the report reads: the numbers are partial */
+  truncated: boolean;
+  summary: {
+    requests: number;
+    refused: number;
+    cancelled: number;
+    returnedUnits: number;
+    deliveredUnits: number;
+    /** Percent of the delivered items that came back */
+    returnRate: number;
+    refundedCount: number;
+    refundedAmount: number;
+  };
+  products: {
+    productId: string;
+    name: string;
+    returned: number;
+    sold: number;
+    /** Returned out of sold, in percent. null when the product had no sale in the period */
+    rate: number | null;
+  }[];
+}
+
+// Under the admin key: any change of a return refreshes the numbers too
+export const adminReturnInsightsOptions = (days: number) =>
+  queryOptions({
+    queryKey: [...returnKeys.admin, "insights", { days }] as const,
+    queryFn: async ({ signal }) => {
+      const { data } = await api.get<ReturnInsights>(
+        "/admin/returns/insights",
+        {
+          params: { days },
+          signal,
+        },
+      );
+      return data;
+    },
+    staleTime: 60_000,
+  });
