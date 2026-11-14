@@ -50,10 +50,20 @@ export default function TermsPage() {
       <InfoSection title="Orders and payment">
         <InfoList
           items={[
-            "You can pay by card (through Stripe) or in cash to the courier when the order arrives.",
-            "A cash order is confirmed when you place it. A card order is confirmed when Stripe confirms your payment.",
+            "You can pay by card (through Stripe), in cash to the courier when the order arrives, or with your store wallet. The wallet can pay a whole order, or a part of it while you pay the rest by card or in cash. You choose whether to use it on every order.",
+            "A cash order, or an order the wallet pays in full, is confirmed when you place it. A card order is confirmed when Stripe confirms your payment.",
             "We need your phone number so the courier can reach you.",
-            "If an item sells out before the payment of a card order is confirmed, we cancel the order automatically and refund the full amount.",
+            "If an item sells out, or your wallet balance is no longer enough, before the payment of a card order is confirmed, we cancel the order automatically and refund what you paid.",
+          ]}
+        />
+      </InfoSection>
+
+      <InfoSection title="Store wallet">
+        <InfoList
+          items={[
+            "The store wallet is store credit in US dollars. You can use it only in this store, and it cannot be withdrawn as cash.",
+            "Money gets into your wallet when you choose to have a refund sent to it, and when what your wallet paid for an order is given back. Every movement is shown in My wallet.",
+            "The wallet is never used unless you choose to use it at checkout.",
           ]}
         />
       </InfoSection>
@@ -64,6 +74,7 @@ export default function TermsPage() {
             `We deliver in ${cities}.`,
             `We aim to deliver within ${storeInfo.deliveryHours} hours of your order.`,
             "When a courier is assigned, a 6-digit delivery code appears on your order page. Give it to the courier only when the order is at your door.",
+            "For an order you pay partly with your wallet, the courier collects only the rest in cash.",
           ]}
         />
       </InfoSection>
@@ -72,18 +83,25 @@ export default function TermsPage() {
         <InfoList
           items={[
             "You can cancel from My orders until the order is packed.",
-            "A card payment is refunded in full to the card you paid with. Banks usually take 5 to 10 business days to show the refund.",
+            "What you paid by card is refunded in full to the card you paid with. Banks usually take 5 to 10 business days to show the refund.",
+            "What your store wallet paid goes back to your wallet at once.",
             `After the order is packed, contact us at ${storeInfo.email} or ${storeInfo.phone}.`,
           ]}
         />
       </InfoSection>
 
-      <InfoSection title="Returns and exchanges">
-        <p>
-          You can return or exchange an item within {storeInfo.returnDays} days of receiving it if
-          it has a manufacturing defect. Contact us with your order number, and we will arrange the
-          exchange or the refund.
-        </p>
+      <InfoSection title="Returns and refunds">
+        <InfoList
+          items={[
+            `After an order is delivered, you can ask to return an item that has a manufacturing defect, within ${storeInfo.returnDays} days of the delivery. Do it from the order page: choose the items, how many, and describe the defect.`,
+            "The store looks at every request. When it approves one, it tells you how to send the item back. The cost of sending it back is yours. The refund is sent when the store receives the item. If the item does not arrive in good order, or the defect is not confirmed, the store may refuse the return and tells you why.",
+            "Items without a manufacturing defect are not covered by returns. Contact us if you have a problem with an order.",
+            "You get the price of the items you return, with their share of the tax and of any discount. Delivery is not refunded.",
+            "A card payment is refunded to the card. For a cash order you choose where the refund goes: your store wallet (available as soon as the store receives the item), your mobile wallet, or InstaPay. A refund to a mobile wallet or InstaPay can take a few days.",
+            "If your wallet paid a part of the order, that part goes back to your wallet first, and the rest goes where the payment came from or where you chose.",
+            "To exchange an item, return it and order the one you want.",
+          ]}
+        />
       </InfoSection>
 
       <InfoSection title="Reviews">

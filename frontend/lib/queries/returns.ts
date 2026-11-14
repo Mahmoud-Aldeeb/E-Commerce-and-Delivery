@@ -9,7 +9,13 @@ import toast from "react-hot-toast";
 import api, { getErrorMessage } from "@/lib/api";
 import { adminKeys } from "@/lib/queries/admin";
 import { productKeys } from "@/lib/queries/products";
-import type { ReturnLine, ReturnReason, ReturnRequest } from "@/types";
+import { walletKeys } from "@/lib/queries/wallet";
+import type {
+  ReturnLine,
+  ReturnReason,
+  ReturnRefundMethod,
+  ReturnRequest,
+} from "@/types";
 
 // "returns" starts every key: invalidating it refreshes the order pages AND the admin lists
 export const returnKeys = {
@@ -39,6 +45,8 @@ export type Eligibility =
 export interface OrderReturns {
   eligibility: Eligibility;
   windowDays: number;
+  /** Where the refund of this order can go. The first one is the default */
+  refundMethods: ReturnRefundMethod[];
   lines: ReturnableLine[];
   returnRequests: ReturnRequest[];
 }
@@ -62,6 +70,10 @@ export interface NewReturn {
   items: { product: string; variant?: string | null; quantity: number }[];
   reason: ReturnReason;
   comment?: string;
+  /** Only a cash order chooses. A card order goes back to the card whatever is sent */
+  refundMethod?: ReturnRefundMethod;
+  /** The mobile number or the InstaPay address, for the methods that need one */
+  refundDestinationDetails?: string;
 }
 
 export function useCreateReturn() {
@@ -116,7 +128,8 @@ export type AdminReturnTab =
   | "approved"
   | "completed"
   | "declined"
-  | "refund-failed";
+  | "refund-failed"
+  | "manual-refund";
 
 export const ADMIN_RETURNS_PAGE_SIZE = 10;
 
@@ -238,7 +251,6 @@ export function useCompleteReturn() {
     }: {
       id: string;
       restock: boolean;
-      cashRefunded?: boolean;
       note?: string;
     }) => {
       const { data } = await api.post<{ returnRequest: AdminReturn }>(
@@ -249,18 +261,25 @@ export function useCompleteReturn() {
     },
     onSuccess: (returnRequest, variables) => {
       const refundProblem =
-        returnRequest.order.paymentMethod === "card" &&
+        returnRequest.refundMethod === "ORIGINAL_PAYMENT" &&
         (returnRequest.refundStatus === null ||
           returnRequest.refundStatus === "failed");
 
       if (refundProblem) {
         toast.error(
-          "The return is completed, but the refund failed. Retry it from the Refund needed tab.",
+          "The return is completed, but the card refund failed. Retry it from the Refund needed tab.",
+        );
+      } else if (returnRequest.refundStatus === "manual-pending") {
+        toast.success(
+          "Return completed. The refund is waiting for you to pay it by hand.",
         );
       } else {
         toast.success("Return completed");
       }
+
       queryClient.invalidateQueries({ queryKey: returnKeys.all });
+      // The wallet of the customer may have grown
+      queryClient.invalidateQueries({ queryKey: walletKeys.all });
       if (variables.restock) {
         // The items went back on the shelves
         queryClient.invalidateQueries({ queryKey: productKeys.all });
@@ -293,6 +312,28 @@ export function useRetryReturnRefund() {
         toast.error(
           "The refund failed again. Check Stripe and the server log.",
         );
+      queryClient.invalidateQueries({ queryKey: returnKeys.all });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+      queryClient.invalidateQueries({ queryKey: returnKeys.all });
+    },
+  });
+}
+
+// The store paid a mobile wallet or InstaPay refund by hand
+export function useMarkReturnRefundPaid() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.post<{ returnRequest: AdminReturn }>(
+        `/admin/returns/${id}/refund-paid`,
+      );
+      return data.returnRequest;
+    },
+    onSuccess: () => {
+      toast.success("Marked as paid. The customer sees the refund as paid.");
       queryClient.invalidateQueries({ queryKey: returnKeys.all });
     },
     onError: (error) => {

@@ -1,16 +1,22 @@
-import type { ReturnLine, ReturnReason, ReturnStatus } from "@/types";
+import type {
+  ReturnLine,
+  ReturnReason,
+  ReturnRefundMethod,
+  ReturnStatus,
+} from "@/types";
 
-// The same reasons as the API
-export const RETURN_REASONS: { value: ReturnReason; label: string }[] = [
-  { value: "DEFECTIVE", label: "Defective or damaged" },
-  { value: "WRONG_ITEM", label: "Wrong item" },
-  { value: "NOT_AS_DESCRIBED", label: "Not as described" },
-  { value: "DOES_NOT_FIT", label: "Does not fit" },
-  { value: "OTHER", label: "Other" },
-];
+// Every reason a return can have in the database. A NEW return can only be "DEFECTIVE" (the policy of
+// the store: manufacturing defects only). The others stay so the returns that already exist read well
+const REASON_LABELS: Record<ReturnReason, string> = {
+  DEFECTIVE: "Manufacturing defect",
+  WRONG_ITEM: "Wrong item",
+  NOT_AS_DESCRIBED: "Not as described",
+  DOES_NOT_FIT: "Does not fit",
+  OTHER: "Other",
+};
 
 export const reasonLabel = (reason: ReturnReason): string =>
-  RETURN_REASONS.find((item) => item.value === reason)?.label ?? reason;
+  REASON_LABELS[reason] ?? reason;
 
 export const RETURN_STATUS_TEXT: Record<ReturnStatus, string> = {
   REQUESTED: "Waiting for the store",
@@ -26,6 +32,14 @@ export const RETURN_STATUS_BADGE: Record<ReturnStatus, string> = {
   COMPLETED: "badge-success",
   REJECTED: "badge-danger",
   CANCELLED: "badge-neutral",
+};
+
+// Where a refund can go, in the words of the customer and of the store
+export const REFUND_METHOD_LABELS: Record<ReturnRefundMethod, string> = {
+  ORIGINAL_PAYMENT: "Back to the card",
+  STORE_WALLET: "Store wallet",
+  MOBILE_WALLET: "Mobile wallet",
+  INSTAPAY: "InstaPay",
 };
 
 // "#R-AB12CD34": the last 8 characters of the id, like an order number. The R keeps the two apart

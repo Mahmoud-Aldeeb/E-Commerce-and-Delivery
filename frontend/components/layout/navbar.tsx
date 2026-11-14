@@ -14,6 +14,7 @@ import {
   ShieldIcon,
   ShoppingCartIcon,
   UserIcon,
+  WalletIcon,
   XIcon,
 } from "lucide-react";
 import Logo from "@/components/layout/logo";
@@ -121,6 +122,9 @@ function AccountMenu() {
           </Link>
           <Link href="/orders" role="menuitem" className={menuItem} onClick={() => setOpen(false)}>
             <PackageIcon className="size-4" /> My orders
+          </Link>
+          <Link href="/wallet" role="menuitem" className={menuItem} onClick={() => setOpen(false)}>
+            <WalletIcon className="size-4" /> My wallet
           </Link>
           <Link href="/favorites" role="menuitem" className={menuItem} onClick={() => setOpen(false)}>
             <HeartIcon className="size-4" /> Favorites

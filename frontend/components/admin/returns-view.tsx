@@ -7,6 +7,7 @@ import Field from "@/components/admin/field";
 import PageHeader from "@/components/admin/page-header";
 import ReturnItems from "@/components/returns/return-items";
 import ReturnStatusBadge from "@/components/returns/return-status-badge";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 import EmptyState from "@/components/ui/empty-state";
 import Modal from "@/components/ui/modal";
 import Pager from "@/components/ui/pager";
@@ -16,19 +17,21 @@ import {
   adminReturnsOptions,
   useApproveReturn,
   useCompleteReturn,
+  useMarkReturnRefundPaid,
   useRejectReturn,
   useRetryReturnRefund,
   type AdminReturn,
   type AdminReturnTab,
 } from "@/lib/queries/returns";
-import { reasonLabel, returnNumber } from "@/lib/returns";
+import { REFUND_METHOD_LABELS, reasonLabel, returnNumber } from "@/lib/returns";
 
 const TABS: { key: AdminReturnTab; label: string }[] = [
   { key: "requested", label: "New" },
   { key: "approved", label: "Approved" },
+  { key: "manual-refund", label: "To pay by hand" },
+  { key: "refund-failed", label: "Refund needed" },
   { key: "completed", label: "Completed" },
   { key: "declined", label: "Refused or cancelled" },
-  { key: "refund-failed", label: "Refund needed" },
   { key: "all", label: "All" },
 ];
 
@@ -38,8 +41,18 @@ const EMPTY: Record<AdminReturnTab, string> = {
   approved: "No approved return is waiting for its items.",
   completed: "No completed returns.",
   declined: "Nothing was refused or cancelled.",
-  "refund-failed": "Every refund went through.",
+  "refund-failed": "Every card refund went through.",
+  "manual-refund": "Nothing is waiting to be paid by hand.",
 };
+
+const round2 = (value: number) => Math.round(value * 100) / 100;
+
+// The part of a refund that does not go to the wallet
+const externalOf = (item: AdminReturn) => round2(item.refundAmount - item.walletRefundAmount);
+
+// "Mobile wallet 01012345678"
+const destinationOf = (item: AdminReturn) =>
+  `${REFUND_METHOD_LABELS[item.refundMethod]}${item.refundDestinationDetails ? ` ${item.refundDestinationDetails}` : ""}`;
 
 // Approve or refuse: a note for the customer. Refusing needs one: the customer reads why
 function DecisionDialog({
@@ -118,35 +131,19 @@ function DecisionDialog({
   );
 }
 
-// The items arrived: they go back on the shelves (or not), and the customer gets the money back
+// The items arrived: they go back on the shelves (or not), and the money goes where the customer asked
 function CompleteDialog({ item, onClose }: { item: AdminReturn; onClose: () => void }) {
   const complete = useCompleteReturn();
-  const isCard = item.order.paymentMethod === "card";
-  const amount = formatPrice(item.refundAmount);
+  const wallet = item.walletRefundAmount;
+  const rest = externalOf(item);
 
   // A defective item cannot be sold again: it only goes back on the shelves when the admin says so
   const [restock, setRestock] = useState(item.reason !== "DEFECTIVE");
-  const [cashRefunded, setCashRefunded] = useState(false);
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string>();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    if (!isCard && !cashRefunded) {
-      setError("Confirm that you gave the money back to the customer.");
-      return;
-    }
-
-    complete.mutate(
-      {
-        id: item.id,
-        restock,
-        cashRefunded: isCard ? undefined : true,
-        note: note.trim() || undefined,
-      },
-      { onSuccess: onClose },
-    );
+    complete.mutate({ id: item.id, restock, note: note.trim() || undefined }, { onSuccess: onClose });
   }
 
   return (
@@ -171,37 +168,19 @@ function CompleteDialog({ item, onClose }: { item: AdminReturn; onClose: () => v
           </span>
         </label>
 
-        {isCard ? (
-          <p className="rounded-control bg-canvas px-3 py-2 text-sm text-ink-soft">
-            {amount} is refunded to the card of the customer now (a partial refund through Stripe).
-          </p>
-        ) : (
-          <div>
-            <label className="flex cursor-pointer items-start gap-3 text-sm">
-              <input
-                type="checkbox"
-                checked={cashRefunded}
-                onChange={(event) => {
-                  setCashRefunded(event.target.checked);
-                  setError(undefined);
-                }}
-                className="mt-0.5 size-4 accent-primary-700"
-                aria-invalid={Boolean(error)}
-              />
-              <span>
-                <span className="font-medium">I gave the customer {amount} back by hand</span>
-                <span className="block text-xs text-ink-muted">
-                  This was a cash order: pay it back by InstaPay or a wallet, then tick this box.
-                </span>
-              </span>
-            </label>
-            {error && (
-              <p role="alert" className="field-error">
-                {error}
-              </p>
-            )}
-          </div>
-        )}
+        <div className="space-y-2 rounded-control bg-canvas px-3 py-3 text-sm text-ink-soft">
+          <p className="font-medium text-ink">Where the {formatPrice(item.refundAmount)} goes</p>
+          {wallet > 0 && <p>{formatPrice(wallet)} is added to the store wallet of the customer now.</p>}
+          {rest > 0 && item.refundMethod === "ORIGINAL_PAYMENT" && (
+            <p>{formatPrice(rest)} is refunded to the card now (a partial refund through Stripe).</p>
+          )}
+          {rest > 0 && (item.refundMethod === "MOBILE_WALLET" || item.refundMethod === "INSTAPAY") && (
+            <p>
+              {formatPrice(rest)} is for you to pay by hand to <strong className="select-all">{destinationOf(item)}</strong>.
+              Pay it, then press Mark as paid in the list.
+            </p>
+          )}
+        </div>
 
         <Field id="complete-note" label="Note for the customer" hint="Optional.">
           <textarea
@@ -227,28 +206,51 @@ function CompleteDialog({ item, onClose }: { item: AdminReturn; onClose: () => v
   );
 }
 
+// What happened to the money of a completed return
 function RefundChip({
   item,
   retrying,
   onRetry,
+  onPay,
 }: {
   item: AdminReturn;
   retrying: boolean;
   onRetry: () => void;
+  onPay: () => void;
 }) {
   if (item.status !== "COMPLETED") return null;
-  if (item.order.paymentMethod !== "card") return <span className="badge badge-success">Paid back by hand</span>;
 
-  if (item.refundStatus === "refunded") return <span className="badge badge-success">Refunded</span>;
+  if (item.refundStatus === "manual-pending") {
+    return (
+      <button
+        onClick={onPay}
+        title="Press it after you paid the customer"
+        className="badge badge-warning cursor-pointer transition-colors hover:bg-amber-100"
+      >
+        Pay by hand: mark as paid
+      </button>
+    );
+  }
   if (item.refundStatus === "none") return <span className="badge badge-neutral">Nothing to refund</span>;
   if (item.refundStatus === "pending") return <span className="badge badge-warning">Refund pending</span>;
+  if (item.refundStatus === "refunded") {
+    return (
+      <span className="badge badge-success">
+        {item.refundMethod === "STORE_WALLET"
+          ? "Added to wallet"
+          : item.refundMethod === "ORIGINAL_PAYMENT" && item.order.paymentMethod === "card"
+            ? "Refunded"
+            : "Paid"}
+      </span>
+    );
+  }
 
-  // "failed", or nothing recorded: the server stopped in the middle
+  // "failed", or nothing recorded: the server stopped in the middle of the card refund
   return (
     <button
       onClick={onRetry}
       disabled={retrying}
-      title="Try to refund again"
+      title="Try to refund the card again"
       className="badge badge-danger cursor-pointer transition-colors hover:bg-red-100"
     >
       {retrying ? "Refunding..." : "Refund needed: retry"}
@@ -260,12 +262,14 @@ type Dialog = { kind: "approve" | "reject" | "complete"; item: AdminReturn };
 
 export default function ReturnsView() {
   const retryRefund = useRetryReturnRefund();
+  const markPaid = useMarkReturnRefundPaid();
 
   const [tab, setTab] = useState<AdminReturnTab>("requested");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [dialog, setDialog] = useState<Dialog | null>(null);
+  const [paying, setPaying] = useState<AdminReturn | null>(null);
 
   // Wait until the admin stops typing before asking the API
   useEffect(() => {
@@ -376,6 +380,7 @@ export default function ReturnsView() {
                       item={item}
                       retrying={retryRefund.isPending && retryRefund.variables === item.id}
                       onRetry={() => retryRefund.mutate(item.id)}
+                      onPay={() => setPaying(item)}
                     />
                   </div>
                 </div>
@@ -402,6 +407,16 @@ export default function ReturnsView() {
                       <span className="text-ink-muted">Refund: </span>
                       <strong>{formatPrice(item.refundAmount)}</strong>{" "}
                       <span className="text-xs text-ink-muted">(delivery is not refunded)</span>
+                    </p>
+                    <p>
+                      <span className="text-ink-muted">Goes to: </span>
+                      {item.walletRefundAmount > 0 &&
+                        `${formatPrice(item.walletRefundAmount)} store wallet${externalOf(item) > 0 ? " + " : ""}`}
+                      {externalOf(item) > 0 && (
+                        <>
+                          {formatPrice(externalOf(item))} <span className="select-all">{destinationOf(item)}</span>
+                        </>
+                      )}
                     </p>
                     {item.adminNote && <p className="text-xs text-ink-soft">Note: {item.adminNote}</p>}
                     {item.status === "COMPLETED" && (
@@ -444,6 +459,18 @@ export default function ReturnsView() {
         <DecisionDialog kind={dialog.kind} item={dialog.item} onClose={() => setDialog(null)} />
       )}
       {dialog && dialog.kind === "complete" && <CompleteDialog item={dialog.item} onClose={() => setDialog(null)} />}
+
+      {paying && (
+        <ConfirmDialog
+          title="Mark this refund as paid?"
+          description={`Did you send ${formatPrice(externalOf(paying))} to ${destinationOf(paying)}? The customer will see the refund as paid.`}
+          confirmLabel="Yes, I paid it"
+          tone="primary"
+          isPending={markPaid.isPending}
+          onConfirm={() => markPaid.mutate(paying.id, { onSuccess: () => setPaying(null) })}
+          onCancel={() => setPaying(null)}
+        />
+      )}
     </>
   );
 }

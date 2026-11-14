@@ -39,7 +39,7 @@ export const storeInfo = {
   deliveryHours: 72,
   returnDays: 14,
   // Change it every time the policies change
-  legalUpdatedAt: "October 31, 2026",
+  legalUpdatedAt: "November 14, 2026",
 };
 
 // The size chart of the store, in centimetres: ONE chart for every product.

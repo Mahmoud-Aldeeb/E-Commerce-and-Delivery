@@ -52,7 +52,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   // New return requests and refunds that failed: the store has to act on them
   const { data: returnCounts } = useQuery(adminReturnCountsOptions());
-  const returnsToDo = (returnCounts?.requested ?? 0) + (returnCounts?.["refund-failed"] ?? 0);
+  const returnsToDo =
+    (returnCounts?.requested ?? 0) +
+    (returnCounts?.["refund-failed"] ?? 0) +
+    (returnCounts?.["manual-refund"] ?? 0);
 
   return (
     <div className="flex h-full flex-col">

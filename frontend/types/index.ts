@@ -171,6 +171,12 @@ export interface ReturnLine {
   quantity: number;
 }
 
+export type ReturnRefundMethod =
+  | "ORIGINAL_PAYMENT"
+  | "STORE_WALLET"
+  | "MOBILE_WALLET"
+  | "INSTAPAY";
+
 export interface ReturnRequest {
   id: string;
   orderId: string;
@@ -182,7 +188,10 @@ export interface ReturnRequest {
   statusHistory: { status: string; timestamp: string; note: string }[];
   adminNote: string | null; // the last thing the store told the customer
   refundAmount: number;
-  refundStatus: string | null; // "refunded" | "pending" | "failed" | "none". null = not refunded yet
+  refundStatus: string | null; // "refunded" | "pending" | "failed" | "none" | "manual-pending" (the store pays it by hand). null = not refunded yet
+  refundMethod: ReturnRefundMethod; // where the refund goes
+  refundDestinationDetails: string | null; // a mobile number or an InstaPay address (MOBILE_WALLET / INSTAPAY only)
+  walletRefundAmount: number; // the part of refundAmount that goes to the store wallet
   restocked: boolean;
   completedAt: string | null;
   createdAt: string;

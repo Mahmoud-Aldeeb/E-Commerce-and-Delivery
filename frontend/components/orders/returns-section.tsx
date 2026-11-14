@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Undo2Icon } from "lucide-react";
 import ReturnDialog from "@/components/orders/return-dialog";
@@ -12,30 +13,72 @@ import { orderReturnsOptions, useCancelReturn } from "@/lib/queries/returns";
 import { reasonLabel, returnNumber } from "@/lib/returns";
 import type { Order, ReturnRequest } from "@/types";
 
+const round2 = (value: number) => Math.round(value * 100) / 100;
+
+// "your mobile wallet (01012345678)", "your InstaPay (mona@instapay)", "your card"
+function destinationOf(request: ReturnRequest): string {
+  const details = request.refundDestinationDetails ? ` (${request.refundDestinationDetails})` : "";
+  if (request.refundMethod === "MOBILE_WALLET") return `your mobile wallet${details}`;
+  if (request.refundMethod === "INSTAPAY") return `your InstaPay${details}`;
+  return "your card";
+}
+
+// Where the money will go, before it is paid
+function whereItGoes(request: ReturnRequest): string {
+  const wallet = request.walletRefundAmount;
+  const rest = round2(request.refundAmount - wallet);
+
+  if (rest <= 0) return `${formatPrice(request.refundAmount)} is added to your store wallet`;
+  if (wallet > 0) return `${formatPrice(wallet)} is added to your store wallet and ${formatPrice(rest)} goes to ${destinationOf(request)}`;
+  return `${formatPrice(request.refundAmount)} goes to ${destinationOf(request)}`;
+}
+
 // What the store said, and where the money is, in words a customer understands
-function StatusNote({ request, isCard }: { request: ReturnRequest; isCard: boolean }) {
-  const amount = formatPrice(request.refundAmount);
-  let text: string | null = null;
+function StatusNote({ request }: { request: ReturnRequest }) {
+  let text: string;
 
   if (request.status === "REQUESTED") {
-    text = `The store will answer soon. If it is approved and the items arrive, you get ${amount} back. You can cancel until it answers.`;
+    text = `The store will answer soon. If it approves the return and receives the items, ${whereItGoes(request)}. You can cancel until it answers.`;
   } else if (request.status === "APPROVED") {
-    text = `Approved. ${request.adminNote ?? "Contact the store to arrange how to send the items back."
-      } Your refund of ${amount} comes after the items arrive.`;
+    text = `Approved. ${request.adminNote ?? "Contact the store to arrange how to send the items back."} When the items arrive, ${whereItGoes(request)}.`;
   } else if (request.status === "COMPLETED") {
-    if (!isCard) text = `The store paid you back ${amount} by hand.`;
-    else if (request.refundStatus === "refunded")
-      text = `${amount} was returned to your card. Banks usually take 5 to 10 business days to show it.`;
-    else if (request.refundStatus === "none") text = "Completed. There was nothing to refund.";
-    else if (request.refundStatus === "pending") text = `Your refund of ${amount} is being processed.`;
-    else text = `Your refund of ${amount} is being reviewed by our team. You do not need to do anything.`;
+    const wallet = request.walletRefundAmount;
+    const rest = round2(request.refundAmount - wallet);
+    const parts: string[] = [];
+
+    if (wallet > 0) parts.push(`${formatPrice(wallet)} was added to your store wallet.`);
+    if (rest > 0 && request.refundMethod === "ORIGINAL_PAYMENT") {
+      if (request.refundStatus === "refunded")
+        parts.push(`${formatPrice(rest)} was returned to your card. Banks usually take 5 to 10 business days to show it.`);
+      else if (request.refundStatus === "pending") parts.push(`Your refund of ${formatPrice(rest)} is being processed.`);
+      else parts.push(`Your refund of ${formatPrice(rest)} is being reviewed by our team. You do not need to do anything.`);
+    } else if (rest > 0) {
+      parts.push(
+        request.refundStatus === "manual-pending"
+          ? `The store will send ${formatPrice(rest)} to ${destinationOf(request)}. It can take a few days.`
+          : `The store sent ${formatPrice(rest)} to ${destinationOf(request)}.`,
+      );
+    }
+    text = parts.length > 0 ? parts.join(" ") : "Completed. There was nothing to refund.";
   } else if (request.status === "REJECTED") {
     text = request.adminNote ? `The store refused this return: ${request.adminNote}` : "The store refused this return.";
   } else {
     text = "You cancelled this return.";
   }
 
-  return <p className="mt-2 text-xs text-ink-soft">{text}</p>;
+  return (
+    <p className="mt-2 text-xs text-ink-soft">
+      {text}
+      {request.status === "COMPLETED" && request.walletRefundAmount > 0 && (
+        <>
+          {" "}
+          <Link href="/wallet" className="font-medium text-primary-700 hover:underline">
+            See your wallet
+          </Link>
+        </>
+      )}
+    </p>
+  );
 }
 
 // On the page of a delivered order: can it be returned, and the returns it already has
@@ -61,7 +104,6 @@ export default function ReturnsSection({ order }: { order: Order }) {
 
   const eligibility = data.eligibility;
   const hasUnits = data.lines.some((line) => line.available > 0);
-  const isCard = order.paymentMethod === "card";
 
   return (
     <section className="card p-5">
@@ -70,10 +112,10 @@ export default function ReturnsSection({ order }: { order: Order }) {
       {eligibility.eligible && hasUnits ? (
         <>
           <p className="mt-1 text-xs text-ink-muted">
-            You can return items until {formatDate(eligibility.windowEndsAt)}.
+            If an item has a manufacturing defect, you can return it until {formatDate(eligibility.windowEndsAt)}.
           </p>
           <button onClick={() => setAsking(true)} className="btn btn-secondary btn-sm mt-3 w-full">
-            <Undo2Icon className="size-4" /> Return items
+            <Undo2Icon className="size-4" /> Return a defective item
           </button>
         </>
       ) : !eligibility.eligible ? (
@@ -102,7 +144,7 @@ export default function ReturnsSection({ order }: { order: Order }) {
                 {request.comment ? `: ${request.comment}` : ""}
               </p>
 
-              <StatusNote request={request} isCard={isCard} />
+              <StatusNote request={request} />
 
               {request.status === "REQUESTED" && (
                 <button
