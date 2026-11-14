@@ -6,23 +6,15 @@ import { roundToCents } from '../orders/order-pricing.js';
 export const RETURN_WINDOW_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export const RETURN_REASONS = [
-  'DEFECTIVE',
-  'WRONG_ITEM',
-  'NOT_AS_DESCRIBED',
-  'DOES_NOT_FIT',
-  'OTHER',
-] as const;
+// The policy of the store: only an item with a MANUFACTURING DEFECT can be returned.
+// The database enum still holds the older reasons (so the returns that already exist read well),
+// but no new return can use them
+export const RETURN_REASONS = ['DEFECTIVE'] as const;
 export type ReturnReason = (typeof RETURN_REASONS)[number];
 
 export const RETURN_REASON_LABELS: Record<ReturnReason, string> = {
-  DEFECTIVE: 'Defective or damaged',
-  WRONG_ITEM: 'Wrong item',
-  NOT_AS_DESCRIBED: 'Not as described',
-  DOES_NOT_FIT: 'Does not fit',
-  OTHER: 'Other',
+  DEFECTIVE: 'Manufacturing defect',
 };
-
 export const RETURN_STATUSES = [
   'REQUESTED',
   'APPROVED',
@@ -312,3 +304,110 @@ export const refundStatusOf = (
 // "#R-AB12CD34", "r-ab12" and "ab12" find the same return
 export const cleanReturnSearch = (value: string | undefined): string =>
   (value ?? '').trim().replace(/^#/, '').replace(/^r-/i, '');
+
+// ---------- Where the refund goes ----------
+
+export const REFUND_METHODS = [
+  'ORIGINAL_PAYMENT',
+  'STORE_WALLET',
+  'MOBILE_WALLET',
+  'INSTAPAY',
+] as const;
+export type RefundMethod = (typeof REFUND_METHODS)[number];
+
+// How the order was paid decides where its refund may go. A card payment goes back to the card, an
+// order the wallet paid in full goes back to the wallet, and a cash order is the customer's choice
+// (the first method is the default)
+export function allowedRefundMethods(paymentMethod: string): RefundMethod[] {
+  if (paymentMethod === 'card') return ['ORIGINAL_PAYMENT'];
+  if (paymentMethod === 'wallet') return ['STORE_WALLET'];
+  return ['STORE_WALLET', 'MOBILE_WALLET', 'INSTAPAY'];
+}
+
+export type MethodChoice =
+  { ok: true; method: RefundMethod } | { ok: false; message: string };
+
+export function resolveRefundMethod(
+  paymentMethod: string,
+  asked: RefundMethod | undefined,
+): MethodChoice {
+  const allowed = allowedRefundMethods(paymentMethod);
+  if (asked === undefined) return { ok: true, method: allowed[0] };
+  if (allowed.includes(asked)) return { ok: true, method: asked };
+
+  return {
+    ok: false,
+    message:
+      paymentMethod === 'card'
+        ? 'A card payment is refunded to the card'
+        : paymentMethod === 'wallet'
+          ? 'An order paid from the wallet is refunded to the wallet'
+          : 'This refund method is not available for this order',
+  };
+}
+
+// An Egyptian mobile number: 010, 011, 012 or 015 and 8 more digits
+const MOBILE = /^(?:\+?20|0020|0)?(1[0125]\d{8})$/;
+// An InstaPay address: name@instapay
+const IPA = /^[a-z0-9][a-z0-9._-]{1,39}@[a-z][a-z0-9.-]{1,29}$/i;
+
+// "+20 101 234 5678" becomes "01012345678". null when it is not a mobile number
+export function normalizeMobile(
+  value: string | null | undefined,
+): string | null {
+  const match = MOBILE.exec((value ?? '').replace(/[\s-]/g, ''));
+  return match ? `0${match[1]}` : null;
+}
+
+export type DestinationCheck =
+  { ok: true; details: string | null } | { ok: false; message: string };
+
+// What the customer typed to say where the money goes. Only a method that needs it keeps it
+export function checkRefundDestination(
+  method: RefundMethod,
+  raw: string | null | undefined,
+): DestinationCheck {
+  const value = (raw ?? '').trim();
+
+  if (method === 'MOBILE_WALLET') {
+    const mobile = normalizeMobile(value);
+    return mobile
+      ? { ok: true, details: mobile }
+      : {
+          ok: false,
+          message: 'Enter the mobile number of your wallet, like 01012345678',
+        };
+  }
+
+  if (method === 'INSTAPAY') {
+    if (IPA.test(value)) return { ok: true, details: value.toLowerCase() };
+    const mobile = normalizeMobile(value);
+    if (mobile) return { ok: true, details: mobile };
+    return {
+      ok: false,
+      message:
+        'Enter your InstaPay address (like name@instapay) or the mobile number linked to it',
+    };
+  }
+
+  return { ok: true, details: null };
+}
+
+const toCentsInt = (dollars: number) => Math.round(dollars * 100);
+
+// How a refund is shared between the store wallet and the rest. `walletPaidLeft` = what the wallet
+// paid for the order and has not got back yet: that part ALWAYS goes back to the wallet first
+// (store credit never turns into cash, and a card is never refunded more than it paid).
+// A customer who asks for the wallet gets everything there
+export function splitReturnRefund(input: {
+  refundAmount: number;
+  method: RefundMethod;
+  walletPaidLeft: number;
+}): { toWallet: number; external: number } {
+  const refund = Math.max(toCentsInt(input.refundAmount), 0);
+  const left = Math.max(toCentsInt(input.walletPaidLeft), 0);
+  const wallet =
+    input.method === 'STORE_WALLET' ? refund : Math.min(refund, left);
+
+  return { toWallet: wallet / 100, external: (refund - wallet) / 100 };
+}

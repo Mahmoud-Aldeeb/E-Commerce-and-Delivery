@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayNotEmpty,
@@ -12,8 +12,14 @@ import {
   MaxLength,
   Min,
   ValidateNested,
+  MinLength,
 } from 'class-validator';
-import { RETURN_REASONS, type ReturnReason } from '../return-rules.js';
+import {
+  REFUND_METHODS,
+  RETURN_REASONS,
+  type RefundMethod,
+  type ReturnReason,
+} from '../return-rules.js';
 
 export class ReturnItemDto {
   @ApiProperty({ description: 'Product id' })
@@ -43,13 +49,46 @@ export class CreateReturnDto {
   @Type(() => ReturnItemDto)
   items: ReturnItemDto[];
 
-  @ApiProperty({ enum: RETURN_REASONS })
-  @IsIn(RETURN_REASONS, { message: 'Choose why you are returning the items' })
+  @ApiProperty({
+    enum: RETURN_REASONS,
+    description: 'Only an item with a manufacturing defect can be returned',
+  })
+  @IsIn(RETURN_REASONS, {
+    message: 'Only an item with a manufacturing defect can be returned',
+  })
   reason: ReturnReason;
 
-  @ApiPropertyOptional({ description: 'Up to 500 characters' })
+  @ApiProperty({
+    description: 'What is wrong with the item (10 to 500 characters)',
+  })
+  // Spaces around the text do not count: ten spaces are not a description
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString({ message: 'Describe the defect' })
+  @MinLength(10, {
+    message: 'Describe the defect in a few words (at least 10 characters)',
+  })
+  @MaxLength(500, {
+    message: 'The description must be 500 characters or fewer',
+  })
+  comment: string;
+
+  @ApiPropertyOptional({
+    enum: REFUND_METHODS,
+    description:
+      'Where the refund goes. A card order is refunded to the card. A cash order can choose STORE_WALLET (the default), MOBILE_WALLET or INSTAPAY',
+  })
+  @IsOptional()
+  @IsIn(REFUND_METHODS, { message: 'Choose where the refund goes' })
+  refundMethod?: RefundMethod;
+
+  @ApiPropertyOptional({
+    description:
+      'The mobile number (MOBILE_WALLET), or the InstaPay address or number (INSTAPAY). Needed for those two methods',
+  })
   @IsOptional()
   @IsString()
-  @MaxLength(500, { message: 'The comment must be 500 characters or fewer' })
-  comment?: string;
+  @MaxLength(60, { message: 'The details must be 60 characters or fewer' })
+  refundDestinationDetails?: string;
 }

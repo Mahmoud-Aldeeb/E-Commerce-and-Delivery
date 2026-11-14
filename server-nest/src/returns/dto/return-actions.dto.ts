@@ -34,14 +34,6 @@ export class CompleteReturnDto {
   @IsBoolean({ message: 'restock must be true or false' })
   restock: boolean;
 
-  @ApiPropertyOptional({
-    description:
-      'A cash order only: true = the money was given back by hand (InstaPay, a wallet...)',
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'cashRefunded must be true or false' })
-  cashRefunded?: boolean;
-
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

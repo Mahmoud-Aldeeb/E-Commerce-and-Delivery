@@ -263,33 +263,6 @@ describe('completing a return on a real database', () => {
     });
   });
 
-  it('a cash return needs the confirmation, and never calls Stripe', async () => {
-    await seed({ paymentMethod: 'cash', paymentIntentId: null, isPaid: false });
-    const { service, refundsCreate } = makeService();
-    const { returnRequest } = await ask(service);
-    await service.approve(returnRequest.id, {} as never);
-
-    const refused = await service
-      .complete(returnRequest.id, { restock: true } as never)
-      .catch((caught: unknown) => caught);
-    expect(refused).toBeInstanceOf(BadRequestException);
-    expect((await rowOf(returnRequest.id)).status).toBe('APPROVED');
-    expect(await stockOf()).toBe(7);
-
-    await service.complete(returnRequest.id, {
-      restock: true,
-      cashRefunded: true,
-    } as never);
-
-    expect(await rowOf(returnRequest.id)).toMatchObject({
-      status: 'COMPLETED',
-      refundStatus: 'refunded',
-      refundId: null,
-    });
-    expect(await stockOf()).toBe(8);
-    expect(refundsCreate).not.toHaveBeenCalled();
-  });
-
   it('records a failed refund without failing the completion, and a retry completes it', async () => {
     vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     await seed();
@@ -404,6 +377,7 @@ describe('the admin lists on a real database', () => {
       completed: 1,
       declined: 0,
       'refund-failed': 1,
+      'manual-refund': 0,
     });
     expect(all.total).toBe(3);
 

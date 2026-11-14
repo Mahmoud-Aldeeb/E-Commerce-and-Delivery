@@ -169,12 +169,10 @@ function setup(data: Data = {}) {
           return sales; // the sales of the period
         },
       ),
-      aggregate: vi
-        .fn()
-        .mockResolvedValue({
-          _count: { _all: previous.count },
-          _sum: { total: previous.total },
-        }),
+      aggregate: vi.fn().mockResolvedValue({
+        _count: { _all: previous.count },
+        _sum: { total: previous.total },
+      }),
       count: vi.fn().mockResolvedValue(cancelledCount),
       groupBy: vi.fn().mockResolvedValue(groups),
     },
@@ -516,13 +514,14 @@ describe('the refunds that need attention', () => {
       by: ['refundStatus'],
       where,
       _count: { _all: true },
-      _sum: { total: true },
+      _sum: { total: true, walletAmountUsed: true },
     });
     expect(prisma.order.findMany).toHaveBeenCalledWith({
       where,
       select: {
         id: true,
         total: true,
+        walletAmountUsed: true,
         refundStatus: true,
         paymentIntentId: true,
         updatedAt: true,
@@ -531,6 +530,35 @@ describe('the refunds that need attention', () => {
       orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }],
       take: 20,
     });
+  });
+
+  it('shows only the card part of an order the wallet paid in part', async () => {
+    const { service } = setup({
+      refundGroups: [
+        {
+          refundStatus: 'failed',
+          _count: { _all: 1 },
+          _sum: { total: 25.5, walletAmountUsed: 5 },
+        },
+      ],
+      refundRows: [
+        {
+          id: 'r1',
+          total: 25.5,
+          walletAmountUsed: 5,
+          refundStatus: 'failed',
+          paymentIntentId: 'pi_1',
+          updatedAt: new Date('2026-11-20T10:00:00.000Z'),
+          user: { name: 'Mona', email: 'mona@example.com' },
+        },
+      ],
+    });
+
+    const result = await service.getAnalytics({ days: 7 });
+
+    // The wallet paid $5.00: only $20.50 was charged to the card
+    expect(result.refunds.needsAction).toEqual({ count: 1, amount: 20.5 });
+    expect(result.refunds.items[0].total).toBe(20.5);
   });
 });
 

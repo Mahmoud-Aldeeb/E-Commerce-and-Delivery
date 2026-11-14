@@ -101,4 +101,19 @@ export class AdminReturnsController {
   retryRefund(@Param('id') id: string) {
     return this.returnsService.retryRefund(id);
   }
+
+  @Post(':id/refund-paid')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'The refund was paid by hand (mobile wallet or InstaPay): mark it as paid',
+  })
+  @ApiOkResponse({ description: '{ returnRequest }' })
+  @ApiBadRequestResponse({
+    description: 'There is nothing to pay by hand for this return',
+  })
+  @ApiNotFoundResponse({ description: 'Return not found' })
+  markRefundPaid(@Param('id') id: string) {
+    return this.returnsService.markRefundPaid(id);
+  }
 }

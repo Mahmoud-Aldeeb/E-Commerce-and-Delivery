@@ -52,6 +52,10 @@ const SALES = {
 
 const cents = (dollars: number | null) => fromCents(toCents(dollars ?? 0));
 
+// An order the wallet paid in part: only the card part can be "waiting to be refunded" in Stripe
+const cardPart = (total: number | null, wallet: number | null) =>
+  fromCents(toCents(total ?? 0) - toCents(wallet ?? 0));
+
 @Injectable()
 export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
@@ -120,13 +124,14 @@ export class AnalyticsService {
         by: ['refundStatus'],
         where: refundProblems,
         _count: { _all: true },
-        _sum: { total: true },
+        _sum: { total: true, walletAmountUsed: true },
       }),
       this.prisma.order.findMany({
         where: refundProblems,
         select: {
           id: true,
           total: true,
+          walletAmountUsed: true,
           refundStatus: true,
           paymentIntentId: true,
           updatedAt: true,
@@ -199,7 +204,11 @@ export class AnalyticsService {
 
     const tally = (groups: typeof refundGroups) => ({
       count: groups.reduce((sum, group) => sum + group._count._all, 0),
-      amount: sumDollars(groups.map((group) => group._sum.total ?? 0)),
+      amount: sumDollars(
+        groups.map((group) =>
+          cardPart(group._sum.total, group._sum.walletAmountUsed),
+        ),
+      ),
     });
 
     return {
@@ -242,7 +251,7 @@ export class AnalyticsService {
           number: orderNumber(row.id),
           customer: row.user.name,
           email: row.user.email,
-          total: row.total,
+          total: cardPart(row.total, row.walletAmountUsed),
           kind: refundKind(row.refundStatus),
           since: row.updatedAt,
           paymentIntentId: row.paymentIntentId,

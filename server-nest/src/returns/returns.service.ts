@@ -13,6 +13,8 @@ import { pageArgs, pageInfo } from '../common/utils/pagination.util.js';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto.js';
 import { restoreStock } from '../orders/stock.util.js';
 import { roundToCents } from '../orders/order-pricing.js';
+import { creditWallet } from '../wallet/wallet.ledger.js';
+import { toCents } from '../wallet/wallet-rules.js';
 import { CreateReturnDto } from './dto/create-return.dto.js';
 import {
   ApproveReturnDto,
@@ -22,16 +24,20 @@ import {
 import { GetAdminReturnsQueryDto } from './dto/get-admin-returns-query.dto.js';
 import {
   ACTIVE_RETURN_STATUSES,
+  allowedRefundMethods,
   availableLines,
   calculateReturnRefund,
   canMove,
   checkEligibility,
+  checkRefundDestination,
   cleanReturnSearch,
   parseLines,
   planReturn,
   refundStatusOf,
+  resolveRefundMethod,
   RETURN_REASON_LABELS,
   RETURN_WINDOW_DAYS,
+  splitReturnRefund,
   type ReturnStatus,
 } from './return-rules.js';
 import {
@@ -67,6 +73,8 @@ const ORDER_FOR_RETURN = {
   subtotal: true,
   total: true,
   deliveryFee: true,
+  paymentMethod: true,
+  walletAmountUsed: true,
 } as const satisfies Prisma.OrderSelect;
 
 const cleanNote = (value: string | undefined) => (value ?? '').trim();
@@ -82,7 +90,8 @@ export class ReturnsService {
 
   // ---------- The customer ----------
 
-  // GET /api/orders/:orderId/returns: can this order be returned, what is left to return, and its returns
+  // GET /api/orders/:orderId/returns: can this order be returned, where the refund can go,
+  // what is left to return, and the returns of this order
   async getOrderReturns(userId: string, orderId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, userId },
@@ -103,6 +112,8 @@ export class ReturnsService {
     return {
       eligibility: checkEligibility(order, new Date()),
       windowDays: RETURN_WINDOW_DAYS,
+      // The first one is the default
+      refundMethods: allowedRefundMethods(order.paymentMethod),
       lines: availableLines(parseLines(order.items), active),
       returnRequests,
     };
@@ -148,7 +159,7 @@ export class ReturnsService {
       // Rejected and cancelled returns hold nothing: their units and their money are free again
       const earlier = await tx.returnRequest.findMany({
         where: { orderId, status: { in: ACTIVE_RETURN_STATUSES } },
-        select: { items: true, refundAmount: true },
+        select: { items: true, refundAmount: true, walletRefundAmount: true },
       });
 
       const plan = planReturn(
@@ -169,6 +180,32 @@ export class ReturnsService {
         completesOrder: plan.completesOrder,
       });
 
+      // Where the money goes: the way the order was paid decides what the customer can choose
+      const choice = resolveRefundMethod(order.paymentMethod, dto.refundMethod);
+      if (!choice.ok) throw new BadRequestException(choice.message);
+      const destination = checkRefundDestination(
+        choice.method,
+        dto.refundDestinationDetails,
+      );
+      if (!destination.ok) throw new BadRequestException(destination.message);
+
+      // What the wallet paid for the order and has not got back yet: that part goes back first
+      const walletPaidLeft = Math.max(
+        roundToCents(
+          order.walletAmountUsed -
+            earlier.reduce(
+              (sum, request) => sum + request.walletRefundAmount,
+              0,
+            ),
+        ),
+        0,
+      );
+      const split = splitReturnRefund({
+        refundAmount,
+        method: choice.method,
+        walletPaidLeft,
+      });
+
       return tx.returnRequest.create({
         data: {
           orderId,
@@ -177,6 +214,9 @@ export class ReturnsService {
           reason: dto.reason,
           comment: dto.comment?.trim() || null,
           refundAmount,
+          refundMethod: choice.method,
+          refundDestinationDetails: destination.details,
+          walletRefundAmount: split.toWallet,
           statusHistory: [
             {
               status: 'Requested',
@@ -311,26 +351,30 @@ export class ReturnsService {
   async complete(id: string, dto: CompleteReturnDto) {
     const row = await this.prisma.returnRequest.findUnique({
       where: { id },
-      include: {
-        order: { select: { paymentMethod: true, paymentIntentId: true } },
-      },
+      include: { order: { select: { paymentIntentId: true } } },
     });
     if (!row) throw new NotFoundException('Return not found');
     if (!canMove(row.status, 'COMPLETED')) {
       throw new BadRequestException('Only an approved return can be completed');
     }
 
-    const isCard = row.order.paymentMethod === 'card';
-    if (!isCard && dto.cashRefunded !== true) {
-      throw new BadRequestException(
-        'Confirm that you have given the money back by hand',
-      );
-    }
-
+    // Where the money goes. The part for the wallet is credited with the stock, in the same
+    // transaction. A part for the card is refunded after the commit. A part for a mobile wallet or
+    // InstaPay waits for the store to pay it by hand
+    const external = roundToCents(row.refundAmount - row.walletRefundAmount);
+    const viaCard = row.refundMethod === 'ORIGINAL_PAYMENT' && external > 0;
+    const refundStatus =
+      row.refundAmount <= 0
+        ? 'none'
+        : external <= 0
+          ? 'refunded'
+          : viaCard
+            ? null
+            : 'manual-pending';
     const note = cleanNote(dto.note);
 
-    // 1) The database part: the status and the shelves change together, or nothing changes.
-    // The status is part of the condition, so a double click can never restock twice
+    // 1) The database part: the status, the shelves and the wallet change together, or nothing changes.
+    // The status is part of the condition, so a double click can never restock or credit twice
     await this.prisma.$transaction(async (tx) => {
       await this.move(
         tx,
@@ -344,20 +388,28 @@ export class ReturnsService {
         {
           completedAt: new Date(),
           restocked: dto.restock,
-          // Cash was given back by hand, right now. A card refund is recorded after Stripe answers
-          refundStatus: isCard ? null : 'refunded',
+          refundStatus,
           ...(note ? { adminNote: note } : {}),
         },
       );
-      // The same lock order as an order: the variants first, then the products
+      // The same lock order as an order: the variants, then the products, then the user (the wallet)
       if (dto.restock) await restoreStock(tx, row.items);
+      if (row.walletRefundAmount > 0) {
+        await creditWallet(tx, {
+          userId: row.userId,
+          cents: toCents(row.walletRefundAmount),
+          type: 'RETURN_REFUND',
+          reference: `return:${row.id}`,
+          returnId: row.id,
+        });
+      }
     });
 
-    // 2) The money part, after the database has committed
-    if (isCard) {
+    // 2) The card part, after the database has committed
+    if (viaCard) {
       await this.refundCard(
         row.id,
-        row.refundAmount,
+        external,
         row.order.paymentIntentId,
         row.orderId,
       );
@@ -365,34 +417,63 @@ export class ReturnsService {
     return this.adminView(id);
   }
 
-  // POST /api/admin/returns/:id/refund: try again when the refund failed (or was never recorded)
+  // POST /api/admin/returns/:id/refund: try again when the card refund failed (or was never recorded)
   async retryRefund(id: string) {
     const row = await this.prisma.returnRequest.findUnique({
       where: { id },
-      include: {
-        order: { select: { paymentMethod: true, paymentIntentId: true } },
-      },
+      include: { order: { select: { paymentIntentId: true } } },
     });
     if (!row) throw new NotFoundException('Return not found');
     if (row.status !== 'COMPLETED') {
       throw new BadRequestException('Only a completed return can be refunded');
     }
-    if (row.order.paymentMethod !== 'card') {
+    if (row.refundMethod !== 'ORIGINAL_PAYMENT') {
       throw new BadRequestException(
-        'This return was paid back by hand: there is nothing to retry',
+        'This refund does not go to a card: there is nothing to retry',
       );
     }
     if (row.refundStatus !== null && row.refundStatus !== 'failed') {
       throw new BadRequestException('This refund does not need another try');
     }
 
+    const external = roundToCents(row.refundAmount - row.walletRefundAmount);
     await this.refundCard(
       row.id,
-      row.refundAmount,
+      external,
       row.order.paymentIntentId,
       row.orderId,
       true,
     );
+    return this.adminView(id);
+  }
+
+  // POST /api/admin/returns/:id/refund-paid: the store paid a mobile wallet or InstaPay refund by hand
+  async markRefundPaid(id: string) {
+    const row = await this.prisma.returnRequest.findUnique({ where: { id } });
+    if (!row) throw new NotFoundException('Return not found');
+    if (row.status !== 'COMPLETED' || row.refundStatus !== 'manual-pending') {
+      throw new BadRequestException(
+        'There is nothing to pay by hand for this return',
+      );
+    }
+
+    // The refund status is part of the condition: the first click wins
+    const { count } = await this.prisma.returnRequest.updateMany({
+      where: { id, status: 'COMPLETED', refundStatus: 'manual-pending' },
+      data: {
+        refundStatus: 'refunded',
+        statusHistory: appendStatusHistory(
+          row.statusHistory,
+          'Refund paid',
+          'The store paid the refund by hand',
+        ),
+      },
+    });
+    if (count === 0) {
+      throw new ConflictException(
+        'The return has just changed. Please try again.',
+      );
+    }
     return this.adminView(id);
   }
 
@@ -438,7 +519,7 @@ export class ReturnsService {
   }
 
   // Never throws for a Stripe problem: a failed refund must not undo a return that already happened.
-  // It is recorded, and the admin sees it and can retry.
+  // It is recorded, and the admin sees it and can retry. `amount` is only the part for the card.
   // `lookFirst`: on a retry, look for a refund of THIS return that already exists. The idempotency key
   // of Stripe is forgotten after 24 hours, and a second partial refund would really be paid
   private async refundCard(
